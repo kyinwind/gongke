@@ -536,79 +536,81 @@ class _SongJingPageState extends State<SongJingPage> {
           },
         ),
       ),
-      body: StreamBuilder<List<JingShuData>>(
-        stream: jingshudatalist,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('数据加载出错: ${snapshot.error}'));
-          }
-          final list = snapshot.data ?? [];
-          return ListView.builder(
-            itemCount: list.length,
-            itemBuilder: (context, index) {
-              return Slidable(
-                startActionPane: ActionPane(
-                  motion: const DrawerMotion(),
-                  children: [
-                    SlidableAction(
-                      onPressed: (context) {
-                        _setFavorite(list[index]);
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              list[index].favoriteDateTime != null
-                                  ? '已设为最爱'
-                                  : '已取消最爱',
+      body: SlidableAutoCloseBehavior(
+        child: StreamBuilder<List<JingShuData>>(
+          stream: jingshudatalist,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return Center(child: Text('数据加载出错: ${snapshot.error}'));
+            }
+            final list = snapshot.data ?? [];
+            return ListView.builder(
+              itemCount: list.length,
+              itemBuilder: (context, index) {
+                return Slidable(
+                  startActionPane: ActionPane(
+                    motion: const DrawerMotion(),
+                    children: [
+                      SlidableAction(
+                        onPressed: (context) {
+                          _setFavorite(list[index]);
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                list[index].favoriteDateTime != null
+                                    ? '已设为最爱'
+                                    : '已取消最爱',
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                      backgroundColor: Colors.yellow,
-                      foregroundColor: Colors.white,
-                      icon: Icons.favorite,
-                      label: list[index].favoriteDateTime != null
-                          ? '取消'
-                          : '设为最爱',
-                    ),
-                  ],
-                ),
-                endActionPane: ActionPane(
-                  motion: const ScrollMotion(),
-                  children: [
-                    SlidableAction(
-                      onPressed: (context) async {
-                        // 在这里处理删除操作
-                        await globalDB.managers.jingShu
-                            .filter((f) => f.id(list[index].id))
-                            .delete();
-                        // 重新获取数据
-                        await fetchAll();
-                      },
-                      backgroundColor: Color(0xFFFE4A49),
-                      foregroundColor: Colors.white,
-                      icon: Icons.delete,
-                      label: '删除',
-                    ),
-                  ],
-                ),
-                child: ListTile(
-                  leading: Image.asset(list[index].image),
-                  title: Text(list[index].name),
-                  trailing: list[index].favoriteDateTime != null
-                      ? Icon(Icons.favorite, color: Colors.yellow)
-                      : null,
-                  onTap: () {
-                    _navigateToPdfView(list[index].fileUrl);
-                  },
-                ).padding(all: 10),
-              );
-            },
-          );
-        },
+                          );
+                        },
+                        backgroundColor: Colors.yellow,
+                        foregroundColor: Colors.white,
+                        icon: Icons.favorite,
+                        label: list[index].favoriteDateTime != null
+                            ? '取消'
+                            : '设为最爱',
+                      ),
+                    ],
+                  ),
+                  endActionPane: ActionPane(
+                    motion: const ScrollMotion(),
+                    children: [
+                      SlidableAction(
+                        onPressed: (context) async {
+                          // 在这里处理删除操作
+                          await globalDB.managers.jingShu
+                              .filter((f) => f.id(list[index].id))
+                              .delete();
+                          // 重新获取数据
+                          await fetchAll();
+                        },
+                        backgroundColor: Color(0xFFFE4A49),
+                        foregroundColor: Colors.white,
+                        icon: Icons.delete,
+                        label: '删除',
+                      ),
+                    ],
+                  ),
+                  child: ListTile(
+                    leading: Image.asset(list[index].image),
+                    title: Text(list[index].name),
+                    trailing: list[index].favoriteDateTime != null
+                        ? Icon(Icons.favorite, color: Colors.yellow)
+                        : null,
+                    onTap: () {
+                      _navigateToPdfView(list[index].fileUrl);
+                    },
+                  ).padding(all: 10),
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }

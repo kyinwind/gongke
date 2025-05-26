@@ -2,25 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:drift/drift.dart';
 import 'package:gongke/main.dart';
 import '../../database.dart';
+import 'package:flutter_slidable/flutter_slidable.dart'; // 导入 Slidable 库
 
 // 假设这是一个StatefulWidget页面
-class AddTipRecordPage extends StatefulWidget {
-  const AddTipRecordPage({Key? key}) : super(key: key);
+class TipRecordPage extends StatefulWidget {
+  const TipRecordPage({Key? key}) : super(key: key);
 
   @override
-  _AddTipRecordPageState createState() => _AddTipRecordPageState();
+  _TipRecordPageState createState() => _TipRecordPageState();
 }
 
-class _AddTipRecordPageState extends State<AddTipRecordPage> {
+class _TipRecordPageState extends State<TipRecordPage> {
   Stream<List<TipRecordData>> tipRecords = Stream.value([]);
   int bookId = 0; // 默认值，实际使用时可能需要从路由参数获取
 
   @override
   void initState() {
     super.initState();
+
     if (bookId > 0) {
       _loadTipRecords(bookId);
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -35,10 +42,10 @@ class _AddTipRecordPageState extends State<AddTipRecordPage> {
   }
 
   Future<void> _loadTipRecords(int bookId) async {
-    final query = globalDB.managers.tipRecord;
-    query.orderBy((o) => o.id.asc());
-    query.filter((f) => f.bookId.equals(bookId));
-    final records = await query.watch();
+    final records = globalDB.managers.tipRecord
+        .orderBy((o) => o.id.asc())
+        .filter((f) => f.bookId.equals(bookId))
+        .watch();
     setState(() {
       tipRecords = records;
     });
@@ -53,47 +60,60 @@ class _AddTipRecordPageState extends State<AddTipRecordPage> {
         actions: [
           Spacer(),
           IconButton(
-            icon: const Icon(Icons.import_export),
-            onPressed: () {
-              // 跳转到导入页面
-              Navigator.pushNamed(context, '/importTip');
-            },
-          ),
-          Text('  '),
-          IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
               // 跳转到新增页面
               Navigator.pushNamed(
                 context,
-                '/addTip',
-                arguments: {'acttype': 'new'},
+                '/AddTipRecord',
+                arguments: {'acttype': 'new', 'bookId': bookId},
               );
             },
           ),
         ],
       ),
-      body: StreamBuilder<List<TipRecordData>>(
-        stream: tipRecords,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final records = snapshot.data ?? [];
-            return ListView.builder(
-              itemCount: records.length,
-              itemBuilder: (context, index) {
-                final record = records[index];
-                return ListTile(
-                  title: Text(record.id.toString()),
-                  subtitle: Text(record.content),
-                );
-              },
-            );
-          } else if (snapshot.hasError) {
-            return Text('错误: ${snapshot.error}');
-          } else {
-            return const CircularProgressIndicator();
-          }
-        },
+      body: SlidableAutoCloseBehavior(
+        child: StreamBuilder<List<TipRecordData>>(
+          stream: tipRecords,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              final records = snapshot.data ?? [];
+              return ListView.builder(
+                itemCount: records.length,
+                itemBuilder: (context, index) {
+                  final record = records[index];
+                  return Slidable(
+                    endActionPane: ActionPane(
+                      motion: const ScrollMotion(),
+                      children: [
+                        SlidableAction(
+                          onPressed: (context) {
+                            // 删除操作
+                            globalDB.managers.tipRecord
+                                .filter((f) => f.id(record.id))
+                                .delete();
+                          },
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          icon: Icons.delete,
+                          label: '删除',
+                        ),
+                      ],
+                    ),
+                    child: ListTile(
+                      title: Text(record.id.toString()),
+                      subtitle: Text(record.content),
+                    ),
+                  );
+                },
+              );
+            } else if (snapshot.hasError) {
+              return Text('错误: ${snapshot.error}');
+            } else {
+              return const CircularProgressIndicator();
+            }
+          },
+        ),
       ),
     );
   }

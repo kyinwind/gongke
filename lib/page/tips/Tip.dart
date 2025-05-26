@@ -131,7 +131,7 @@ class _TipPageState extends State<TipPage> {
             icon: const Icon(Icons.import_export),
             onPressed: () {
               // 跳转到导入页面
-              Navigator.pushNamed(context, '/importTip');
+              Navigator.pushNamed(context, '/ImportTip');
             },
           ),
           Text('  '),
@@ -141,7 +141,7 @@ class _TipPageState extends State<TipPage> {
               // 跳转到新增页面
               Navigator.pushNamed(
                 context,
-                '/addTip',
+                '/AddTip',
                 arguments: {'acttype': 'new'},
               );
             },
@@ -149,170 +149,175 @@ class _TipPageState extends State<TipPage> {
         ],
       ),
       body: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 移除SizedBox包装器，直接使用StreamBuilder
-            StreamBuilder<List<TipBookData>>(
-              stream: records,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Text('错误: ${snapshot.error}');
-                }
-                final books = snapshot.data ?? [];
-                return ListView.builder(
-                  shrinkWrap: true, // 保持这个属性确保正确嵌套
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: books.length,
-                  itemBuilder: (context, index) {
-                    final record = books[index];
-                    return Slidable(
-                      startActionPane: ActionPane(
-                        motion: const ScrollMotion(),
-                        children: [
-                          SlidableAction(
-                            onPressed: (context) {
-                              // 跳转到修改页面
-                              Navigator.pushNamed(
-                                context,
-                                '/addTip',
-                                arguments: {'acttype': 'mod', 'id': record.id},
-                              );
-                            },
-                            backgroundColor: Color(0xFF2196F3),
-                            foregroundColor: Colors.white,
-                            icon: Icons.edit,
-                            label: '修改',
-                          ),
-                          SlidableAction(
-                            onPressed: (context) {
-                              _setFavorite(books[index]);
-                            },
-                            backgroundColor: Color.fromARGB(
-                              5,
-                              201,
-                              223,
-                              36,
-                            ), // 使用不同颜色区分
-                            foregroundColor: const Color.fromARGB(
-                              255,
-                              226,
-                              203,
-                              50,
-                            ),
-                            icon: Icons.favorite,
-                            label: record.favoriteDateTime == null
-                                ? '设为最爱'
-                                : '取消最爱',
-                          ),
-                        ],
-                      ),
-                      endActionPane: ActionPane(
-                        motion: const ScrollMotion(),
-                        children: [
-                          SlidableAction(
-                            onPressed: (context) async {
-                              // 在这里处理删除操作
-                              await globalDB.managers.tipBook
-                                  .filter((f) => f.id(record.id))
-                                  .delete();
-                              // 重新获取数据
-                              await fetchTip();
-                            },
-                            backgroundColor: Color(0xFFFE4A49),
-                            foregroundColor: Colors.white,
-                            icon: Icons.delete,
-                            label: '删除',
-                          ),
-                        ],
-                      ),
-                      child: ListTile(
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            '/TipRecord',
-                            arguments: {'bookId': record.id},
-                          );
-                        },
-                        leading: (record.image != null && record.image != '')
-                            ? Image.memory(
-                                const Base64Codec().decode(record.image),
-                                height: 100,
-                              )
-                            : Image.asset(
-                                'assets/images/jingshu.png',
-                                height: 100,
-                              ),
-                        title: Text(record.name),
-                        trailing: record.favoriteDateTime != null
-                            ? Icon(Icons.favorite, color: Colors.yellow)
-                            : const SizedBox(),
-                      ).padding(all: 10),
-                    );
-                  },
-                );
-              },
-            ),
-            const Text(
-              '预览',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ).padding(all: 15),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center, // 添加水平居中
-              crossAxisAlignment: CrossAxisAlignment.center, //
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center, // 添加水平居中
-                  crossAxisAlignment: CrossAxisAlignment.center, //
-                  children: [
-                    Image.asset(
-                      'assets/images/jingshu.png',
-                      height: 100,
-                      fit: BoxFit.fitHeight, // 确保图片按高度适配
-                    ).padding(all: 10),
-                    const SizedBox(width: 10),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
+        child: SlidableAutoCloseBehavior(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 移除SizedBox包装器，直接使用StreamBuilder
+              StreamBuilder<List<TipBookData>>(
+                stream: records,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Text('错误: ${snapshot.error}');
+                  }
+                  final books = snapshot.data ?? [];
+                  return ListView.builder(
+                    shrinkWrap: true, // 保持这个属性确保正确嵌套
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: books.length,
+                    itemBuilder: (context, index) {
+                      final record = books[index];
+                      return Slidable(
+                        startActionPane: ActionPane(
+                          motion: const ScrollMotion(),
                           children: [
-                            Text(
-                              '${DateTime.now().day}',
-                              style: const TextStyle(fontSize: 60),
+                            SlidableAction(
+                              onPressed: (context) {
+                                // 跳转到修改页面
+                                Navigator.pushNamed(
+                                  context,
+                                  '/AddTip',
+                                  arguments: {
+                                    'acttype': 'mod',
+                                    'id': record.id,
+                                  },
+                                );
+                              },
+                              backgroundColor: Color(0xFF2196F3),
+                              foregroundColor: Colors.white,
+                              icon: Icons.edit,
+                              label: '修改',
                             ),
-                            Divider(),
-                            buildVerticalText(
-                              '${DateTime.now().month}月',
-                              20,
-                            ).padding(all: 10),
-                            Divider(),
-                            //const VerticalDivider(width: 20, thickness: 1, color: Colors.grey),
-                            // 在 Column 中添加显示星期几的 Text 组件
-                            buildVerticalText(getWeekday(), 20),
+                            SlidableAction(
+                              onPressed: (context) {
+                                _setFavorite(books[index]);
+                              },
+                              backgroundColor: Color.fromARGB(
+                                5,
+                                201,
+                                223,
+                                36,
+                              ), // 使用不同颜色区分
+                              foregroundColor: const Color.fromARGB(
+                                255,
+                                226,
+                                203,
+                                50,
+                              ),
+                              icon: Icons.favorite,
+                              label: record.favoriteDateTime == null
+                                  ? '设为最爱'
+                                  : '取消最爱',
+                            ),
                           ],
                         ),
-                        Text(
-                          '更新:${DateTime.now().toString().split(' ')[0]}',
-                          style: const TextStyle(fontSize: 12),
+                        endActionPane: ActionPane(
+                          motion: const ScrollMotion(),
+                          children: [
+                            SlidableAction(
+                              onPressed: (context) async {
+                                // 在这里处理删除操作
+                                await globalDB.managers.tipBook
+                                    .filter((f) => f.id(record.id))
+                                    .delete();
+                                // 重新获取数据
+                                await fetchTip();
+                              },
+                              backgroundColor: Color(0xFFFE4A49),
+                              foregroundColor: Colors.white,
+                              icon: Icons.delete,
+                              label: '删除',
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-                const Text(
-                  '今日开示录\n今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ).padding(all: 15),
-          ],
+                        child: ListTile(
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/TipRecord',
+                              arguments: {'bookId': record.id},
+                            );
+                          },
+                          leading: (record.image != null && record.image != '')
+                              ? Image.memory(
+                                  const Base64Codec().decode(record.image),
+                                  height: 100,
+                                )
+                              : Image.asset(
+                                  'assets/images/jingshu.png',
+                                  height: 100,
+                                ),
+                          title: Text(record.name),
+                          trailing: record.favoriteDateTime != null
+                              ? Icon(Icons.favorite, color: Colors.yellow)
+                              : const SizedBox(),
+                        ).padding(all: 10),
+                      );
+                    },
+                  );
+                },
+              ),
+              const Text(
+                '预览',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ).padding(all: 15),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center, // 添加水平居中
+                crossAxisAlignment: CrossAxisAlignment.center, //
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center, // 添加水平居中
+                    crossAxisAlignment: CrossAxisAlignment.center, //
+                    children: [
+                      Image.asset(
+                        'assets/images/jingshu.png',
+                        height: 100,
+                        fit: BoxFit.fitHeight, // 确保图片按高度适配
+                      ).padding(all: 10),
+                      const SizedBox(width: 10),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                '${DateTime.now().day}',
+                                style: const TextStyle(fontSize: 60),
+                              ),
+                              Divider(),
+                              buildVerticalText(
+                                '${DateTime.now().month}月',
+                                20,
+                              ).padding(all: 10),
+                              Divider(),
+                              //const VerticalDivider(width: 20, thickness: 1, color: Colors.grey),
+                              // 在 Column 中添加显示星期几的 Text 组件
+                              buildVerticalText(getWeekday(), 20),
+                            ],
+                          ),
+                          Text(
+                            '更新:${DateTime.now().toString().split(' ')[0]}',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const Text(
+                    '今日开示录\n今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ).padding(all: 15),
+            ],
+          ),
         ),
       ),
     );

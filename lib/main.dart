@@ -6,6 +6,7 @@ import 'page/songjing/songjing.dart';
 import 'page/tips/Tip.dart';
 import 'page/tips/AddTip.dart';
 import 'page/tips/TipRecord.dart';
+import 'page/tips/AddTipRecord.dart';
 import 'page/tips/ImportTips.dart';
 // 导入 path_provider 库以使用 getApplicationDocumentsDirectory 函数
 import 'package:path_provider/path_provider.dart';
@@ -48,9 +49,11 @@ class _MyAppState extends State<MyApp> {
       home: TabbedHomePage(title: 'Flutter Demo Home Page'),
       // 添加路由配置
       routes: {
-        '/addTip': (context) => const AddTipPage(),
-        '/importTip': (context) => const ImportTipPage(),
-        '/TipRecord': (context) => const AddTipRecordPage(),
+        '/Tip': (context) => const TipPage(),
+        '/AddTip': (context) => const AddTipPage(),
+        '/ImportTip': (context) => const ImportTipPage(),
+        '/TipRecord': (context) => const TipRecordPage(),
+        '/AddTipRecord': (context) => const AddTipRecordPage(),
       },
       initialRoute: '/',
     );

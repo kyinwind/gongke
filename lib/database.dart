@@ -4,7 +4,8 @@ import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
 
-class JingShu extends Table with AutoIncrementingPrimaryKey,CreateDateTimeColumn,RemarksColumn{
+class JingShu extends Table
+    with AutoIncrementingPrimaryKey, CreateDateTimeColumn, RemarksColumn {
   TextColumn get name => text()();
   TextColumn get type => text()();
   TextColumn get image => text()();
@@ -22,13 +23,15 @@ class JingShu extends Table with AutoIncrementingPrimaryKey,CreateDateTimeColumn
   RealColumn get muyuDuration => real().nullable()();
 }
 
-class TipBook extends Table with AutoIncrementingPrimaryKey,CreateDateTimeColumn,RemarksColumn {
+class TipBook extends Table
+    with AutoIncrementingPrimaryKey, CreateDateTimeColumn, RemarksColumn {
   TextColumn get name => text()();
   TextColumn get image => text()();
   DateTimeColumn get favoriteDateTime => dateTime().nullable()();
 }
 
-class TipRecord extends Table with AutoIncrementingPrimaryKey,CreateDateTimeColumn,RemarksColumn {
+class TipRecord extends Table
+    with AutoIncrementingPrimaryKey, CreateDateTimeColumn, RemarksColumn {
   TextColumn get content => text()();
   IntColumn get bookId => integer()();
 }
@@ -38,7 +41,8 @@ mixin AutoIncrementingPrimaryKey on Table {
 }
 
 mixin CreateDateTimeColumn on Table {
-  DateTimeColumn get createDateTime => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get createDateTime =>
+      dateTime().withDefault(currentDateAndTime)();
 }
 
 mixin RemarksColumn on Table {

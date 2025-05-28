@@ -243,9 +243,14 @@ class _TipPageState extends State<TipPage> {
                             );
                           },
                           leading: (record.image != null && record.image != '')
-                              ? Image.memory(
-                                  const Base64Codec().decode(record.image),
-                                  height: 100,
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  child: Image.memory(
+                                    const Base64Codec().decode(record.image),
+                                    //height: 200,
+                                    width: 60,
+                                    fit: BoxFit.cover,
+                                  ),
                                 )
                               : Image.asset(
                                   'assets/images/jingshu.png',

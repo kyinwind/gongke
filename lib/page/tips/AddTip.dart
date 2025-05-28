@@ -61,10 +61,9 @@ class _AddTipPageState extends State<AddTipPage> {
   }
 
   Future<void> _loadData() async {
-    final data =
-        await globalDB.managers.tipBook
-            .filter((f) => f.id(recordId))
-            .getSingle();
+    final data = await globalDB.managers.tipBook
+        .filter((f) => f.id(recordId))
+        .getSingle();
     setState(() {
       _nameController.text = data.name;
       _remarksController.text = data.remarks;
@@ -75,13 +74,13 @@ class _AddTipPageState extends State<AddTipPage> {
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    File? _selectedImage;
+    File? selectedImage;
     if (pickedFile != null) {
       File imageFile = File(pickedFile.path);
       // 处理图片大小
       final processedImage = await _processImage(imageFile);
       setState(() {
-        _selectedImage = processedImage;
+        selectedImage = processedImage;
         _base64Image = base64Encode(processedImage.readAsBytesSync());
       });
     }

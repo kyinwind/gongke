@@ -5,7 +5,7 @@ import 'dart:io'; // 引入 dart:io 来判断平台
 import 'package:flutter/foundation.dart';
 
 class PdfViewerPage extends StatefulWidget {
-  final String pdfFileName;  //带pdf后缀的文件名
+  final String pdfFileName; //带pdf后缀的文件名
   const PdfViewerPage({super.key, required this.pdfFileName});
 
   @override
@@ -76,12 +76,9 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
 
         return Row(
           children: [
+            Expanded(flex: 1, child: SizedBox()),
             Expanded(
-              flex: 1,
-              child: SizedBox()
-              ),
-            Expanded(
-              flex : 4,
+              flex: 4,
               child: Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: PdfPageView(
@@ -90,20 +87,16 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                 ),
               ),
             ),
-            (rightPage <= _pages) ? 
-              Expanded(
-                flex : 4,
-                child:PdfPageView(
-                    pageNumber: rightPage,
-                    controller: _pdfController!,
-                  ),
-              )
-              : Expanded(child: SizedBox())
-              ,
-            Expanded(
-              flex: 1,
-              child: SizedBox()
-              ),
+            (rightPage <= _pages)
+                ? Expanded(
+                    flex: 4,
+                    child: PdfPageView(
+                      pageNumber: rightPage,
+                      controller: _pdfController!,
+                    ),
+                  )
+                : Expanded(child: SizedBox()),
+            Expanded(flex: 1, child: SizedBox()),
           ],
         );
       },
@@ -111,21 +104,22 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   }
 
   Widget _buildSinglePageView() {
-    if (_pdfController == null)
+    if (_pdfController == null) {
       return const Center(child: CircularProgressIndicator());
+    }
     return PdfView(
       controller: _pdfController!,
       scrollDirection: Axis.vertical, // 设置滚动方向为垂直方向
     );
   }
 
-  void _handleClickAndJump(int index,int pageNumber) {
+  void _handleClickAndJump(int index, int pageNumber) {
     if (_isDoublePage) {
       final doublePageIndex = index ~/ 2;
       //setState(() {
       //  _currentIndex = doublePageIndex;
       //});
-      _pageController?.jumpToPage(doublePageIndex); 
+      _pageController?.jumpToPage(doublePageIndex);
     } else {
       _pdfController!.jumpToPage(pageNumber);
     }
@@ -168,55 +162,55 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                 return (Platform.isIOS || Platform.isAndroid || kIsWeb)
                     // 如果是触摸设备或Web，使用GestureDetector
                     ? GestureDetector(
-                      onTap: () {
-                        _handleClickAndJump(index,pageNumber);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: Image.memory(snapshot.data!.bytes),
-                      ),
-                    )
-                    // 如果是PC设备，使用MouseRegion来捕捉鼠标点击
-                    : MouseRegion(
-                      onEnter: (_) {
-                        // 可以根据需要处理鼠标悬停事件
-                      },
-                      onExit: (_) {
-                        // 可以根据需要处理鼠标离开事件
-                      },
-                      onHover: (_) {
-                        // 可以处理鼠标悬浮时的效果
-                      },
-                      child: GestureDetector(
                         onTap: () {
                           _handleClickAndJump(index, pageNumber);
                         },
-                        child: Stack(
-                          alignment: Alignment.center ,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: Image.memory(snapshot.data!.bytes),
-                            ),
-                            Container(
-                              color: Colors.white.withOpacity(0.7),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 4,
-                                vertical: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Image.memory(snapshot.data!.bytes),
+                        ),
+                      )
+                    // 如果是PC设备，使用MouseRegion来捕捉鼠标点击
+                    : MouseRegion(
+                        onEnter: (_) {
+                          // 可以根据需要处理鼠标悬停事件
+                        },
+                        onExit: (_) {
+                          // 可以根据需要处理鼠标离开事件
+                        },
+                        onHover: (_) {
+                          // 可以处理鼠标悬浮时的效果
+                        },
+                        child: GestureDetector(
+                          onTap: () {
+                            _handleClickAndJump(index, pageNumber);
+                          },
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: Image.memory(snapshot.data!.bytes),
                               ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                '$pageNumber',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
+                              Container(
+                                color: Colors.white.withOpacity(0.7),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                  vertical: 2,
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  '$pageNumber',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    );
+                      );
               } else {
                 return const Padding(
                   padding: EdgeInsets.all(4.0),
@@ -295,7 +289,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     if (_pages == 0) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-    
+
     return Scaffold(
       appBar: AppBar(
         // 设置 AppBar 的高度
@@ -317,15 +311,15 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
           if (event is KeyDownEvent) {
             //print('已经进入if判断。。。');
             if (event.logicalKey == LogicalKeyboardKey.pageDown ||
-                  event.logicalKey == LogicalKeyboardKey.arrowDown ||
-                  event.logicalKey == LogicalKeyboardKey.arrowRight) {
+                event.logicalKey == LogicalKeyboardKey.arrowDown ||
+                event.logicalKey == LogicalKeyboardKey.arrowRight) {
               _handleNextPage();
-            } else if (event.logicalKey == LogicalKeyboardKey.pageUp || 
-                  event.logicalKey == LogicalKeyboardKey.arrowUp ||
-                  event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+            } else if (event.logicalKey == LogicalKeyboardKey.pageUp ||
+                event.logicalKey == LogicalKeyboardKey.arrowUp ||
+                event.logicalKey == LogicalKeyboardKey.arrowLeft) {
               _handlePreviousPage();
             } else if (event.logicalKey == LogicalKeyboardKey.space ||
-                  event.logicalKey == LogicalKeyboardKey.enter) {
+                event.logicalKey == LogicalKeyboardKey.enter) {
               _handleNextPage();
             }
             focusNode.requestFocus(); // 处理完事件后重新获取焦点
@@ -334,10 +328,9 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
         child: Row(
           children: [
             Expanded(
-              child:
-                  _isDoublePage
-                      ? _buildDoublePageView()
-                      : _buildSinglePageView(),
+              child: _isDoublePage
+                  ? _buildDoublePageView()
+                  : _buildSinglePageView(),
             ),
             Column(
               children: [
@@ -392,23 +385,28 @@ class PdfPageView extends StatelessWidget {
       // FutureBuilder to render the page
       future: controller.document.then(
         (doc) => doc.getPage(pageNumber).then((page) async {
-          final width = await page.width; // Get the actual page width
-          final height = await page.height; // Get the actual page height
+          final width = page.width; // Get the actual page width
+          final height = page.height; // Get the actual page height
 
           // 获取设备像素密度
-          final double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+          final double devicePixelRatio = MediaQuery.of(
+            context,
+          ).devicePixelRatio;
 
           // 根据设备像素密度调整渲染尺寸，乘以一个系数以进一步提高清晰度
           const double clarityFactor = 1.5; // 可根据需要调整此系数
           final double renderWidth = (width * devicePixelRatio * clarityFactor);
-          final double renderHeight = (height * devicePixelRatio * clarityFactor);
+          final double renderHeight =
+              (height * devicePixelRatio * clarityFactor);
 
           // Calculate scale factor to fit the screen while maintaining aspect ratio
-          double scaleFactor = MediaQuery.of(context).size.width / (width * clarityFactor);
+          double scaleFactor =
+              MediaQuery.of(context).size.width / (width * clarityFactor);
 
           // You can adjust the scale factor if needed for better fitting
           if (height * scaleFactor > MediaQuery.of(context).size.height) {
-            scaleFactor = MediaQuery.of(context).size.height / (height * clarityFactor);
+            scaleFactor =
+                MediaQuery.of(context).size.height / (height * clarityFactor);
           }
 
           // Render the page with the correct scaling

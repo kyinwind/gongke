@@ -12,7 +12,7 @@ class SongJingPage extends StatefulWidget {
 }
 
 class _SongJingPageState extends State<SongJingPage> {
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   Stream<List<JingShuData>> jingshudatalist = Stream.value([]);
   String? imagePath = 'assets/images/jingshu.png';
 
@@ -561,7 +561,7 @@ class _SongJingPageState extends State<SongJingPage> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                list[index].favoriteDateTime != null
+                                list[index].favoriteDateTime == null
                                     ? '已设为最爱'
                                     : '已取消最爱',
                               ),

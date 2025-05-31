@@ -6,6 +6,9 @@ import 'package:drift/drift.dart' hide Column;
 import 'package:flutter_slidable/flutter_slidable.dart'; // 导入 Slidable 库
 import 'dart:convert'; // 导入 dart:convert 库，确保已导入
 import 'package:flutter/services.dart';
+import '../../viewmodel/CurrentRecord.dart';
+import '../../main.dart'; // 导入 main.dart 以访问 firstDate 和 globalDB
+import 'package:intl/intl.dart';
 
 // 为了让页面能够上下滑动，将 Scaffold 的 body 用 SingleChildScrollView 包裹
 class TipPage extends StatefulWidget {
@@ -18,7 +21,7 @@ class TipPage extends StatefulWidget {
 // 在 _TipPageState 类中添加数据库实例和记录列表
 class _TipPageState extends State<TipPage> {
   Stream<List<TipBookData>> records = Stream.value([]);
-
+  CurrentRecord curRec = CurrentRecord();
   _TipPageState(); // 添加构造函数
 
   @override
@@ -31,6 +34,64 @@ class _TipPageState extends State<TipPage> {
         fetchTip();
       }
     });
+    _loadCurrentRecord();
+  }
+
+  // 新增方法处理异步加载
+  Future<void> _loadCurrentRecord() async {
+    final record = await getCurrentRecord();
+    setState(() {
+      curRec = record;
+      //print(curRec.id);
+      //print(curRec.content);
+    });
+  }
+
+  Future<CurrentRecord> getCurrentRecord() async {
+    final difference = DateTime.now()
+        .difference(DateFormat('yyyy-MM-dd').parse(firstDate!))
+        .inDays;
+    final seq = difference + 1;
+
+    var curRecord = CurrentRecord();
+
+    // 获取所有按照favoriteDateTime和createDateTime排序的tipbooks
+    final books = await (globalDB.managers.tipBook.orderBy(
+      (t) => t.favoriteDateTime.desc() & t.createDateTime.desc(),
+    )).get();
+
+    List<TipRecordData> allRecords = [];
+
+    // 遍历每个tipbook获取其对应的tiprecords
+    for (var book in books) {
+      List<TipRecordData> temprecords =
+          await (globalDB.managers.tipRecord
+                  .filter((t) => t.bookId.equals(book.id))
+                  .orderBy((t) => t.id.asc()))
+              .get();
+      print('Book: ${book.name}, Records Count: ${temprecords.length}');
+      allRecords.addAll(temprecords);
+      // 打印前五个记录的id
+      // for (var i = 0; i < 5 && i < allRecords.length; i++) {
+      //   print('Record ${i + 1} ID: ${allRecords[i].id}');
+      // }
+    }
+
+    // 如果有足够的记录，获取第seq个记录
+    if (allRecords.length >= seq && seq > 0) {
+      final record = allRecords[seq - 1];
+      curRecord.id = record.id;
+      curRecord.content = record.content;
+
+      // 获取对应的tipbook信息
+      final book = await globalDB.managers.tipBook
+          .filter((t) => t.id(record.bookId))
+          .getSingle();
+      curRecord.bookName = book.name;
+      curRecord.bookImage = book.image;
+    }
+
+    return curRecord;
   }
 
   Future<void> importTip() async {
@@ -101,19 +162,19 @@ class _TipPageState extends State<TipPage> {
 
   String? imagePath = 'assets/images/jingshu.png';
   // 设置为最爱
-  void _setFavorite(TipBookData book) {
-    setState(() {
-      var favoriteDateTime = book.favoriteDateTime;
-      if (book.favoriteDateTime != null) {
-        favoriteDateTime = null; // 如果已经是最爱，则取消
-      } else {
-        favoriteDateTime = DateTime.now();
-      }
-      // 添加数据库更新逻辑
-      globalDB.managers.tipBook
-          .filter((f) => f.id(book.id))
-          .update((o) => o(favoriteDateTime: Value(favoriteDateTime)));
-    });
+  Future<void> _setFavorite(TipBookData book) async {
+    var favoriteDateTime = book.favoriteDateTime;
+    if (book.favoriteDateTime != null) {
+      favoriteDateTime = null; // 如果已经是最爱，则取消
+    } else {
+      favoriteDateTime = DateTime.now();
+    }
+    // 添加数据库更新逻辑
+    await globalDB.managers.tipBook
+        .filter((f) => f.id(book.id))
+        .update((o) => o(favoriteDateTime: Value(favoriteDateTime)));
+
+    await _loadCurrentRecord();
   }
 
   @override
@@ -257,9 +318,14 @@ class _TipPageState extends State<TipPage> {
                                   height: 100,
                                 ),
                           title: Text(record.name),
-                          trailing: record.favoriteDateTime != null
-                              ? Icon(Icons.favorite, color: Colors.yellow)
-                              : const SizedBox(),
+                          subtitle: Row(
+                            children: [
+                              if (record.favoriteDateTime != null)
+                                const Icon(Icons.favorite, color: Colors.yellow)
+                              else
+                                const SizedBox.shrink(),
+                            ],
+                          ),
                         ).padding(all: 10),
                       );
                     },
@@ -315,9 +381,28 @@ class _TipPageState extends State<TipPage> {
                       ),
                     ],
                   ),
-                  const Text(
-                    '今日开示录\n今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录今日开示录',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Column(
+                    children: [
+                      Text(
+                        curRec.content,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Spacer(),
+                          Text(
+                            '《${curRec.bookName}》',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ],
               ).padding(all: 15),

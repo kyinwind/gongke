@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 Future<void> saveBoolValue(String key, bool value) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -45,4 +46,19 @@ Future<String?> getStringValue(String key) async {
 Future<List<String>?> getStringListValue(String key) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   return prefs.getStringList(key);
+}
+
+// 存储日期（仅年月日）
+Future<void> saveDateValue(String key, DateTime value) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  final String dateStr = DateFormat('yyyy-MM-dd').format(value);
+  await prefs.setString(key, dateStr);
+}
+
+// 读取日期（仅年月日）
+Future<String?> getDateValue(String key) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  final String? dateString = prefs.getString(key);
+  if (dateString == null) return null;
+  return dateString;
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gongke/database.dart';
 import 'package:styled_widget/styled_widget.dart';
-import '../../comm/pdfview.dart';
+import '../../comm/pdf_view.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gongke/main.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -598,10 +598,18 @@ class _SongJingPageState extends State<SongJingPage> {
                   ),
                   child: ListTile(
                     leading: Image.asset(list[index].image),
-                    title: Text(list[index].name),
-                    trailing: list[index].favoriteDateTime != null
-                        ? Icon(Icons.favorite, color: Colors.yellow)
-                        : null,
+                    title: Row(
+                      children: [Expanded(child: Text(list[index].name))],
+                    ),
+                    subtitle: Row(
+                      children: [
+                        if (list[index].favoriteDateTime != null)
+                          const Icon(Icons.favorite, color: Colors.yellow)
+                        else
+                          const SizedBox.shrink(),
+                        //Spacer(),
+                      ],
+                    ),
                     onTap: () {
                       _navigateToPdfView(list[index].fileUrl);
                     },

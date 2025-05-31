@@ -1,22 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:gongke/comm/shared_preferences.dart';
 import 'dart:io';
-import 'page/gongke/gongke.dart';
+import 'view/gongke/gongke.dart';
 import 'database.dart';
-import 'page/songjing/songjing.dart';
-import 'page/tips/Tip.dart';
-import 'page/tips/AddTip.dart';
-import 'page/tips/TipRecord.dart';
-import 'page/tips/AddTipRecord.dart';
-import 'page/tips/ImportTips.dart';
+import 'view/songjing/songjing.dart';
+import 'view/tips/Tip.dart';
+import 'view/tips/AddTip.dart';
+import 'view/tips/TipRecord.dart';
+import 'view/tips/AddTipRecord.dart';
+import 'view/tips/ImportTips.dart';
 // 导入 path_provider 库以使用 getApplicationDocumentsDirectory 函数
 import 'package:path_provider/path_provider.dart';
 
 // 声明全局数据库变量
 late AppDatabase globalDB; // 在main函数中创建单一实例;
-void main() {
-  globalDB = AppDatabase();
-  final dbFolder = getApplicationDocumentsDirectory();
 
+// 声明全局变量 app第一次运行的日期，用于后续显示开示
+late String? firstDate;
+
+void main() async {
+  globalDB = AppDatabase();
+  //final dbFolder = getApplicationDocumentsDirectory();
+  // 检查并存储首次运行时间
+  firstDate = await getDateValue('firstDate');
+  if (firstDate == null) {
+    await saveDateValue('firstDate', DateTime.now());
+  }
+  print(firstDate);
   runApp(MyApp(db: globalDB));
 }
 

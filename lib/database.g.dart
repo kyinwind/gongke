@@ -34,6 +34,18 @@ class $JingShuTable extends JingShu with TableInfo<$JingShuTable, JingShuData> {
         requiredDuringInsert: false,
         defaultValue: currentDateAndTime,
       );
+  static const VerificationMeta _favoriteDateTimeMeta = const VerificationMeta(
+    'favoriteDateTime',
+  );
+  @override
+  late final GeneratedColumn<DateTime> favoriteDateTime =
+      GeneratedColumn<DateTime>(
+        'favorite_date_time',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _remarksMeta = const VerificationMeta(
     'remarks',
   );
@@ -44,6 +56,24 @@ class $JingShuTable extends JingShu with TableInfo<$JingShuTable, JingShuData> {
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bk1Meta = const VerificationMeta('bk1');
+  @override
+  late final GeneratedColumn<String> bk1 = GeneratedColumn<String>(
+    'bk1',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _bk2Meta = const VerificationMeta('bk2');
+  @override
+  late final GeneratedColumn<String> bk2 = GeneratedColumn<String>(
+    'bk2',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
@@ -94,18 +124,6 @@ class $JingShuTable extends JingShu with TableInfo<$JingShuTable, JingShuData> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _favoriteDateTimeMeta = const VerificationMeta(
-    'favoriteDateTime',
-  );
-  @override
-  late final GeneratedColumn<DateTime> favoriteDateTime =
-      GeneratedColumn<DateTime>(
-        'favorite_date_time',
-        aliasedName,
-        true,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-      );
   static const VerificationMeta _muyuMeta = const VerificationMeta('muyu');
   @override
   late final GeneratedColumn<bool> muyu = GeneratedColumn<bool>(
@@ -215,13 +233,15 @@ class $JingShuTable extends JingShu with TableInfo<$JingShuTable, JingShuData> {
   List<GeneratedColumn> get $columns => [
     id,
     createDateTime,
+    favoriteDateTime,
     remarks,
+    bk1,
+    bk2,
     name,
     type,
     image,
     fileUrl,
     fileType,
-    favoriteDateTime,
     muyu,
     bkMusic,
     bkMusicname,
@@ -256,6 +276,15 @@ class $JingShuTable extends JingShu with TableInfo<$JingShuTable, JingShuData> {
         ),
       );
     }
+    if (data.containsKey('favorite_date_time')) {
+      context.handle(
+        _favoriteDateTimeMeta,
+        favoriteDateTime.isAcceptableOrUnknown(
+          data['favorite_date_time']!,
+          _favoriteDateTimeMeta,
+        ),
+      );
+    }
     if (data.containsKey('remarks')) {
       context.handle(
         _remarksMeta,
@@ -263,6 +292,18 @@ class $JingShuTable extends JingShu with TableInfo<$JingShuTable, JingShuData> {
       );
     } else if (isInserting) {
       context.missing(_remarksMeta);
+    }
+    if (data.containsKey('bk1')) {
+      context.handle(
+        _bk1Meta,
+        bk1.isAcceptableOrUnknown(data['bk1']!, _bk1Meta),
+      );
+    }
+    if (data.containsKey('bk2')) {
+      context.handle(
+        _bk2Meta,
+        bk2.isAcceptableOrUnknown(data['bk2']!, _bk2Meta),
+      );
     }
     if (data.containsKey('name')) {
       context.handle(
@@ -303,15 +344,6 @@ class $JingShuTable extends JingShu with TableInfo<$JingShuTable, JingShuData> {
       );
     } else if (isInserting) {
       context.missing(_fileTypeMeta);
-    }
-    if (data.containsKey('favorite_date_time')) {
-      context.handle(
-        _favoriteDateTimeMeta,
-        favoriteDateTime.isAcceptableOrUnknown(
-          data['favorite_date_time']!,
-          _favoriteDateTimeMeta,
-        ),
-      );
     }
     if (data.containsKey('muyu')) {
       context.handle(
@@ -385,60 +417,58 @@ class $JingShuTable extends JingShu with TableInfo<$JingShuTable, JingShuData> {
   JingShuData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return JingShuData(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
-      createDateTime:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}create_date_time'],
-          )!,
-      remarks:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}remarks'],
-          )!,
-      name:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}name'],
-          )!,
-      type:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}type'],
-          )!,
-      image:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}image'],
-          )!,
-      fileUrl:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}file_url'],
-          )!,
-      fileType:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}file_type'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      createDateTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}create_date_time'],
+      )!,
       favoriteDateTime: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}favorite_date_time'],
       ),
-      muyu:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}muyu'],
-          )!,
-      bkMusic:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}bk_music'],
-          )!,
+      remarks: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remarks'],
+      )!,
+      bk1: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bk1'],
+      ),
+      bk2: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bk2'],
+      ),
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      image: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image'],
+      )!,
+      fileUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}file_url'],
+      )!,
+      fileType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}file_type'],
+      )!,
+      muyu: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}muyu'],
+      )!,
+      bkMusic: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}bk_music'],
+      )!,
       bkMusicname: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}bk_musicname'],
@@ -479,13 +509,15 @@ class $JingShuTable extends JingShu with TableInfo<$JingShuTable, JingShuData> {
 class JingShuData extends DataClass implements Insertable<JingShuData> {
   final int id;
   final DateTime createDateTime;
+  final DateTime? favoriteDateTime;
   final String remarks;
+  final String? bk1;
+  final String? bk2;
   final String name;
   final String type;
   final String image;
   final String fileUrl;
   final String fileType;
-  final DateTime? favoriteDateTime;
   final bool muyu;
   final bool bkMusic;
   final String? bkMusicname;
@@ -498,13 +530,15 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
   const JingShuData({
     required this.id,
     required this.createDateTime,
+    this.favoriteDateTime,
     required this.remarks,
+    this.bk1,
+    this.bk2,
     required this.name,
     required this.type,
     required this.image,
     required this.fileUrl,
     required this.fileType,
-    this.favoriteDateTime,
     required this.muyu,
     required this.bkMusic,
     this.bkMusicname,
@@ -520,15 +554,21 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['create_date_time'] = Variable<DateTime>(createDateTime);
+    if (!nullToAbsent || favoriteDateTime != null) {
+      map['favorite_date_time'] = Variable<DateTime>(favoriteDateTime);
+    }
     map['remarks'] = Variable<String>(remarks);
+    if (!nullToAbsent || bk1 != null) {
+      map['bk1'] = Variable<String>(bk1);
+    }
+    if (!nullToAbsent || bk2 != null) {
+      map['bk2'] = Variable<String>(bk2);
+    }
     map['name'] = Variable<String>(name);
     map['type'] = Variable<String>(type);
     map['image'] = Variable<String>(image);
     map['file_url'] = Variable<String>(fileUrl);
     map['file_type'] = Variable<String>(fileType);
-    if (!nullToAbsent || favoriteDateTime != null) {
-      map['favorite_date_time'] = Variable<DateTime>(favoriteDateTime);
-    }
     map['muyu'] = Variable<bool>(muyu);
     map['bk_music'] = Variable<bool>(bkMusic);
     if (!nullToAbsent || bkMusicname != null) {
@@ -559,46 +599,40 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
     return JingShuCompanion(
       id: Value(id),
       createDateTime: Value(createDateTime),
+      favoriteDateTime: favoriteDateTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(favoriteDateTime),
       remarks: Value(remarks),
+      bk1: bk1 == null && nullToAbsent ? const Value.absent() : Value(bk1),
+      bk2: bk2 == null && nullToAbsent ? const Value.absent() : Value(bk2),
       name: Value(name),
       type: Value(type),
       image: Value(image),
       fileUrl: Value(fileUrl),
       fileType: Value(fileType),
-      favoriteDateTime:
-          favoriteDateTime == null && nullToAbsent
-              ? const Value.absent()
-              : Value(favoriteDateTime),
       muyu: Value(muyu),
       bkMusic: Value(bkMusic),
-      bkMusicname:
-          bkMusicname == null && nullToAbsent
-              ? const Value.absent()
-              : Value(bkMusicname),
-      muyuName:
-          muyuName == null && nullToAbsent
-              ? const Value.absent()
-              : Value(muyuName),
-      muyuImage:
-          muyuImage == null && nullToAbsent
-              ? const Value.absent()
-              : Value(muyuImage),
-      muyuType:
-          muyuType == null && nullToAbsent
-              ? const Value.absent()
-              : Value(muyuType),
-      muyuCount:
-          muyuCount == null && nullToAbsent
-              ? const Value.absent()
-              : Value(muyuCount),
-      muyuInterval:
-          muyuInterval == null && nullToAbsent
-              ? const Value.absent()
-              : Value(muyuInterval),
-      muyuDuration:
-          muyuDuration == null && nullToAbsent
-              ? const Value.absent()
-              : Value(muyuDuration),
+      bkMusicname: bkMusicname == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bkMusicname),
+      muyuName: muyuName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(muyuName),
+      muyuImage: muyuImage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(muyuImage),
+      muyuType: muyuType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(muyuType),
+      muyuCount: muyuCount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(muyuCount),
+      muyuInterval: muyuInterval == null && nullToAbsent
+          ? const Value.absent()
+          : Value(muyuInterval),
+      muyuDuration: muyuDuration == null && nullToAbsent
+          ? const Value.absent()
+          : Value(muyuDuration),
     );
   }
 
@@ -610,15 +644,17 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
     return JingShuData(
       id: serializer.fromJson<int>(json['id']),
       createDateTime: serializer.fromJson<DateTime>(json['createDateTime']),
+      favoriteDateTime: serializer.fromJson<DateTime?>(
+        json['favoriteDateTime'],
+      ),
       remarks: serializer.fromJson<String>(json['remarks']),
+      bk1: serializer.fromJson<String?>(json['bk1']),
+      bk2: serializer.fromJson<String?>(json['bk2']),
       name: serializer.fromJson<String>(json['name']),
       type: serializer.fromJson<String>(json['type']),
       image: serializer.fromJson<String>(json['image']),
       fileUrl: serializer.fromJson<String>(json['fileUrl']),
       fileType: serializer.fromJson<String>(json['fileType']),
-      favoriteDateTime: serializer.fromJson<DateTime?>(
-        json['favoriteDateTime'],
-      ),
       muyu: serializer.fromJson<bool>(json['muyu']),
       bkMusic: serializer.fromJson<bool>(json['bkMusic']),
       bkMusicname: serializer.fromJson<String?>(json['bkMusicname']),
@@ -636,13 +672,15 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'createDateTime': serializer.toJson<DateTime>(createDateTime),
+      'favoriteDateTime': serializer.toJson<DateTime?>(favoriteDateTime),
       'remarks': serializer.toJson<String>(remarks),
+      'bk1': serializer.toJson<String?>(bk1),
+      'bk2': serializer.toJson<String?>(bk2),
       'name': serializer.toJson<String>(name),
       'type': serializer.toJson<String>(type),
       'image': serializer.toJson<String>(image),
       'fileUrl': serializer.toJson<String>(fileUrl),
       'fileType': serializer.toJson<String>(fileType),
-      'favoriteDateTime': serializer.toJson<DateTime?>(favoriteDateTime),
       'muyu': serializer.toJson<bool>(muyu),
       'bkMusic': serializer.toJson<bool>(bkMusic),
       'bkMusicname': serializer.toJson<String?>(bkMusicname),
@@ -658,13 +696,15 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
   JingShuData copyWith({
     int? id,
     DateTime? createDateTime,
+    Value<DateTime?> favoriteDateTime = const Value.absent(),
     String? remarks,
+    Value<String?> bk1 = const Value.absent(),
+    Value<String?> bk2 = const Value.absent(),
     String? name,
     String? type,
     String? image,
     String? fileUrl,
     String? fileType,
-    Value<DateTime?> favoriteDateTime = const Value.absent(),
     bool? muyu,
     bool? bkMusic,
     Value<String?> bkMusicname = const Value.absent(),
@@ -677,16 +717,17 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
   }) => JingShuData(
     id: id ?? this.id,
     createDateTime: createDateTime ?? this.createDateTime,
+    favoriteDateTime: favoriteDateTime.present
+        ? favoriteDateTime.value
+        : this.favoriteDateTime,
     remarks: remarks ?? this.remarks,
+    bk1: bk1.present ? bk1.value : this.bk1,
+    bk2: bk2.present ? bk2.value : this.bk2,
     name: name ?? this.name,
     type: type ?? this.type,
     image: image ?? this.image,
     fileUrl: fileUrl ?? this.fileUrl,
     fileType: fileType ?? this.fileType,
-    favoriteDateTime:
-        favoriteDateTime.present
-            ? favoriteDateTime.value
-            : this.favoriteDateTime,
     muyu: muyu ?? this.muyu,
     bkMusic: bkMusic ?? this.bkMusic,
     bkMusicname: bkMusicname.present ? bkMusicname.value : this.bkMusicname,
@@ -700,36 +741,35 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
   JingShuData copyWithCompanion(JingShuCompanion data) {
     return JingShuData(
       id: data.id.present ? data.id.value : this.id,
-      createDateTime:
-          data.createDateTime.present
-              ? data.createDateTime.value
-              : this.createDateTime,
+      createDateTime: data.createDateTime.present
+          ? data.createDateTime.value
+          : this.createDateTime,
+      favoriteDateTime: data.favoriteDateTime.present
+          ? data.favoriteDateTime.value
+          : this.favoriteDateTime,
       remarks: data.remarks.present ? data.remarks.value : this.remarks,
+      bk1: data.bk1.present ? data.bk1.value : this.bk1,
+      bk2: data.bk2.present ? data.bk2.value : this.bk2,
       name: data.name.present ? data.name.value : this.name,
       type: data.type.present ? data.type.value : this.type,
       image: data.image.present ? data.image.value : this.image,
       fileUrl: data.fileUrl.present ? data.fileUrl.value : this.fileUrl,
       fileType: data.fileType.present ? data.fileType.value : this.fileType,
-      favoriteDateTime:
-          data.favoriteDateTime.present
-              ? data.favoriteDateTime.value
-              : this.favoriteDateTime,
       muyu: data.muyu.present ? data.muyu.value : this.muyu,
       bkMusic: data.bkMusic.present ? data.bkMusic.value : this.bkMusic,
-      bkMusicname:
-          data.bkMusicname.present ? data.bkMusicname.value : this.bkMusicname,
+      bkMusicname: data.bkMusicname.present
+          ? data.bkMusicname.value
+          : this.bkMusicname,
       muyuName: data.muyuName.present ? data.muyuName.value : this.muyuName,
       muyuImage: data.muyuImage.present ? data.muyuImage.value : this.muyuImage,
       muyuType: data.muyuType.present ? data.muyuType.value : this.muyuType,
       muyuCount: data.muyuCount.present ? data.muyuCount.value : this.muyuCount,
-      muyuInterval:
-          data.muyuInterval.present
-              ? data.muyuInterval.value
-              : this.muyuInterval,
-      muyuDuration:
-          data.muyuDuration.present
-              ? data.muyuDuration.value
-              : this.muyuDuration,
+      muyuInterval: data.muyuInterval.present
+          ? data.muyuInterval.value
+          : this.muyuInterval,
+      muyuDuration: data.muyuDuration.present
+          ? data.muyuDuration.value
+          : this.muyuDuration,
     );
   }
 
@@ -738,13 +778,15 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
     return (StringBuffer('JingShuData(')
           ..write('id: $id, ')
           ..write('createDateTime: $createDateTime, ')
+          ..write('favoriteDateTime: $favoriteDateTime, ')
           ..write('remarks: $remarks, ')
+          ..write('bk1: $bk1, ')
+          ..write('bk2: $bk2, ')
           ..write('name: $name, ')
           ..write('type: $type, ')
           ..write('image: $image, ')
           ..write('fileUrl: $fileUrl, ')
           ..write('fileType: $fileType, ')
-          ..write('favoriteDateTime: $favoriteDateTime, ')
           ..write('muyu: $muyu, ')
           ..write('bkMusic: $bkMusic, ')
           ..write('bkMusicname: $bkMusicname, ')
@@ -762,13 +804,15 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
   int get hashCode => Object.hash(
     id,
     createDateTime,
+    favoriteDateTime,
     remarks,
+    bk1,
+    bk2,
     name,
     type,
     image,
     fileUrl,
     fileType,
-    favoriteDateTime,
     muyu,
     bkMusic,
     bkMusicname,
@@ -785,13 +829,15 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
       (other is JingShuData &&
           other.id == this.id &&
           other.createDateTime == this.createDateTime &&
+          other.favoriteDateTime == this.favoriteDateTime &&
           other.remarks == this.remarks &&
+          other.bk1 == this.bk1 &&
+          other.bk2 == this.bk2 &&
           other.name == this.name &&
           other.type == this.type &&
           other.image == this.image &&
           other.fileUrl == this.fileUrl &&
           other.fileType == this.fileType &&
-          other.favoriteDateTime == this.favoriteDateTime &&
           other.muyu == this.muyu &&
           other.bkMusic == this.bkMusic &&
           other.bkMusicname == this.bkMusicname &&
@@ -806,13 +852,15 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
 class JingShuCompanion extends UpdateCompanion<JingShuData> {
   final Value<int> id;
   final Value<DateTime> createDateTime;
+  final Value<DateTime?> favoriteDateTime;
   final Value<String> remarks;
+  final Value<String?> bk1;
+  final Value<String?> bk2;
   final Value<String> name;
   final Value<String> type;
   final Value<String> image;
   final Value<String> fileUrl;
   final Value<String> fileType;
-  final Value<DateTime?> favoriteDateTime;
   final Value<bool> muyu;
   final Value<bool> bkMusic;
   final Value<String?> bkMusicname;
@@ -825,13 +873,15 @@ class JingShuCompanion extends UpdateCompanion<JingShuData> {
   const JingShuCompanion({
     this.id = const Value.absent(),
     this.createDateTime = const Value.absent(),
+    this.favoriteDateTime = const Value.absent(),
     this.remarks = const Value.absent(),
+    this.bk1 = const Value.absent(),
+    this.bk2 = const Value.absent(),
     this.name = const Value.absent(),
     this.type = const Value.absent(),
     this.image = const Value.absent(),
     this.fileUrl = const Value.absent(),
     this.fileType = const Value.absent(),
-    this.favoriteDateTime = const Value.absent(),
     this.muyu = const Value.absent(),
     this.bkMusic = const Value.absent(),
     this.bkMusicname = const Value.absent(),
@@ -845,13 +895,15 @@ class JingShuCompanion extends UpdateCompanion<JingShuData> {
   JingShuCompanion.insert({
     this.id = const Value.absent(),
     this.createDateTime = const Value.absent(),
+    this.favoriteDateTime = const Value.absent(),
     required String remarks,
+    this.bk1 = const Value.absent(),
+    this.bk2 = const Value.absent(),
     required String name,
     required String type,
     required String image,
     required String fileUrl,
     required String fileType,
-    this.favoriteDateTime = const Value.absent(),
     this.muyu = const Value.absent(),
     this.bkMusic = const Value.absent(),
     this.bkMusicname = const Value.absent(),
@@ -870,13 +922,15 @@ class JingShuCompanion extends UpdateCompanion<JingShuData> {
   static Insertable<JingShuData> custom({
     Expression<int>? id,
     Expression<DateTime>? createDateTime,
+    Expression<DateTime>? favoriteDateTime,
     Expression<String>? remarks,
+    Expression<String>? bk1,
+    Expression<String>? bk2,
     Expression<String>? name,
     Expression<String>? type,
     Expression<String>? image,
     Expression<String>? fileUrl,
     Expression<String>? fileType,
-    Expression<DateTime>? favoriteDateTime,
     Expression<bool>? muyu,
     Expression<bool>? bkMusic,
     Expression<String>? bkMusicname,
@@ -890,13 +944,15 @@ class JingShuCompanion extends UpdateCompanion<JingShuData> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (createDateTime != null) 'create_date_time': createDateTime,
+      if (favoriteDateTime != null) 'favorite_date_time': favoriteDateTime,
       if (remarks != null) 'remarks': remarks,
+      if (bk1 != null) 'bk1': bk1,
+      if (bk2 != null) 'bk2': bk2,
       if (name != null) 'name': name,
       if (type != null) 'type': type,
       if (image != null) 'image': image,
       if (fileUrl != null) 'file_url': fileUrl,
       if (fileType != null) 'file_type': fileType,
-      if (favoriteDateTime != null) 'favorite_date_time': favoriteDateTime,
       if (muyu != null) 'muyu': muyu,
       if (bkMusic != null) 'bk_music': bkMusic,
       if (bkMusicname != null) 'bk_musicname': bkMusicname,
@@ -912,13 +968,15 @@ class JingShuCompanion extends UpdateCompanion<JingShuData> {
   JingShuCompanion copyWith({
     Value<int>? id,
     Value<DateTime>? createDateTime,
+    Value<DateTime?>? favoriteDateTime,
     Value<String>? remarks,
+    Value<String?>? bk1,
+    Value<String?>? bk2,
     Value<String>? name,
     Value<String>? type,
     Value<String>? image,
     Value<String>? fileUrl,
     Value<String>? fileType,
-    Value<DateTime?>? favoriteDateTime,
     Value<bool>? muyu,
     Value<bool>? bkMusic,
     Value<String?>? bkMusicname,
@@ -932,13 +990,15 @@ class JingShuCompanion extends UpdateCompanion<JingShuData> {
     return JingShuCompanion(
       id: id ?? this.id,
       createDateTime: createDateTime ?? this.createDateTime,
+      favoriteDateTime: favoriteDateTime ?? this.favoriteDateTime,
       remarks: remarks ?? this.remarks,
+      bk1: bk1 ?? this.bk1,
+      bk2: bk2 ?? this.bk2,
       name: name ?? this.name,
       type: type ?? this.type,
       image: image ?? this.image,
       fileUrl: fileUrl ?? this.fileUrl,
       fileType: fileType ?? this.fileType,
-      favoriteDateTime: favoriteDateTime ?? this.favoriteDateTime,
       muyu: muyu ?? this.muyu,
       bkMusic: bkMusic ?? this.bkMusic,
       bkMusicname: bkMusicname ?? this.bkMusicname,
@@ -960,8 +1020,17 @@ class JingShuCompanion extends UpdateCompanion<JingShuData> {
     if (createDateTime.present) {
       map['create_date_time'] = Variable<DateTime>(createDateTime.value);
     }
+    if (favoriteDateTime.present) {
+      map['favorite_date_time'] = Variable<DateTime>(favoriteDateTime.value);
+    }
     if (remarks.present) {
       map['remarks'] = Variable<String>(remarks.value);
+    }
+    if (bk1.present) {
+      map['bk1'] = Variable<String>(bk1.value);
+    }
+    if (bk2.present) {
+      map['bk2'] = Variable<String>(bk2.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
@@ -977,9 +1046,6 @@ class JingShuCompanion extends UpdateCompanion<JingShuData> {
     }
     if (fileType.present) {
       map['file_type'] = Variable<String>(fileType.value);
-    }
-    if (favoriteDateTime.present) {
-      map['favorite_date_time'] = Variable<DateTime>(favoriteDateTime.value);
     }
     if (muyu.present) {
       map['muyu'] = Variable<bool>(muyu.value);
@@ -1016,13 +1082,15 @@ class JingShuCompanion extends UpdateCompanion<JingShuData> {
     return (StringBuffer('JingShuCompanion(')
           ..write('id: $id, ')
           ..write('createDateTime: $createDateTime, ')
+          ..write('favoriteDateTime: $favoriteDateTime, ')
           ..write('remarks: $remarks, ')
+          ..write('bk1: $bk1, ')
+          ..write('bk2: $bk2, ')
           ..write('name: $name, ')
           ..write('type: $type, ')
           ..write('image: $image, ')
           ..write('fileUrl: $fileUrl, ')
           ..write('fileType: $fileType, ')
-          ..write('favoriteDateTime: $favoriteDateTime, ')
           ..write('muyu: $muyu, ')
           ..write('bkMusic: $bkMusic, ')
           ..write('bkMusicname: $bkMusicname, ')
@@ -1068,6 +1136,18 @@ class $TipBookTable extends TipBook with TableInfo<$TipBookTable, TipBookData> {
         requiredDuringInsert: false,
         defaultValue: currentDateAndTime,
       );
+  static const VerificationMeta _favoriteDateTimeMeta = const VerificationMeta(
+    'favoriteDateTime',
+  );
+  @override
+  late final GeneratedColumn<DateTime> favoriteDateTime =
+      GeneratedColumn<DateTime>(
+        'favorite_date_time',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _remarksMeta = const VerificationMeta(
     'remarks',
   );
@@ -1078,6 +1158,24 @@ class $TipBookTable extends TipBook with TableInfo<$TipBookTable, TipBookData> {
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bk1Meta = const VerificationMeta('bk1');
+  @override
+  late final GeneratedColumn<String> bk1 = GeneratedColumn<String>(
+    'bk1',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _bk2Meta = const VerificationMeta('bk2');
+  @override
+  late final GeneratedColumn<String> bk2 = GeneratedColumn<String>(
+    'bk2',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
@@ -1097,26 +1195,16 @@ class $TipBookTable extends TipBook with TableInfo<$TipBookTable, TipBookData> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _favoriteDateTimeMeta = const VerificationMeta(
-    'favoriteDateTime',
-  );
-  @override
-  late final GeneratedColumn<DateTime> favoriteDateTime =
-      GeneratedColumn<DateTime>(
-        'favorite_date_time',
-        aliasedName,
-        true,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     createDateTime,
+    favoriteDateTime,
     remarks,
+    bk1,
+    bk2,
     name,
     image,
-    favoriteDateTime,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1142,6 +1230,15 @@ class $TipBookTable extends TipBook with TableInfo<$TipBookTable, TipBookData> {
         ),
       );
     }
+    if (data.containsKey('favorite_date_time')) {
+      context.handle(
+        _favoriteDateTimeMeta,
+        favoriteDateTime.isAcceptableOrUnknown(
+          data['favorite_date_time']!,
+          _favoriteDateTimeMeta,
+        ),
+      );
+    }
     if (data.containsKey('remarks')) {
       context.handle(
         _remarksMeta,
@@ -1149,6 +1246,18 @@ class $TipBookTable extends TipBook with TableInfo<$TipBookTable, TipBookData> {
       );
     } else if (isInserting) {
       context.missing(_remarksMeta);
+    }
+    if (data.containsKey('bk1')) {
+      context.handle(
+        _bk1Meta,
+        bk1.isAcceptableOrUnknown(data['bk1']!, _bk1Meta),
+      );
+    }
+    if (data.containsKey('bk2')) {
+      context.handle(
+        _bk2Meta,
+        bk2.isAcceptableOrUnknown(data['bk2']!, _bk2Meta),
+      );
     }
     if (data.containsKey('name')) {
       context.handle(
@@ -1166,15 +1275,6 @@ class $TipBookTable extends TipBook with TableInfo<$TipBookTable, TipBookData> {
     } else if (isInserting) {
       context.missing(_imageMeta);
     }
-    if (data.containsKey('favorite_date_time')) {
-      context.handle(
-        _favoriteDateTimeMeta,
-        favoriteDateTime.isAcceptableOrUnknown(
-          data['favorite_date_time']!,
-          _favoriteDateTimeMeta,
-        ),
-      );
-    }
     return context;
   }
 
@@ -1184,35 +1284,38 @@ class $TipBookTable extends TipBook with TableInfo<$TipBookTable, TipBookData> {
   TipBookData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return TipBookData(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
-      createDateTime:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}create_date_time'],
-          )!,
-      remarks:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}remarks'],
-          )!,
-      name:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}name'],
-          )!,
-      image:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}image'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      createDateTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}create_date_time'],
+      )!,
       favoriteDateTime: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}favorite_date_time'],
       ),
+      remarks: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remarks'],
+      )!,
+      bk1: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bk1'],
+      ),
+      bk2: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bk2'],
+      ),
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      image: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image'],
+      )!,
     );
   }
 
@@ -1225,29 +1328,39 @@ class $TipBookTable extends TipBook with TableInfo<$TipBookTable, TipBookData> {
 class TipBookData extends DataClass implements Insertable<TipBookData> {
   final int id;
   final DateTime createDateTime;
+  final DateTime? favoriteDateTime;
   final String remarks;
+  final String? bk1;
+  final String? bk2;
   final String name;
   final String image;
-  final DateTime? favoriteDateTime;
   const TipBookData({
     required this.id,
     required this.createDateTime,
+    this.favoriteDateTime,
     required this.remarks,
+    this.bk1,
+    this.bk2,
     required this.name,
     required this.image,
-    this.favoriteDateTime,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['create_date_time'] = Variable<DateTime>(createDateTime);
-    map['remarks'] = Variable<String>(remarks);
-    map['name'] = Variable<String>(name);
-    map['image'] = Variable<String>(image);
     if (!nullToAbsent || favoriteDateTime != null) {
       map['favorite_date_time'] = Variable<DateTime>(favoriteDateTime);
     }
+    map['remarks'] = Variable<String>(remarks);
+    if (!nullToAbsent || bk1 != null) {
+      map['bk1'] = Variable<String>(bk1);
+    }
+    if (!nullToAbsent || bk2 != null) {
+      map['bk2'] = Variable<String>(bk2);
+    }
+    map['name'] = Variable<String>(name);
+    map['image'] = Variable<String>(image);
     return map;
   }
 
@@ -1255,13 +1368,14 @@ class TipBookData extends DataClass implements Insertable<TipBookData> {
     return TipBookCompanion(
       id: Value(id),
       createDateTime: Value(createDateTime),
+      favoriteDateTime: favoriteDateTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(favoriteDateTime),
       remarks: Value(remarks),
+      bk1: bk1 == null && nullToAbsent ? const Value.absent() : Value(bk1),
+      bk2: bk2 == null && nullToAbsent ? const Value.absent() : Value(bk2),
       name: Value(name),
       image: Value(image),
-      favoriteDateTime:
-          favoriteDateTime == null && nullToAbsent
-              ? const Value.absent()
-              : Value(favoriteDateTime),
     );
   }
 
@@ -1273,12 +1387,14 @@ class TipBookData extends DataClass implements Insertable<TipBookData> {
     return TipBookData(
       id: serializer.fromJson<int>(json['id']),
       createDateTime: serializer.fromJson<DateTime>(json['createDateTime']),
-      remarks: serializer.fromJson<String>(json['remarks']),
-      name: serializer.fromJson<String>(json['name']),
-      image: serializer.fromJson<String>(json['image']),
       favoriteDateTime: serializer.fromJson<DateTime?>(
         json['favoriteDateTime'],
       ),
+      remarks: serializer.fromJson<String>(json['remarks']),
+      bk1: serializer.fromJson<String?>(json['bk1']),
+      bk2: serializer.fromJson<String?>(json['bk2']),
+      name: serializer.fromJson<String>(json['name']),
+      image: serializer.fromJson<String>(json['image']),
     );
   }
   @override
@@ -1287,45 +1403,50 @@ class TipBookData extends DataClass implements Insertable<TipBookData> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'createDateTime': serializer.toJson<DateTime>(createDateTime),
+      'favoriteDateTime': serializer.toJson<DateTime?>(favoriteDateTime),
       'remarks': serializer.toJson<String>(remarks),
+      'bk1': serializer.toJson<String?>(bk1),
+      'bk2': serializer.toJson<String?>(bk2),
       'name': serializer.toJson<String>(name),
       'image': serializer.toJson<String>(image),
-      'favoriteDateTime': serializer.toJson<DateTime?>(favoriteDateTime),
     };
   }
 
   TipBookData copyWith({
     int? id,
     DateTime? createDateTime,
+    Value<DateTime?> favoriteDateTime = const Value.absent(),
     String? remarks,
+    Value<String?> bk1 = const Value.absent(),
+    Value<String?> bk2 = const Value.absent(),
     String? name,
     String? image,
-    Value<DateTime?> favoriteDateTime = const Value.absent(),
   }) => TipBookData(
     id: id ?? this.id,
     createDateTime: createDateTime ?? this.createDateTime,
+    favoriteDateTime: favoriteDateTime.present
+        ? favoriteDateTime.value
+        : this.favoriteDateTime,
     remarks: remarks ?? this.remarks,
+    bk1: bk1.present ? bk1.value : this.bk1,
+    bk2: bk2.present ? bk2.value : this.bk2,
     name: name ?? this.name,
     image: image ?? this.image,
-    favoriteDateTime:
-        favoriteDateTime.present
-            ? favoriteDateTime.value
-            : this.favoriteDateTime,
   );
   TipBookData copyWithCompanion(TipBookCompanion data) {
     return TipBookData(
       id: data.id.present ? data.id.value : this.id,
-      createDateTime:
-          data.createDateTime.present
-              ? data.createDateTime.value
-              : this.createDateTime,
+      createDateTime: data.createDateTime.present
+          ? data.createDateTime.value
+          : this.createDateTime,
+      favoriteDateTime: data.favoriteDateTime.present
+          ? data.favoriteDateTime.value
+          : this.favoriteDateTime,
       remarks: data.remarks.present ? data.remarks.value : this.remarks,
+      bk1: data.bk1.present ? data.bk1.value : this.bk1,
+      bk2: data.bk2.present ? data.bk2.value : this.bk2,
       name: data.name.present ? data.name.value : this.name,
       image: data.image.present ? data.image.value : this.image,
-      favoriteDateTime:
-          data.favoriteDateTime.present
-              ? data.favoriteDateTime.value
-              : this.favoriteDateTime,
     );
   }
 
@@ -1334,87 +1455,113 @@ class TipBookData extends DataClass implements Insertable<TipBookData> {
     return (StringBuffer('TipBookData(')
           ..write('id: $id, ')
           ..write('createDateTime: $createDateTime, ')
+          ..write('favoriteDateTime: $favoriteDateTime, ')
           ..write('remarks: $remarks, ')
+          ..write('bk1: $bk1, ')
+          ..write('bk2: $bk2, ')
           ..write('name: $name, ')
-          ..write('image: $image, ')
-          ..write('favoriteDateTime: $favoriteDateTime')
+          ..write('image: $image')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, createDateTime, remarks, name, image, favoriteDateTime);
+  int get hashCode => Object.hash(
+    id,
+    createDateTime,
+    favoriteDateTime,
+    remarks,
+    bk1,
+    bk2,
+    name,
+    image,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is TipBookData &&
           other.id == this.id &&
           other.createDateTime == this.createDateTime &&
+          other.favoriteDateTime == this.favoriteDateTime &&
           other.remarks == this.remarks &&
+          other.bk1 == this.bk1 &&
+          other.bk2 == this.bk2 &&
           other.name == this.name &&
-          other.image == this.image &&
-          other.favoriteDateTime == this.favoriteDateTime);
+          other.image == this.image);
 }
 
 class TipBookCompanion extends UpdateCompanion<TipBookData> {
   final Value<int> id;
   final Value<DateTime> createDateTime;
+  final Value<DateTime?> favoriteDateTime;
   final Value<String> remarks;
+  final Value<String?> bk1;
+  final Value<String?> bk2;
   final Value<String> name;
   final Value<String> image;
-  final Value<DateTime?> favoriteDateTime;
   const TipBookCompanion({
     this.id = const Value.absent(),
     this.createDateTime = const Value.absent(),
+    this.favoriteDateTime = const Value.absent(),
     this.remarks = const Value.absent(),
+    this.bk1 = const Value.absent(),
+    this.bk2 = const Value.absent(),
     this.name = const Value.absent(),
     this.image = const Value.absent(),
-    this.favoriteDateTime = const Value.absent(),
   });
   TipBookCompanion.insert({
     this.id = const Value.absent(),
     this.createDateTime = const Value.absent(),
+    this.favoriteDateTime = const Value.absent(),
     required String remarks,
+    this.bk1 = const Value.absent(),
+    this.bk2 = const Value.absent(),
     required String name,
     required String image,
-    this.favoriteDateTime = const Value.absent(),
   }) : remarks = Value(remarks),
        name = Value(name),
        image = Value(image);
   static Insertable<TipBookData> custom({
     Expression<int>? id,
     Expression<DateTime>? createDateTime,
+    Expression<DateTime>? favoriteDateTime,
     Expression<String>? remarks,
+    Expression<String>? bk1,
+    Expression<String>? bk2,
     Expression<String>? name,
     Expression<String>? image,
-    Expression<DateTime>? favoriteDateTime,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (createDateTime != null) 'create_date_time': createDateTime,
+      if (favoriteDateTime != null) 'favorite_date_time': favoriteDateTime,
       if (remarks != null) 'remarks': remarks,
+      if (bk1 != null) 'bk1': bk1,
+      if (bk2 != null) 'bk2': bk2,
       if (name != null) 'name': name,
       if (image != null) 'image': image,
-      if (favoriteDateTime != null) 'favorite_date_time': favoriteDateTime,
     });
   }
 
   TipBookCompanion copyWith({
     Value<int>? id,
     Value<DateTime>? createDateTime,
+    Value<DateTime?>? favoriteDateTime,
     Value<String>? remarks,
+    Value<String?>? bk1,
+    Value<String?>? bk2,
     Value<String>? name,
     Value<String>? image,
-    Value<DateTime?>? favoriteDateTime,
   }) {
     return TipBookCompanion(
       id: id ?? this.id,
       createDateTime: createDateTime ?? this.createDateTime,
+      favoriteDateTime: favoriteDateTime ?? this.favoriteDateTime,
       remarks: remarks ?? this.remarks,
+      bk1: bk1 ?? this.bk1,
+      bk2: bk2 ?? this.bk2,
       name: name ?? this.name,
       image: image ?? this.image,
-      favoriteDateTime: favoriteDateTime ?? this.favoriteDateTime,
     );
   }
 
@@ -1427,17 +1574,23 @@ class TipBookCompanion extends UpdateCompanion<TipBookData> {
     if (createDateTime.present) {
       map['create_date_time'] = Variable<DateTime>(createDateTime.value);
     }
+    if (favoriteDateTime.present) {
+      map['favorite_date_time'] = Variable<DateTime>(favoriteDateTime.value);
+    }
     if (remarks.present) {
       map['remarks'] = Variable<String>(remarks.value);
+    }
+    if (bk1.present) {
+      map['bk1'] = Variable<String>(bk1.value);
+    }
+    if (bk2.present) {
+      map['bk2'] = Variable<String>(bk2.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
     if (image.present) {
       map['image'] = Variable<String>(image.value);
-    }
-    if (favoriteDateTime.present) {
-      map['favorite_date_time'] = Variable<DateTime>(favoriteDateTime.value);
     }
     return map;
   }
@@ -1447,10 +1600,12 @@ class TipBookCompanion extends UpdateCompanion<TipBookData> {
     return (StringBuffer('TipBookCompanion(')
           ..write('id: $id, ')
           ..write('createDateTime: $createDateTime, ')
+          ..write('favoriteDateTime: $favoriteDateTime, ')
           ..write('remarks: $remarks, ')
+          ..write('bk1: $bk1, ')
+          ..write('bk2: $bk2, ')
           ..write('name: $name, ')
-          ..write('image: $image, ')
-          ..write('favoriteDateTime: $favoriteDateTime')
+          ..write('image: $image')
           ..write(')'))
         .toString();
   }
@@ -1499,6 +1654,24 @@ class $TipRecordTable extends TipRecord
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _bk1Meta = const VerificationMeta('bk1');
+  @override
+  late final GeneratedColumn<String> bk1 = GeneratedColumn<String>(
+    'bk1',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _bk2Meta = const VerificationMeta('bk2');
+  @override
+  late final GeneratedColumn<String> bk2 = GeneratedColumn<String>(
+    'bk2',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _contentMeta = const VerificationMeta(
     'content',
   );
@@ -1524,6 +1697,8 @@ class $TipRecordTable extends TipRecord
     id,
     createDateTime,
     remarks,
+    bk1,
+    bk2,
     content,
     bookId,
   ];
@@ -1559,6 +1734,18 @@ class $TipRecordTable extends TipRecord
     } else if (isInserting) {
       context.missing(_remarksMeta);
     }
+    if (data.containsKey('bk1')) {
+      context.handle(
+        _bk1Meta,
+        bk1.isAcceptableOrUnknown(data['bk1']!, _bk1Meta),
+      );
+    }
+    if (data.containsKey('bk2')) {
+      context.handle(
+        _bk2Meta,
+        bk2.isAcceptableOrUnknown(data['bk2']!, _bk2Meta),
+      );
+    }
     if (data.containsKey('content')) {
       context.handle(
         _contentMeta,
@@ -1584,31 +1771,34 @@ class $TipRecordTable extends TipRecord
   TipRecordData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return TipRecordData(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
-      createDateTime:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}create_date_time'],
-          )!,
-      remarks:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}remarks'],
-          )!,
-      content:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}content'],
-          )!,
-      bookId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}book_id'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      createDateTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}create_date_time'],
+      )!,
+      remarks: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remarks'],
+      )!,
+      bk1: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bk1'],
+      ),
+      bk2: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bk2'],
+      ),
+      content: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content'],
+      )!,
+      bookId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}book_id'],
+      )!,
     );
   }
 
@@ -1622,12 +1812,16 @@ class TipRecordData extends DataClass implements Insertable<TipRecordData> {
   final int id;
   final DateTime createDateTime;
   final String remarks;
+  final String? bk1;
+  final String? bk2;
   final String content;
   final int bookId;
   const TipRecordData({
     required this.id,
     required this.createDateTime,
     required this.remarks,
+    this.bk1,
+    this.bk2,
     required this.content,
     required this.bookId,
   });
@@ -1637,6 +1831,12 @@ class TipRecordData extends DataClass implements Insertable<TipRecordData> {
     map['id'] = Variable<int>(id);
     map['create_date_time'] = Variable<DateTime>(createDateTime);
     map['remarks'] = Variable<String>(remarks);
+    if (!nullToAbsent || bk1 != null) {
+      map['bk1'] = Variable<String>(bk1);
+    }
+    if (!nullToAbsent || bk2 != null) {
+      map['bk2'] = Variable<String>(bk2);
+    }
     map['content'] = Variable<String>(content);
     map['book_id'] = Variable<int>(bookId);
     return map;
@@ -1647,6 +1847,8 @@ class TipRecordData extends DataClass implements Insertable<TipRecordData> {
       id: Value(id),
       createDateTime: Value(createDateTime),
       remarks: Value(remarks),
+      bk1: bk1 == null && nullToAbsent ? const Value.absent() : Value(bk1),
+      bk2: bk2 == null && nullToAbsent ? const Value.absent() : Value(bk2),
       content: Value(content),
       bookId: Value(bookId),
     );
@@ -1661,6 +1863,8 @@ class TipRecordData extends DataClass implements Insertable<TipRecordData> {
       id: serializer.fromJson<int>(json['id']),
       createDateTime: serializer.fromJson<DateTime>(json['createDateTime']),
       remarks: serializer.fromJson<String>(json['remarks']),
+      bk1: serializer.fromJson<String?>(json['bk1']),
+      bk2: serializer.fromJson<String?>(json['bk2']),
       content: serializer.fromJson<String>(json['content']),
       bookId: serializer.fromJson<int>(json['bookId']),
     );
@@ -1672,6 +1876,8 @@ class TipRecordData extends DataClass implements Insertable<TipRecordData> {
       'id': serializer.toJson<int>(id),
       'createDateTime': serializer.toJson<DateTime>(createDateTime),
       'remarks': serializer.toJson<String>(remarks),
+      'bk1': serializer.toJson<String?>(bk1),
+      'bk2': serializer.toJson<String?>(bk2),
       'content': serializer.toJson<String>(content),
       'bookId': serializer.toJson<int>(bookId),
     };
@@ -1681,23 +1887,28 @@ class TipRecordData extends DataClass implements Insertable<TipRecordData> {
     int? id,
     DateTime? createDateTime,
     String? remarks,
+    Value<String?> bk1 = const Value.absent(),
+    Value<String?> bk2 = const Value.absent(),
     String? content,
     int? bookId,
   }) => TipRecordData(
     id: id ?? this.id,
     createDateTime: createDateTime ?? this.createDateTime,
     remarks: remarks ?? this.remarks,
+    bk1: bk1.present ? bk1.value : this.bk1,
+    bk2: bk2.present ? bk2.value : this.bk2,
     content: content ?? this.content,
     bookId: bookId ?? this.bookId,
   );
   TipRecordData copyWithCompanion(TipRecordCompanion data) {
     return TipRecordData(
       id: data.id.present ? data.id.value : this.id,
-      createDateTime:
-          data.createDateTime.present
-              ? data.createDateTime.value
-              : this.createDateTime,
+      createDateTime: data.createDateTime.present
+          ? data.createDateTime.value
+          : this.createDateTime,
       remarks: data.remarks.present ? data.remarks.value : this.remarks,
+      bk1: data.bk1.present ? data.bk1.value : this.bk1,
+      bk2: data.bk2.present ? data.bk2.value : this.bk2,
       content: data.content.present ? data.content.value : this.content,
       bookId: data.bookId.present ? data.bookId.value : this.bookId,
     );
@@ -1709,6 +1920,8 @@ class TipRecordData extends DataClass implements Insertable<TipRecordData> {
           ..write('id: $id, ')
           ..write('createDateTime: $createDateTime, ')
           ..write('remarks: $remarks, ')
+          ..write('bk1: $bk1, ')
+          ..write('bk2: $bk2, ')
           ..write('content: $content, ')
           ..write('bookId: $bookId')
           ..write(')'))
@@ -1716,7 +1929,8 @@ class TipRecordData extends DataClass implements Insertable<TipRecordData> {
   }
 
   @override
-  int get hashCode => Object.hash(id, createDateTime, remarks, content, bookId);
+  int get hashCode =>
+      Object.hash(id, createDateTime, remarks, bk1, bk2, content, bookId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1724,6 +1938,8 @@ class TipRecordData extends DataClass implements Insertable<TipRecordData> {
           other.id == this.id &&
           other.createDateTime == this.createDateTime &&
           other.remarks == this.remarks &&
+          other.bk1 == this.bk1 &&
+          other.bk2 == this.bk2 &&
           other.content == this.content &&
           other.bookId == this.bookId);
 }
@@ -1732,12 +1948,16 @@ class TipRecordCompanion extends UpdateCompanion<TipRecordData> {
   final Value<int> id;
   final Value<DateTime> createDateTime;
   final Value<String> remarks;
+  final Value<String?> bk1;
+  final Value<String?> bk2;
   final Value<String> content;
   final Value<int> bookId;
   const TipRecordCompanion({
     this.id = const Value.absent(),
     this.createDateTime = const Value.absent(),
     this.remarks = const Value.absent(),
+    this.bk1 = const Value.absent(),
+    this.bk2 = const Value.absent(),
     this.content = const Value.absent(),
     this.bookId = const Value.absent(),
   });
@@ -1745,6 +1965,8 @@ class TipRecordCompanion extends UpdateCompanion<TipRecordData> {
     this.id = const Value.absent(),
     this.createDateTime = const Value.absent(),
     required String remarks,
+    this.bk1 = const Value.absent(),
+    this.bk2 = const Value.absent(),
     required String content,
     required int bookId,
   }) : remarks = Value(remarks),
@@ -1754,6 +1976,8 @@ class TipRecordCompanion extends UpdateCompanion<TipRecordData> {
     Expression<int>? id,
     Expression<DateTime>? createDateTime,
     Expression<String>? remarks,
+    Expression<String>? bk1,
+    Expression<String>? bk2,
     Expression<String>? content,
     Expression<int>? bookId,
   }) {
@@ -1761,6 +1985,8 @@ class TipRecordCompanion extends UpdateCompanion<TipRecordData> {
       if (id != null) 'id': id,
       if (createDateTime != null) 'create_date_time': createDateTime,
       if (remarks != null) 'remarks': remarks,
+      if (bk1 != null) 'bk1': bk1,
+      if (bk2 != null) 'bk2': bk2,
       if (content != null) 'content': content,
       if (bookId != null) 'book_id': bookId,
     });
@@ -1770,6 +1996,8 @@ class TipRecordCompanion extends UpdateCompanion<TipRecordData> {
     Value<int>? id,
     Value<DateTime>? createDateTime,
     Value<String>? remarks,
+    Value<String?>? bk1,
+    Value<String?>? bk2,
     Value<String>? content,
     Value<int>? bookId,
   }) {
@@ -1777,6 +2005,8 @@ class TipRecordCompanion extends UpdateCompanion<TipRecordData> {
       id: id ?? this.id,
       createDateTime: createDateTime ?? this.createDateTime,
       remarks: remarks ?? this.remarks,
+      bk1: bk1 ?? this.bk1,
+      bk2: bk2 ?? this.bk2,
       content: content ?? this.content,
       bookId: bookId ?? this.bookId,
     );
@@ -1794,6 +2024,12 @@ class TipRecordCompanion extends UpdateCompanion<TipRecordData> {
     if (remarks.present) {
       map['remarks'] = Variable<String>(remarks.value);
     }
+    if (bk1.present) {
+      map['bk1'] = Variable<String>(bk1.value);
+    }
+    if (bk2.present) {
+      map['bk2'] = Variable<String>(bk2.value);
+    }
     if (content.present) {
       map['content'] = Variable<String>(content.value);
     }
@@ -1809,6 +2045,8 @@ class TipRecordCompanion extends UpdateCompanion<TipRecordData> {
           ..write('id: $id, ')
           ..write('createDateTime: $createDateTime, ')
           ..write('remarks: $remarks, ')
+          ..write('bk1: $bk1, ')
+          ..write('bk2: $bk2, ')
           ..write('content: $content, ')
           ..write('bookId: $bookId')
           ..write(')'))
@@ -1837,13 +2075,15 @@ typedef $$JingShuTableCreateCompanionBuilder =
     JingShuCompanion Function({
       Value<int> id,
       Value<DateTime> createDateTime,
+      Value<DateTime?> favoriteDateTime,
       required String remarks,
+      Value<String?> bk1,
+      Value<String?> bk2,
       required String name,
       required String type,
       required String image,
       required String fileUrl,
       required String fileType,
-      Value<DateTime?> favoriteDateTime,
       Value<bool> muyu,
       Value<bool> bkMusic,
       Value<String?> bkMusicname,
@@ -1858,13 +2098,15 @@ typedef $$JingShuTableUpdateCompanionBuilder =
     JingShuCompanion Function({
       Value<int> id,
       Value<DateTime> createDateTime,
+      Value<DateTime?> favoriteDateTime,
       Value<String> remarks,
+      Value<String?> bk1,
+      Value<String?> bk2,
       Value<String> name,
       Value<String> type,
       Value<String> image,
       Value<String> fileUrl,
       Value<String> fileType,
-      Value<DateTime?> favoriteDateTime,
       Value<bool> muyu,
       Value<bool> bkMusic,
       Value<String?> bkMusicname,
@@ -1895,8 +2137,23 @@ class $$JingShuTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<DateTime> get favoriteDateTime => $composableBuilder(
+    column: $table.favoriteDateTime,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get remarks => $composableBuilder(
     column: $table.remarks,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bk1 => $composableBuilder(
+    column: $table.bk1,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bk2 => $composableBuilder(
+    column: $table.bk2,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1922,11 +2179,6 @@ class $$JingShuTableFilterComposer
 
   ColumnFilters<String> get fileType => $composableBuilder(
     column: $table.fileType,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get favoriteDateTime => $composableBuilder(
-    column: $table.favoriteDateTime,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1995,8 +2247,23 @@ class $$JingShuTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get favoriteDateTime => $composableBuilder(
+    column: $table.favoriteDateTime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get remarks => $composableBuilder(
     column: $table.remarks,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bk1 => $composableBuilder(
+    column: $table.bk1,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bk2 => $composableBuilder(
+    column: $table.bk2,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -2022,11 +2289,6 @@ class $$JingShuTableOrderingComposer
 
   ColumnOrderings<String> get fileType => $composableBuilder(
     column: $table.fileType,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get favoriteDateTime => $composableBuilder(
-    column: $table.favoriteDateTime,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -2093,8 +2355,19 @@ class $$JingShuTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<DateTime> get favoriteDateTime => $composableBuilder(
+    column: $table.favoriteDateTime,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get remarks =>
       $composableBuilder(column: $table.remarks, builder: (column) => column);
+
+  GeneratedColumn<String> get bk1 =>
+      $composableBuilder(column: $table.bk1, builder: (column) => column);
+
+  GeneratedColumn<String> get bk2 =>
+      $composableBuilder(column: $table.bk2, builder: (column) => column);
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
@@ -2110,11 +2383,6 @@ class $$JingShuTableAnnotationComposer
 
   GeneratedColumn<String> get fileType =>
       $composableBuilder(column: $table.fileType, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get favoriteDateTime => $composableBuilder(
-    column: $table.favoriteDateTime,
-    builder: (column) => column,
-  );
 
   GeneratedColumn<bool> get muyu =>
       $composableBuilder(column: $table.muyu, builder: (column) => column);
@@ -2173,23 +2441,25 @@ class $$JingShuTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $$JingShuTableFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $$JingShuTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $$JingShuTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $$JingShuTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$JingShuTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$JingShuTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 Value<DateTime> createDateTime = const Value.absent(),
+                Value<DateTime?> favoriteDateTime = const Value.absent(),
                 Value<String> remarks = const Value.absent(),
+                Value<String?> bk1 = const Value.absent(),
+                Value<String?> bk2 = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String> type = const Value.absent(),
                 Value<String> image = const Value.absent(),
                 Value<String> fileUrl = const Value.absent(),
                 Value<String> fileType = const Value.absent(),
-                Value<DateTime?> favoriteDateTime = const Value.absent(),
                 Value<bool> muyu = const Value.absent(),
                 Value<bool> bkMusic = const Value.absent(),
                 Value<String?> bkMusicname = const Value.absent(),
@@ -2202,13 +2472,15 @@ class $$JingShuTableTableManager
               }) => JingShuCompanion(
                 id: id,
                 createDateTime: createDateTime,
+                favoriteDateTime: favoriteDateTime,
                 remarks: remarks,
+                bk1: bk1,
+                bk2: bk2,
                 name: name,
                 type: type,
                 image: image,
                 fileUrl: fileUrl,
                 fileType: fileType,
-                favoriteDateTime: favoriteDateTime,
                 muyu: muyu,
                 bkMusic: bkMusic,
                 bkMusicname: bkMusicname,
@@ -2223,13 +2495,15 @@ class $$JingShuTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<DateTime> createDateTime = const Value.absent(),
+                Value<DateTime?> favoriteDateTime = const Value.absent(),
                 required String remarks,
+                Value<String?> bk1 = const Value.absent(),
+                Value<String?> bk2 = const Value.absent(),
                 required String name,
                 required String type,
                 required String image,
                 required String fileUrl,
                 required String fileType,
-                Value<DateTime?> favoriteDateTime = const Value.absent(),
                 Value<bool> muyu = const Value.absent(),
                 Value<bool> bkMusic = const Value.absent(),
                 Value<String?> bkMusicname = const Value.absent(),
@@ -2242,13 +2516,15 @@ class $$JingShuTableTableManager
               }) => JingShuCompanion.insert(
                 id: id,
                 createDateTime: createDateTime,
+                favoriteDateTime: favoriteDateTime,
                 remarks: remarks,
+                bk1: bk1,
+                bk2: bk2,
                 name: name,
                 type: type,
                 image: image,
                 fileUrl: fileUrl,
                 fileType: fileType,
-                favoriteDateTime: favoriteDateTime,
                 muyu: muyu,
                 bkMusic: bkMusic,
                 bkMusicname: bkMusicname,
@@ -2259,16 +2535,9 @@ class $$JingShuTableTableManager
                 muyuInterval: muyuInterval,
                 muyuDuration: muyuDuration,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -2292,19 +2561,23 @@ typedef $$TipBookTableCreateCompanionBuilder =
     TipBookCompanion Function({
       Value<int> id,
       Value<DateTime> createDateTime,
+      Value<DateTime?> favoriteDateTime,
       required String remarks,
+      Value<String?> bk1,
+      Value<String?> bk2,
       required String name,
       required String image,
-      Value<DateTime?> favoriteDateTime,
     });
 typedef $$TipBookTableUpdateCompanionBuilder =
     TipBookCompanion Function({
       Value<int> id,
       Value<DateTime> createDateTime,
+      Value<DateTime?> favoriteDateTime,
       Value<String> remarks,
+      Value<String?> bk1,
+      Value<String?> bk2,
       Value<String> name,
       Value<String> image,
-      Value<DateTime?> favoriteDateTime,
     });
 
 class $$TipBookTableFilterComposer
@@ -2326,8 +2599,23 @@ class $$TipBookTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<DateTime> get favoriteDateTime => $composableBuilder(
+    column: $table.favoriteDateTime,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get remarks => $composableBuilder(
     column: $table.remarks,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bk1 => $composableBuilder(
+    column: $table.bk1,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bk2 => $composableBuilder(
+    column: $table.bk2,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2338,11 +2626,6 @@ class $$TipBookTableFilterComposer
 
   ColumnFilters<String> get image => $composableBuilder(
     column: $table.image,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get favoriteDateTime => $composableBuilder(
-    column: $table.favoriteDateTime,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2366,8 +2649,23 @@ class $$TipBookTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get favoriteDateTime => $composableBuilder(
+    column: $table.favoriteDateTime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get remarks => $composableBuilder(
     column: $table.remarks,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bk1 => $composableBuilder(
+    column: $table.bk1,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bk2 => $composableBuilder(
+    column: $table.bk2,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -2378,11 +2676,6 @@ class $$TipBookTableOrderingComposer
 
   ColumnOrderings<String> get image => $composableBuilder(
     column: $table.image,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get favoriteDateTime => $composableBuilder(
-    column: $table.favoriteDateTime,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -2404,19 +2697,25 @@ class $$TipBookTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<DateTime> get favoriteDateTime => $composableBuilder(
+    column: $table.favoriteDateTime,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get remarks =>
       $composableBuilder(column: $table.remarks, builder: (column) => column);
+
+  GeneratedColumn<String> get bk1 =>
+      $composableBuilder(column: $table.bk1, builder: (column) => column);
+
+  GeneratedColumn<String> get bk2 =>
+      $composableBuilder(column: $table.bk2, builder: (column) => column);
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
   GeneratedColumn<String> get image =>
       $composableBuilder(column: $table.image, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get favoriteDateTime => $composableBuilder(
-    column: $table.favoriteDateTime,
-    builder: (column) => column,
-  );
 }
 
 class $$TipBookTableTableManager
@@ -2442,54 +2741,55 @@ class $$TipBookTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $$TipBookTableFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $$TipBookTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $$TipBookTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $$TipBookTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TipBookTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TipBookTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 Value<DateTime> createDateTime = const Value.absent(),
+                Value<DateTime?> favoriteDateTime = const Value.absent(),
                 Value<String> remarks = const Value.absent(),
+                Value<String?> bk1 = const Value.absent(),
+                Value<String?> bk2 = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String> image = const Value.absent(),
-                Value<DateTime?> favoriteDateTime = const Value.absent(),
               }) => TipBookCompanion(
                 id: id,
                 createDateTime: createDateTime,
+                favoriteDateTime: favoriteDateTime,
                 remarks: remarks,
+                bk1: bk1,
+                bk2: bk2,
                 name: name,
                 image: image,
-                favoriteDateTime: favoriteDateTime,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 Value<DateTime> createDateTime = const Value.absent(),
+                Value<DateTime?> favoriteDateTime = const Value.absent(),
                 required String remarks,
+                Value<String?> bk1 = const Value.absent(),
+                Value<String?> bk2 = const Value.absent(),
                 required String name,
                 required String image,
-                Value<DateTime?> favoriteDateTime = const Value.absent(),
               }) => TipBookCompanion.insert(
                 id: id,
                 createDateTime: createDateTime,
+                favoriteDateTime: favoriteDateTime,
                 remarks: remarks,
+                bk1: bk1,
+                bk2: bk2,
                 name: name,
                 image: image,
-                favoriteDateTime: favoriteDateTime,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -2514,6 +2814,8 @@ typedef $$TipRecordTableCreateCompanionBuilder =
       Value<int> id,
       Value<DateTime> createDateTime,
       required String remarks,
+      Value<String?> bk1,
+      Value<String?> bk2,
       required String content,
       required int bookId,
     });
@@ -2522,6 +2824,8 @@ typedef $$TipRecordTableUpdateCompanionBuilder =
       Value<int> id,
       Value<DateTime> createDateTime,
       Value<String> remarks,
+      Value<String?> bk1,
+      Value<String?> bk2,
       Value<String> content,
       Value<int> bookId,
     });
@@ -2547,6 +2851,16 @@ class $$TipRecordTableFilterComposer
 
   ColumnFilters<String> get remarks => $composableBuilder(
     column: $table.remarks,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bk1 => $composableBuilder(
+    column: $table.bk1,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bk2 => $composableBuilder(
+    column: $table.bk2,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2585,6 +2899,16 @@ class $$TipRecordTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get bk1 => $composableBuilder(
+    column: $table.bk1,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bk2 => $composableBuilder(
+    column: $table.bk2,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get content => $composableBuilder(
     column: $table.content,
     builder: (column) => ColumnOrderings(column),
@@ -2616,6 +2940,12 @@ class $$TipRecordTableAnnotationComposer
   GeneratedColumn<String> get remarks =>
       $composableBuilder(column: $table.remarks, builder: (column) => column);
 
+  GeneratedColumn<String> get bk1 =>
+      $composableBuilder(column: $table.bk1, builder: (column) => column);
+
+  GeneratedColumn<String> get bk2 =>
+      $composableBuilder(column: $table.bk2, builder: (column) => column);
+
   GeneratedColumn<String> get content =>
       $composableBuilder(column: $table.content, builder: (column) => column);
 
@@ -2646,23 +2976,27 @@ class $$TipRecordTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $$TipRecordTableFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $$TipRecordTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $$TipRecordTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $$TipRecordTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TipRecordTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TipRecordTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 Value<DateTime> createDateTime = const Value.absent(),
                 Value<String> remarks = const Value.absent(),
+                Value<String?> bk1 = const Value.absent(),
+                Value<String?> bk2 = const Value.absent(),
                 Value<String> content = const Value.absent(),
                 Value<int> bookId = const Value.absent(),
               }) => TipRecordCompanion(
                 id: id,
                 createDateTime: createDateTime,
                 remarks: remarks,
+                bk1: bk1,
+                bk2: bk2,
                 content: content,
                 bookId: bookId,
               ),
@@ -2671,25 +3005,22 @@ class $$TipRecordTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<DateTime> createDateTime = const Value.absent(),
                 required String remarks,
+                Value<String?> bk1 = const Value.absent(),
+                Value<String?> bk2 = const Value.absent(),
                 required String content,
                 required int bookId,
               }) => TipRecordCompanion.insert(
                 id: id,
                 createDateTime: createDateTime,
                 remarks: remarks,
+                bk1: bk1,
+                bk2: bk2,
                 content: content,
                 bookId: bookId,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );

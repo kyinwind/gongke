@@ -19,7 +19,10 @@ class GongKePage extends StatelessWidget {
           children: [
             // 第一个 section: 发愿一览
             const ListTile(
-              title: Text('发愿一览'),
+              title: Text(
+                '发愿一览',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
             ),
             ListView.builder(
               shrinkWrap: true,
@@ -31,7 +34,9 @@ class GongKePage extends StatelessWidget {
                     // 点击导航到另一个页面
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const AnotherPage()),
+                      MaterialPageRoute(
+                        builder: (context) => const AnotherPage(),
+                      ),
                     );
                   },
                   leading: SizedBox(
@@ -43,8 +48,10 @@ class GongKePage extends StatelessWidget {
                           dataSource: <double>[index * 10, 100 - index * 10],
                           xValueMapper: (double data, _) => '',
                           yValueMapper: (double data, _) => data,
-                          dataLabelSettings: const DataLabelSettings(isVisible: true),
-                        )
+                          dataLabelSettings: const DataLabelSettings(
+                            isVisible: true,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -53,11 +60,9 @@ class GongKePage extends StatelessWidget {
               },
             ),
             // 第二个 section
-            const ListTile(
-              title: Text('日期选择与日历'),
-            ),
+            const ListTile(title: Text('日期选择与日历')),
             // 选择框
-            Text('月份选择')
+            Text('月份选择'),
             //DateTimePickerWidget(),
             // 日历
             //CalendarWidget(),
@@ -74,12 +79,8 @@ class AnotherPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('另一个页面'),
-      ),
-      body: Center(
-        child: Text('这是点击后打开的页面').fontSize(24).bold(),
-      ),
+      appBar: AppBar(title: const Text('另一个页面')),
+      body: Center(child: Text('这是点击后打开的页面').fontSize(24).bold()),
     );
   }
 }
@@ -99,7 +100,11 @@ class CalendarWidget extends StatelessWidget {
       ),
       itemCount: 31, // 示例一个月的天数
       itemBuilder: (context, index) {
-        final DateTime date = DateTime(_selectedDate.year, _selectedDate.month, index + 1);
+        final DateTime date = DateTime(
+          _selectedDate.year,
+          _selectedDate.month,
+          index + 1,
+        );
         return Column(
           children: [
             Text(DateFormat('d').format(date)),

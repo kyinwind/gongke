@@ -3,6 +3,1927 @@
 part of 'database.dart';
 
 // ignore_for_file: type=lint
+class $FaYuanTable extends FaYuan with TableInfo<$FaYuanTable, FaYuanData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FaYuanTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _createDateTimeMeta = const VerificationMeta(
+    'createDateTime',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createDateTime =
+      GeneratedColumn<DateTime>(
+        'create_date_time',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+        defaultValue: currentDateAndTime,
+      );
+  static const VerificationMeta _modifyDateTimeMeta = const VerificationMeta(
+    'modifyDateTime',
+  );
+  @override
+  late final GeneratedColumn<DateTime> modifyDateTime =
+      GeneratedColumn<DateTime>(
+        'modify_date_time',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+        defaultValue: currentDateAndTime,
+      );
+  static const VerificationMeta _remarksMeta = const VerificationMeta(
+    'remarks',
+  );
+  @override
+  late final GeneratedColumn<String> remarks = GeneratedColumn<String>(
+    'remarks',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _bk1Meta = const VerificationMeta('bk1');
+  @override
+  late final GeneratedColumn<String> bk1 = GeneratedColumn<String>(
+    'bk1',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _bk2Meta = const VerificationMeta('bk2');
+  @override
+  late final GeneratedColumn<String> bk2 = GeneratedColumn<String>(
+    'bk2',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fodizinameMeta = const VerificationMeta(
+    'fodiziname',
+  );
+  @override
+  late final GeneratedColumn<String> fodiziname = GeneratedColumn<String>(
+    'fodiziname',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _startDateMeta = const VerificationMeta(
+    'startDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> startDate = GeneratedColumn<DateTime>(
+    'start_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endDateMeta = const VerificationMeta(
+    'endDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> endDate = GeneratedColumn<DateTime>(
+    'end_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _yuanwangMeta = const VerificationMeta(
+    'yuanwang',
+  );
+  @override
+  late final GeneratedColumn<String> yuanwang = GeneratedColumn<String>(
+    'yuanwang',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isCompleteMeta = const VerificationMeta(
+    'isComplete',
+  );
+  @override
+  late final GeneratedColumn<bool> isComplete = GeneratedColumn<bool>(
+    'is_complete',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_complete" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _fayuanwenMeta = const VerificationMeta(
+    'fayuanwen',
+  );
+  @override
+  late final GeneratedColumn<String> fayuanwen = GeneratedColumn<String>(
+    'fayuanwen',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stsMeta = const VerificationMeta('sts');
+  @override
+  late final GeneratedColumn<String> sts = GeneratedColumn<String>(
+    'sts',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('A'),
+  );
+  static const VerificationMeta _percentValueMeta = const VerificationMeta(
+    'percentValue',
+  );
+  @override
+  late final GeneratedColumn<double> percentValue = GeneratedColumn<double>(
+    'percent_value',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createDateTime,
+    modifyDateTime,
+    remarks,
+    bk1,
+    bk2,
+    name,
+    fodiziname,
+    startDate,
+    endDate,
+    yuanwang,
+    isComplete,
+    fayuanwen,
+    sts,
+    percentValue,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'fa_yuan';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<FaYuanData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('create_date_time')) {
+      context.handle(
+        _createDateTimeMeta,
+        createDateTime.isAcceptableOrUnknown(
+          data['create_date_time']!,
+          _createDateTimeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('modify_date_time')) {
+      context.handle(
+        _modifyDateTimeMeta,
+        modifyDateTime.isAcceptableOrUnknown(
+          data['modify_date_time']!,
+          _modifyDateTimeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('remarks')) {
+      context.handle(
+        _remarksMeta,
+        remarks.isAcceptableOrUnknown(data['remarks']!, _remarksMeta),
+      );
+    }
+    if (data.containsKey('bk1')) {
+      context.handle(
+        _bk1Meta,
+        bk1.isAcceptableOrUnknown(data['bk1']!, _bk1Meta),
+      );
+    }
+    if (data.containsKey('bk2')) {
+      context.handle(
+        _bk2Meta,
+        bk2.isAcceptableOrUnknown(data['bk2']!, _bk2Meta),
+      );
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('fodiziname')) {
+      context.handle(
+        _fodizinameMeta,
+        fodiziname.isAcceptableOrUnknown(data['fodiziname']!, _fodizinameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fodizinameMeta);
+    }
+    if (data.containsKey('start_date')) {
+      context.handle(
+        _startDateMeta,
+        startDate.isAcceptableOrUnknown(data['start_date']!, _startDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startDateMeta);
+    }
+    if (data.containsKey('end_date')) {
+      context.handle(
+        _endDateMeta,
+        endDate.isAcceptableOrUnknown(data['end_date']!, _endDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_endDateMeta);
+    }
+    if (data.containsKey('yuanwang')) {
+      context.handle(
+        _yuanwangMeta,
+        yuanwang.isAcceptableOrUnknown(data['yuanwang']!, _yuanwangMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_yuanwangMeta);
+    }
+    if (data.containsKey('is_complete')) {
+      context.handle(
+        _isCompleteMeta,
+        isComplete.isAcceptableOrUnknown(data['is_complete']!, _isCompleteMeta),
+      );
+    }
+    if (data.containsKey('fayuanwen')) {
+      context.handle(
+        _fayuanwenMeta,
+        fayuanwen.isAcceptableOrUnknown(data['fayuanwen']!, _fayuanwenMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fayuanwenMeta);
+    }
+    if (data.containsKey('sts')) {
+      context.handle(
+        _stsMeta,
+        sts.isAcceptableOrUnknown(data['sts']!, _stsMeta),
+      );
+    }
+    if (data.containsKey('percent_value')) {
+      context.handle(
+        _percentValueMeta,
+        percentValue.isAcceptableOrUnknown(
+          data['percent_value']!,
+          _percentValueMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  FaYuanData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FaYuanData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      createDateTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}create_date_time'],
+      )!,
+      modifyDateTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}modify_date_time'],
+      )!,
+      remarks: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remarks'],
+      ),
+      bk1: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bk1'],
+      ),
+      bk2: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bk2'],
+      ),
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      fodiziname: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fodiziname'],
+      )!,
+      startDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}start_date'],
+      )!,
+      endDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}end_date'],
+      )!,
+      yuanwang: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}yuanwang'],
+      )!,
+      isComplete: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_complete'],
+      )!,
+      fayuanwen: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fayuanwen'],
+      )!,
+      sts: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sts'],
+      )!,
+      percentValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}percent_value'],
+      )!,
+    );
+  }
+
+  @override
+  $FaYuanTable createAlias(String alias) {
+    return $FaYuanTable(attachedDatabase, alias);
+  }
+}
+
+class FaYuanData extends DataClass implements Insertable<FaYuanData> {
+  final int id;
+  final DateTime createDateTime;
+  final DateTime modifyDateTime;
+  final String? remarks;
+  final String? bk1;
+  final String? bk2;
+  final String name;
+  final String fodiziname;
+  final DateTime startDate;
+  final DateTime endDate;
+  final String yuanwang;
+  final bool isComplete;
+  final String fayuanwen;
+  final String sts;
+  final double percentValue;
+  const FaYuanData({
+    required this.id,
+    required this.createDateTime,
+    required this.modifyDateTime,
+    this.remarks,
+    this.bk1,
+    this.bk2,
+    required this.name,
+    required this.fodiziname,
+    required this.startDate,
+    required this.endDate,
+    required this.yuanwang,
+    required this.isComplete,
+    required this.fayuanwen,
+    required this.sts,
+    required this.percentValue,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['create_date_time'] = Variable<DateTime>(createDateTime);
+    map['modify_date_time'] = Variable<DateTime>(modifyDateTime);
+    if (!nullToAbsent || remarks != null) {
+      map['remarks'] = Variable<String>(remarks);
+    }
+    if (!nullToAbsent || bk1 != null) {
+      map['bk1'] = Variable<String>(bk1);
+    }
+    if (!nullToAbsent || bk2 != null) {
+      map['bk2'] = Variable<String>(bk2);
+    }
+    map['name'] = Variable<String>(name);
+    map['fodiziname'] = Variable<String>(fodiziname);
+    map['start_date'] = Variable<DateTime>(startDate);
+    map['end_date'] = Variable<DateTime>(endDate);
+    map['yuanwang'] = Variable<String>(yuanwang);
+    map['is_complete'] = Variable<bool>(isComplete);
+    map['fayuanwen'] = Variable<String>(fayuanwen);
+    map['sts'] = Variable<String>(sts);
+    map['percent_value'] = Variable<double>(percentValue);
+    return map;
+  }
+
+  FaYuanCompanion toCompanion(bool nullToAbsent) {
+    return FaYuanCompanion(
+      id: Value(id),
+      createDateTime: Value(createDateTime),
+      modifyDateTime: Value(modifyDateTime),
+      remarks: remarks == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remarks),
+      bk1: bk1 == null && nullToAbsent ? const Value.absent() : Value(bk1),
+      bk2: bk2 == null && nullToAbsent ? const Value.absent() : Value(bk2),
+      name: Value(name),
+      fodiziname: Value(fodiziname),
+      startDate: Value(startDate),
+      endDate: Value(endDate),
+      yuanwang: Value(yuanwang),
+      isComplete: Value(isComplete),
+      fayuanwen: Value(fayuanwen),
+      sts: Value(sts),
+      percentValue: Value(percentValue),
+    );
+  }
+
+  factory FaYuanData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FaYuanData(
+      id: serializer.fromJson<int>(json['id']),
+      createDateTime: serializer.fromJson<DateTime>(json['createDateTime']),
+      modifyDateTime: serializer.fromJson<DateTime>(json['modifyDateTime']),
+      remarks: serializer.fromJson<String?>(json['remarks']),
+      bk1: serializer.fromJson<String?>(json['bk1']),
+      bk2: serializer.fromJson<String?>(json['bk2']),
+      name: serializer.fromJson<String>(json['name']),
+      fodiziname: serializer.fromJson<String>(json['fodiziname']),
+      startDate: serializer.fromJson<DateTime>(json['startDate']),
+      endDate: serializer.fromJson<DateTime>(json['endDate']),
+      yuanwang: serializer.fromJson<String>(json['yuanwang']),
+      isComplete: serializer.fromJson<bool>(json['isComplete']),
+      fayuanwen: serializer.fromJson<String>(json['fayuanwen']),
+      sts: serializer.fromJson<String>(json['sts']),
+      percentValue: serializer.fromJson<double>(json['percentValue']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'createDateTime': serializer.toJson<DateTime>(createDateTime),
+      'modifyDateTime': serializer.toJson<DateTime>(modifyDateTime),
+      'remarks': serializer.toJson<String?>(remarks),
+      'bk1': serializer.toJson<String?>(bk1),
+      'bk2': serializer.toJson<String?>(bk2),
+      'name': serializer.toJson<String>(name),
+      'fodiziname': serializer.toJson<String>(fodiziname),
+      'startDate': serializer.toJson<DateTime>(startDate),
+      'endDate': serializer.toJson<DateTime>(endDate),
+      'yuanwang': serializer.toJson<String>(yuanwang),
+      'isComplete': serializer.toJson<bool>(isComplete),
+      'fayuanwen': serializer.toJson<String>(fayuanwen),
+      'sts': serializer.toJson<String>(sts),
+      'percentValue': serializer.toJson<double>(percentValue),
+    };
+  }
+
+  FaYuanData copyWith({
+    int? id,
+    DateTime? createDateTime,
+    DateTime? modifyDateTime,
+    Value<String?> remarks = const Value.absent(),
+    Value<String?> bk1 = const Value.absent(),
+    Value<String?> bk2 = const Value.absent(),
+    String? name,
+    String? fodiziname,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? yuanwang,
+    bool? isComplete,
+    String? fayuanwen,
+    String? sts,
+    double? percentValue,
+  }) => FaYuanData(
+    id: id ?? this.id,
+    createDateTime: createDateTime ?? this.createDateTime,
+    modifyDateTime: modifyDateTime ?? this.modifyDateTime,
+    remarks: remarks.present ? remarks.value : this.remarks,
+    bk1: bk1.present ? bk1.value : this.bk1,
+    bk2: bk2.present ? bk2.value : this.bk2,
+    name: name ?? this.name,
+    fodiziname: fodiziname ?? this.fodiziname,
+    startDate: startDate ?? this.startDate,
+    endDate: endDate ?? this.endDate,
+    yuanwang: yuanwang ?? this.yuanwang,
+    isComplete: isComplete ?? this.isComplete,
+    fayuanwen: fayuanwen ?? this.fayuanwen,
+    sts: sts ?? this.sts,
+    percentValue: percentValue ?? this.percentValue,
+  );
+  FaYuanData copyWithCompanion(FaYuanCompanion data) {
+    return FaYuanData(
+      id: data.id.present ? data.id.value : this.id,
+      createDateTime: data.createDateTime.present
+          ? data.createDateTime.value
+          : this.createDateTime,
+      modifyDateTime: data.modifyDateTime.present
+          ? data.modifyDateTime.value
+          : this.modifyDateTime,
+      remarks: data.remarks.present ? data.remarks.value : this.remarks,
+      bk1: data.bk1.present ? data.bk1.value : this.bk1,
+      bk2: data.bk2.present ? data.bk2.value : this.bk2,
+      name: data.name.present ? data.name.value : this.name,
+      fodiziname: data.fodiziname.present
+          ? data.fodiziname.value
+          : this.fodiziname,
+      startDate: data.startDate.present ? data.startDate.value : this.startDate,
+      endDate: data.endDate.present ? data.endDate.value : this.endDate,
+      yuanwang: data.yuanwang.present ? data.yuanwang.value : this.yuanwang,
+      isComplete: data.isComplete.present
+          ? data.isComplete.value
+          : this.isComplete,
+      fayuanwen: data.fayuanwen.present ? data.fayuanwen.value : this.fayuanwen,
+      sts: data.sts.present ? data.sts.value : this.sts,
+      percentValue: data.percentValue.present
+          ? data.percentValue.value
+          : this.percentValue,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FaYuanData(')
+          ..write('id: $id, ')
+          ..write('createDateTime: $createDateTime, ')
+          ..write('modifyDateTime: $modifyDateTime, ')
+          ..write('remarks: $remarks, ')
+          ..write('bk1: $bk1, ')
+          ..write('bk2: $bk2, ')
+          ..write('name: $name, ')
+          ..write('fodiziname: $fodiziname, ')
+          ..write('startDate: $startDate, ')
+          ..write('endDate: $endDate, ')
+          ..write('yuanwang: $yuanwang, ')
+          ..write('isComplete: $isComplete, ')
+          ..write('fayuanwen: $fayuanwen, ')
+          ..write('sts: $sts, ')
+          ..write('percentValue: $percentValue')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createDateTime,
+    modifyDateTime,
+    remarks,
+    bk1,
+    bk2,
+    name,
+    fodiziname,
+    startDate,
+    endDate,
+    yuanwang,
+    isComplete,
+    fayuanwen,
+    sts,
+    percentValue,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FaYuanData &&
+          other.id == this.id &&
+          other.createDateTime == this.createDateTime &&
+          other.modifyDateTime == this.modifyDateTime &&
+          other.remarks == this.remarks &&
+          other.bk1 == this.bk1 &&
+          other.bk2 == this.bk2 &&
+          other.name == this.name &&
+          other.fodiziname == this.fodiziname &&
+          other.startDate == this.startDate &&
+          other.endDate == this.endDate &&
+          other.yuanwang == this.yuanwang &&
+          other.isComplete == this.isComplete &&
+          other.fayuanwen == this.fayuanwen &&
+          other.sts == this.sts &&
+          other.percentValue == this.percentValue);
+}
+
+class FaYuanCompanion extends UpdateCompanion<FaYuanData> {
+  final Value<int> id;
+  final Value<DateTime> createDateTime;
+  final Value<DateTime> modifyDateTime;
+  final Value<String?> remarks;
+  final Value<String?> bk1;
+  final Value<String?> bk2;
+  final Value<String> name;
+  final Value<String> fodiziname;
+  final Value<DateTime> startDate;
+  final Value<DateTime> endDate;
+  final Value<String> yuanwang;
+  final Value<bool> isComplete;
+  final Value<String> fayuanwen;
+  final Value<String> sts;
+  final Value<double> percentValue;
+  const FaYuanCompanion({
+    this.id = const Value.absent(),
+    this.createDateTime = const Value.absent(),
+    this.modifyDateTime = const Value.absent(),
+    this.remarks = const Value.absent(),
+    this.bk1 = const Value.absent(),
+    this.bk2 = const Value.absent(),
+    this.name = const Value.absent(),
+    this.fodiziname = const Value.absent(),
+    this.startDate = const Value.absent(),
+    this.endDate = const Value.absent(),
+    this.yuanwang = const Value.absent(),
+    this.isComplete = const Value.absent(),
+    this.fayuanwen = const Value.absent(),
+    this.sts = const Value.absent(),
+    this.percentValue = const Value.absent(),
+  });
+  FaYuanCompanion.insert({
+    this.id = const Value.absent(),
+    this.createDateTime = const Value.absent(),
+    this.modifyDateTime = const Value.absent(),
+    this.remarks = const Value.absent(),
+    this.bk1 = const Value.absent(),
+    this.bk2 = const Value.absent(),
+    required String name,
+    required String fodiziname,
+    required DateTime startDate,
+    required DateTime endDate,
+    required String yuanwang,
+    this.isComplete = const Value.absent(),
+    required String fayuanwen,
+    this.sts = const Value.absent(),
+    this.percentValue = const Value.absent(),
+  }) : name = Value(name),
+       fodiziname = Value(fodiziname),
+       startDate = Value(startDate),
+       endDate = Value(endDate),
+       yuanwang = Value(yuanwang),
+       fayuanwen = Value(fayuanwen);
+  static Insertable<FaYuanData> custom({
+    Expression<int>? id,
+    Expression<DateTime>? createDateTime,
+    Expression<DateTime>? modifyDateTime,
+    Expression<String>? remarks,
+    Expression<String>? bk1,
+    Expression<String>? bk2,
+    Expression<String>? name,
+    Expression<String>? fodiziname,
+    Expression<DateTime>? startDate,
+    Expression<DateTime>? endDate,
+    Expression<String>? yuanwang,
+    Expression<bool>? isComplete,
+    Expression<String>? fayuanwen,
+    Expression<String>? sts,
+    Expression<double>? percentValue,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createDateTime != null) 'create_date_time': createDateTime,
+      if (modifyDateTime != null) 'modify_date_time': modifyDateTime,
+      if (remarks != null) 'remarks': remarks,
+      if (bk1 != null) 'bk1': bk1,
+      if (bk2 != null) 'bk2': bk2,
+      if (name != null) 'name': name,
+      if (fodiziname != null) 'fodiziname': fodiziname,
+      if (startDate != null) 'start_date': startDate,
+      if (endDate != null) 'end_date': endDate,
+      if (yuanwang != null) 'yuanwang': yuanwang,
+      if (isComplete != null) 'is_complete': isComplete,
+      if (fayuanwen != null) 'fayuanwen': fayuanwen,
+      if (sts != null) 'sts': sts,
+      if (percentValue != null) 'percent_value': percentValue,
+    });
+  }
+
+  FaYuanCompanion copyWith({
+    Value<int>? id,
+    Value<DateTime>? createDateTime,
+    Value<DateTime>? modifyDateTime,
+    Value<String?>? remarks,
+    Value<String?>? bk1,
+    Value<String?>? bk2,
+    Value<String>? name,
+    Value<String>? fodiziname,
+    Value<DateTime>? startDate,
+    Value<DateTime>? endDate,
+    Value<String>? yuanwang,
+    Value<bool>? isComplete,
+    Value<String>? fayuanwen,
+    Value<String>? sts,
+    Value<double>? percentValue,
+  }) {
+    return FaYuanCompanion(
+      id: id ?? this.id,
+      createDateTime: createDateTime ?? this.createDateTime,
+      modifyDateTime: modifyDateTime ?? this.modifyDateTime,
+      remarks: remarks ?? this.remarks,
+      bk1: bk1 ?? this.bk1,
+      bk2: bk2 ?? this.bk2,
+      name: name ?? this.name,
+      fodiziname: fodiziname ?? this.fodiziname,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      yuanwang: yuanwang ?? this.yuanwang,
+      isComplete: isComplete ?? this.isComplete,
+      fayuanwen: fayuanwen ?? this.fayuanwen,
+      sts: sts ?? this.sts,
+      percentValue: percentValue ?? this.percentValue,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (createDateTime.present) {
+      map['create_date_time'] = Variable<DateTime>(createDateTime.value);
+    }
+    if (modifyDateTime.present) {
+      map['modify_date_time'] = Variable<DateTime>(modifyDateTime.value);
+    }
+    if (remarks.present) {
+      map['remarks'] = Variable<String>(remarks.value);
+    }
+    if (bk1.present) {
+      map['bk1'] = Variable<String>(bk1.value);
+    }
+    if (bk2.present) {
+      map['bk2'] = Variable<String>(bk2.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (fodiziname.present) {
+      map['fodiziname'] = Variable<String>(fodiziname.value);
+    }
+    if (startDate.present) {
+      map['start_date'] = Variable<DateTime>(startDate.value);
+    }
+    if (endDate.present) {
+      map['end_date'] = Variable<DateTime>(endDate.value);
+    }
+    if (yuanwang.present) {
+      map['yuanwang'] = Variable<String>(yuanwang.value);
+    }
+    if (isComplete.present) {
+      map['is_complete'] = Variable<bool>(isComplete.value);
+    }
+    if (fayuanwen.present) {
+      map['fayuanwen'] = Variable<String>(fayuanwen.value);
+    }
+    if (sts.present) {
+      map['sts'] = Variable<String>(sts.value);
+    }
+    if (percentValue.present) {
+      map['percent_value'] = Variable<double>(percentValue.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FaYuanCompanion(')
+          ..write('id: $id, ')
+          ..write('createDateTime: $createDateTime, ')
+          ..write('modifyDateTime: $modifyDateTime, ')
+          ..write('remarks: $remarks, ')
+          ..write('bk1: $bk1, ')
+          ..write('bk2: $bk2, ')
+          ..write('name: $name, ')
+          ..write('fodiziname: $fodiziname, ')
+          ..write('startDate: $startDate, ')
+          ..write('endDate: $endDate, ')
+          ..write('yuanwang: $yuanwang, ')
+          ..write('isComplete: $isComplete, ')
+          ..write('fayuanwen: $fayuanwen, ')
+          ..write('sts: $sts, ')
+          ..write('percentValue: $percentValue')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $GongKeItemsOneDayTable extends GongKeItemsOneDay
+    with TableInfo<$GongKeItemsOneDayTable, GongKeItemsOneDayData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $GongKeItemsOneDayTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _fayuanIdMeta = const VerificationMeta(
+    'fayuanId',
+  );
+  @override
+  late final GeneratedColumn<int> fayuanId = GeneratedColumn<int>(
+    'fayuan_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _gongketypeMeta = const VerificationMeta(
+    'gongketype',
+  );
+  @override
+  late final GeneratedColumn<String> gongketype = GeneratedColumn<String>(
+    'gongketype',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('songjing'),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _cntMeta = const VerificationMeta('cnt');
+  @override
+  late final GeneratedColumn<int> cnt = GeneratedColumn<int>(
+    'cnt',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _idxMeta = const VerificationMeta('idx');
+  @override
+  late final GeneratedColumn<int> idx = GeneratedColumn<int>(
+    'idx',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    fayuanId,
+    gongketype,
+    name,
+    cnt,
+    idx,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'gong_ke_items_one_day';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<GongKeItemsOneDayData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('fayuan_id')) {
+      context.handle(
+        _fayuanIdMeta,
+        fayuanId.isAcceptableOrUnknown(data['fayuan_id']!, _fayuanIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fayuanIdMeta);
+    }
+    if (data.containsKey('gongketype')) {
+      context.handle(
+        _gongketypeMeta,
+        gongketype.isAcceptableOrUnknown(data['gongketype']!, _gongketypeMeta),
+      );
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('cnt')) {
+      context.handle(
+        _cntMeta,
+        cnt.isAcceptableOrUnknown(data['cnt']!, _cntMeta),
+      );
+    }
+    if (data.containsKey('idx')) {
+      context.handle(
+        _idxMeta,
+        idx.isAcceptableOrUnknown(data['idx']!, _idxMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  GongKeItemsOneDayData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return GongKeItemsOneDayData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      fayuanId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}fayuan_id'],
+      )!,
+      gongketype: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}gongketype'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      cnt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}cnt'],
+      )!,
+      idx: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}idx'],
+      )!,
+    );
+  }
+
+  @override
+  $GongKeItemsOneDayTable createAlias(String alias) {
+    return $GongKeItemsOneDayTable(attachedDatabase, alias);
+  }
+}
+
+class GongKeItemsOneDayData extends DataClass
+    implements Insertable<GongKeItemsOneDayData> {
+  final int id;
+  final int fayuanId;
+  final String gongketype;
+  final String name;
+  final int cnt;
+  final int idx;
+  const GongKeItemsOneDayData({
+    required this.id,
+    required this.fayuanId,
+    required this.gongketype,
+    required this.name,
+    required this.cnt,
+    required this.idx,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['fayuan_id'] = Variable<int>(fayuanId);
+    map['gongketype'] = Variable<String>(gongketype);
+    map['name'] = Variable<String>(name);
+    map['cnt'] = Variable<int>(cnt);
+    map['idx'] = Variable<int>(idx);
+    return map;
+  }
+
+  GongKeItemsOneDayCompanion toCompanion(bool nullToAbsent) {
+    return GongKeItemsOneDayCompanion(
+      id: Value(id),
+      fayuanId: Value(fayuanId),
+      gongketype: Value(gongketype),
+      name: Value(name),
+      cnt: Value(cnt),
+      idx: Value(idx),
+    );
+  }
+
+  factory GongKeItemsOneDayData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return GongKeItemsOneDayData(
+      id: serializer.fromJson<int>(json['id']),
+      fayuanId: serializer.fromJson<int>(json['fayuanId']),
+      gongketype: serializer.fromJson<String>(json['gongketype']),
+      name: serializer.fromJson<String>(json['name']),
+      cnt: serializer.fromJson<int>(json['cnt']),
+      idx: serializer.fromJson<int>(json['idx']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'fayuanId': serializer.toJson<int>(fayuanId),
+      'gongketype': serializer.toJson<String>(gongketype),
+      'name': serializer.toJson<String>(name),
+      'cnt': serializer.toJson<int>(cnt),
+      'idx': serializer.toJson<int>(idx),
+    };
+  }
+
+  GongKeItemsOneDayData copyWith({
+    int? id,
+    int? fayuanId,
+    String? gongketype,
+    String? name,
+    int? cnt,
+    int? idx,
+  }) => GongKeItemsOneDayData(
+    id: id ?? this.id,
+    fayuanId: fayuanId ?? this.fayuanId,
+    gongketype: gongketype ?? this.gongketype,
+    name: name ?? this.name,
+    cnt: cnt ?? this.cnt,
+    idx: idx ?? this.idx,
+  );
+  GongKeItemsOneDayData copyWithCompanion(GongKeItemsOneDayCompanion data) {
+    return GongKeItemsOneDayData(
+      id: data.id.present ? data.id.value : this.id,
+      fayuanId: data.fayuanId.present ? data.fayuanId.value : this.fayuanId,
+      gongketype: data.gongketype.present
+          ? data.gongketype.value
+          : this.gongketype,
+      name: data.name.present ? data.name.value : this.name,
+      cnt: data.cnt.present ? data.cnt.value : this.cnt,
+      idx: data.idx.present ? data.idx.value : this.idx,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GongKeItemsOneDayData(')
+          ..write('id: $id, ')
+          ..write('fayuanId: $fayuanId, ')
+          ..write('gongketype: $gongketype, ')
+          ..write('name: $name, ')
+          ..write('cnt: $cnt, ')
+          ..write('idx: $idx')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, fayuanId, gongketype, name, cnt, idx);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is GongKeItemsOneDayData &&
+          other.id == this.id &&
+          other.fayuanId == this.fayuanId &&
+          other.gongketype == this.gongketype &&
+          other.name == this.name &&
+          other.cnt == this.cnt &&
+          other.idx == this.idx);
+}
+
+class GongKeItemsOneDayCompanion
+    extends UpdateCompanion<GongKeItemsOneDayData> {
+  final Value<int> id;
+  final Value<int> fayuanId;
+  final Value<String> gongketype;
+  final Value<String> name;
+  final Value<int> cnt;
+  final Value<int> idx;
+  const GongKeItemsOneDayCompanion({
+    this.id = const Value.absent(),
+    this.fayuanId = const Value.absent(),
+    this.gongketype = const Value.absent(),
+    this.name = const Value.absent(),
+    this.cnt = const Value.absent(),
+    this.idx = const Value.absent(),
+  });
+  GongKeItemsOneDayCompanion.insert({
+    this.id = const Value.absent(),
+    required int fayuanId,
+    this.gongketype = const Value.absent(),
+    required String name,
+    this.cnt = const Value.absent(),
+    this.idx = const Value.absent(),
+  }) : fayuanId = Value(fayuanId),
+       name = Value(name);
+  static Insertable<GongKeItemsOneDayData> custom({
+    Expression<int>? id,
+    Expression<int>? fayuanId,
+    Expression<String>? gongketype,
+    Expression<String>? name,
+    Expression<int>? cnt,
+    Expression<int>? idx,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (fayuanId != null) 'fayuan_id': fayuanId,
+      if (gongketype != null) 'gongketype': gongketype,
+      if (name != null) 'name': name,
+      if (cnt != null) 'cnt': cnt,
+      if (idx != null) 'idx': idx,
+    });
+  }
+
+  GongKeItemsOneDayCompanion copyWith({
+    Value<int>? id,
+    Value<int>? fayuanId,
+    Value<String>? gongketype,
+    Value<String>? name,
+    Value<int>? cnt,
+    Value<int>? idx,
+  }) {
+    return GongKeItemsOneDayCompanion(
+      id: id ?? this.id,
+      fayuanId: fayuanId ?? this.fayuanId,
+      gongketype: gongketype ?? this.gongketype,
+      name: name ?? this.name,
+      cnt: cnt ?? this.cnt,
+      idx: idx ?? this.idx,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (fayuanId.present) {
+      map['fayuan_id'] = Variable<int>(fayuanId.value);
+    }
+    if (gongketype.present) {
+      map['gongketype'] = Variable<String>(gongketype.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (cnt.present) {
+      map['cnt'] = Variable<int>(cnt.value);
+    }
+    if (idx.present) {
+      map['idx'] = Variable<int>(idx.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GongKeItemsOneDayCompanion(')
+          ..write('id: $id, ')
+          ..write('fayuanId: $fayuanId, ')
+          ..write('gongketype: $gongketype, ')
+          ..write('name: $name, ')
+          ..write('cnt: $cnt, ')
+          ..write('idx: $idx')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $GongKeItemTable extends GongKeItem
+    with TableInfo<$GongKeItemTable, GongKeItemData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $GongKeItemTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _createDateTimeMeta = const VerificationMeta(
+    'createDateTime',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createDateTime =
+      GeneratedColumn<DateTime>(
+        'create_date_time',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+        defaultValue: currentDateAndTime,
+      );
+  static const VerificationMeta _remarksMeta = const VerificationMeta(
+    'remarks',
+  );
+  @override
+  late final GeneratedColumn<String> remarks = GeneratedColumn<String>(
+    'remarks',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _bk1Meta = const VerificationMeta('bk1');
+  @override
+  late final GeneratedColumn<String> bk1 = GeneratedColumn<String>(
+    'bk1',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _bk2Meta = const VerificationMeta('bk2');
+  @override
+  late final GeneratedColumn<String> bk2 = GeneratedColumn<String>(
+    'bk2',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fayuanIdMeta = const VerificationMeta(
+    'fayuanId',
+  );
+  @override
+  late final GeneratedColumn<int> fayuanId = GeneratedColumn<int>(
+    'fayuan_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _gongketypeMeta = const VerificationMeta(
+    'gongketype',
+  );
+  @override
+  late final GeneratedColumn<String> gongketype = GeneratedColumn<String>(
+    'gongketype',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _cntMeta = const VerificationMeta('cnt');
+  @override
+  late final GeneratedColumn<int> cnt = GeneratedColumn<int>(
+    'cnt',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _gongKeDayMeta = const VerificationMeta(
+    'gongKeDay',
+  );
+  @override
+  late final GeneratedColumn<String> gongKeDay = GeneratedColumn<String>(
+    'gong_ke_day',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isCompleteMeta = const VerificationMeta(
+    'isComplete',
+  );
+  @override
+  late final GeneratedColumn<bool> isComplete = GeneratedColumn<bool>(
+    'is_complete',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_complete" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _idxMeta = const VerificationMeta('idx');
+  @override
+  late final GeneratedColumn<int> idx = GeneratedColumn<int>(
+    'idx',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createDateTime,
+    remarks,
+    bk1,
+    bk2,
+    name,
+    fayuanId,
+    gongketype,
+    cnt,
+    gongKeDay,
+    isComplete,
+    idx,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'gong_ke_item';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<GongKeItemData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('create_date_time')) {
+      context.handle(
+        _createDateTimeMeta,
+        createDateTime.isAcceptableOrUnknown(
+          data['create_date_time']!,
+          _createDateTimeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('remarks')) {
+      context.handle(
+        _remarksMeta,
+        remarks.isAcceptableOrUnknown(data['remarks']!, _remarksMeta),
+      );
+    }
+    if (data.containsKey('bk1')) {
+      context.handle(
+        _bk1Meta,
+        bk1.isAcceptableOrUnknown(data['bk1']!, _bk1Meta),
+      );
+    }
+    if (data.containsKey('bk2')) {
+      context.handle(
+        _bk2Meta,
+        bk2.isAcceptableOrUnknown(data['bk2']!, _bk2Meta),
+      );
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('fayuan_id')) {
+      context.handle(
+        _fayuanIdMeta,
+        fayuanId.isAcceptableOrUnknown(data['fayuan_id']!, _fayuanIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fayuanIdMeta);
+    }
+    if (data.containsKey('gongketype')) {
+      context.handle(
+        _gongketypeMeta,
+        gongketype.isAcceptableOrUnknown(data['gongketype']!, _gongketypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_gongketypeMeta);
+    }
+    if (data.containsKey('cnt')) {
+      context.handle(
+        _cntMeta,
+        cnt.isAcceptableOrUnknown(data['cnt']!, _cntMeta),
+      );
+    }
+    if (data.containsKey('gong_ke_day')) {
+      context.handle(
+        _gongKeDayMeta,
+        gongKeDay.isAcceptableOrUnknown(data['gong_ke_day']!, _gongKeDayMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_gongKeDayMeta);
+    }
+    if (data.containsKey('is_complete')) {
+      context.handle(
+        _isCompleteMeta,
+        isComplete.isAcceptableOrUnknown(data['is_complete']!, _isCompleteMeta),
+      );
+    }
+    if (data.containsKey('idx')) {
+      context.handle(
+        _idxMeta,
+        idx.isAcceptableOrUnknown(data['idx']!, _idxMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  GongKeItemData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return GongKeItemData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      createDateTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}create_date_time'],
+      )!,
+      remarks: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remarks'],
+      ),
+      bk1: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bk1'],
+      ),
+      bk2: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bk2'],
+      ),
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      fayuanId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}fayuan_id'],
+      )!,
+      gongketype: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}gongketype'],
+      )!,
+      cnt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}cnt'],
+      )!,
+      gongKeDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}gong_ke_day'],
+      )!,
+      isComplete: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_complete'],
+      )!,
+      idx: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}idx'],
+      )!,
+    );
+  }
+
+  @override
+  $GongKeItemTable createAlias(String alias) {
+    return $GongKeItemTable(attachedDatabase, alias);
+  }
+}
+
+class GongKeItemData extends DataClass implements Insertable<GongKeItemData> {
+  final int id;
+  final DateTime createDateTime;
+  final String? remarks;
+  final String? bk1;
+  final String? bk2;
+  final String name;
+  final int fayuanId;
+  final String gongketype;
+  final int cnt;
+  final String gongKeDay;
+  final bool isComplete;
+  final int idx;
+  const GongKeItemData({
+    required this.id,
+    required this.createDateTime,
+    this.remarks,
+    this.bk1,
+    this.bk2,
+    required this.name,
+    required this.fayuanId,
+    required this.gongketype,
+    required this.cnt,
+    required this.gongKeDay,
+    required this.isComplete,
+    required this.idx,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['create_date_time'] = Variable<DateTime>(createDateTime);
+    if (!nullToAbsent || remarks != null) {
+      map['remarks'] = Variable<String>(remarks);
+    }
+    if (!nullToAbsent || bk1 != null) {
+      map['bk1'] = Variable<String>(bk1);
+    }
+    if (!nullToAbsent || bk2 != null) {
+      map['bk2'] = Variable<String>(bk2);
+    }
+    map['name'] = Variable<String>(name);
+    map['fayuan_id'] = Variable<int>(fayuanId);
+    map['gongketype'] = Variable<String>(gongketype);
+    map['cnt'] = Variable<int>(cnt);
+    map['gong_ke_day'] = Variable<String>(gongKeDay);
+    map['is_complete'] = Variable<bool>(isComplete);
+    map['idx'] = Variable<int>(idx);
+    return map;
+  }
+
+  GongKeItemCompanion toCompanion(bool nullToAbsent) {
+    return GongKeItemCompanion(
+      id: Value(id),
+      createDateTime: Value(createDateTime),
+      remarks: remarks == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remarks),
+      bk1: bk1 == null && nullToAbsent ? const Value.absent() : Value(bk1),
+      bk2: bk2 == null && nullToAbsent ? const Value.absent() : Value(bk2),
+      name: Value(name),
+      fayuanId: Value(fayuanId),
+      gongketype: Value(gongketype),
+      cnt: Value(cnt),
+      gongKeDay: Value(gongKeDay),
+      isComplete: Value(isComplete),
+      idx: Value(idx),
+    );
+  }
+
+  factory GongKeItemData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return GongKeItemData(
+      id: serializer.fromJson<int>(json['id']),
+      createDateTime: serializer.fromJson<DateTime>(json['createDateTime']),
+      remarks: serializer.fromJson<String?>(json['remarks']),
+      bk1: serializer.fromJson<String?>(json['bk1']),
+      bk2: serializer.fromJson<String?>(json['bk2']),
+      name: serializer.fromJson<String>(json['name']),
+      fayuanId: serializer.fromJson<int>(json['fayuanId']),
+      gongketype: serializer.fromJson<String>(json['gongketype']),
+      cnt: serializer.fromJson<int>(json['cnt']),
+      gongKeDay: serializer.fromJson<String>(json['gongKeDay']),
+      isComplete: serializer.fromJson<bool>(json['isComplete']),
+      idx: serializer.fromJson<int>(json['idx']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'createDateTime': serializer.toJson<DateTime>(createDateTime),
+      'remarks': serializer.toJson<String?>(remarks),
+      'bk1': serializer.toJson<String?>(bk1),
+      'bk2': serializer.toJson<String?>(bk2),
+      'name': serializer.toJson<String>(name),
+      'fayuanId': serializer.toJson<int>(fayuanId),
+      'gongketype': serializer.toJson<String>(gongketype),
+      'cnt': serializer.toJson<int>(cnt),
+      'gongKeDay': serializer.toJson<String>(gongKeDay),
+      'isComplete': serializer.toJson<bool>(isComplete),
+      'idx': serializer.toJson<int>(idx),
+    };
+  }
+
+  GongKeItemData copyWith({
+    int? id,
+    DateTime? createDateTime,
+    Value<String?> remarks = const Value.absent(),
+    Value<String?> bk1 = const Value.absent(),
+    Value<String?> bk2 = const Value.absent(),
+    String? name,
+    int? fayuanId,
+    String? gongketype,
+    int? cnt,
+    String? gongKeDay,
+    bool? isComplete,
+    int? idx,
+  }) => GongKeItemData(
+    id: id ?? this.id,
+    createDateTime: createDateTime ?? this.createDateTime,
+    remarks: remarks.present ? remarks.value : this.remarks,
+    bk1: bk1.present ? bk1.value : this.bk1,
+    bk2: bk2.present ? bk2.value : this.bk2,
+    name: name ?? this.name,
+    fayuanId: fayuanId ?? this.fayuanId,
+    gongketype: gongketype ?? this.gongketype,
+    cnt: cnt ?? this.cnt,
+    gongKeDay: gongKeDay ?? this.gongKeDay,
+    isComplete: isComplete ?? this.isComplete,
+    idx: idx ?? this.idx,
+  );
+  GongKeItemData copyWithCompanion(GongKeItemCompanion data) {
+    return GongKeItemData(
+      id: data.id.present ? data.id.value : this.id,
+      createDateTime: data.createDateTime.present
+          ? data.createDateTime.value
+          : this.createDateTime,
+      remarks: data.remarks.present ? data.remarks.value : this.remarks,
+      bk1: data.bk1.present ? data.bk1.value : this.bk1,
+      bk2: data.bk2.present ? data.bk2.value : this.bk2,
+      name: data.name.present ? data.name.value : this.name,
+      fayuanId: data.fayuanId.present ? data.fayuanId.value : this.fayuanId,
+      gongketype: data.gongketype.present
+          ? data.gongketype.value
+          : this.gongketype,
+      cnt: data.cnt.present ? data.cnt.value : this.cnt,
+      gongKeDay: data.gongKeDay.present ? data.gongKeDay.value : this.gongKeDay,
+      isComplete: data.isComplete.present
+          ? data.isComplete.value
+          : this.isComplete,
+      idx: data.idx.present ? data.idx.value : this.idx,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GongKeItemData(')
+          ..write('id: $id, ')
+          ..write('createDateTime: $createDateTime, ')
+          ..write('remarks: $remarks, ')
+          ..write('bk1: $bk1, ')
+          ..write('bk2: $bk2, ')
+          ..write('name: $name, ')
+          ..write('fayuanId: $fayuanId, ')
+          ..write('gongketype: $gongketype, ')
+          ..write('cnt: $cnt, ')
+          ..write('gongKeDay: $gongKeDay, ')
+          ..write('isComplete: $isComplete, ')
+          ..write('idx: $idx')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createDateTime,
+    remarks,
+    bk1,
+    bk2,
+    name,
+    fayuanId,
+    gongketype,
+    cnt,
+    gongKeDay,
+    isComplete,
+    idx,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is GongKeItemData &&
+          other.id == this.id &&
+          other.createDateTime == this.createDateTime &&
+          other.remarks == this.remarks &&
+          other.bk1 == this.bk1 &&
+          other.bk2 == this.bk2 &&
+          other.name == this.name &&
+          other.fayuanId == this.fayuanId &&
+          other.gongketype == this.gongketype &&
+          other.cnt == this.cnt &&
+          other.gongKeDay == this.gongKeDay &&
+          other.isComplete == this.isComplete &&
+          other.idx == this.idx);
+}
+
+class GongKeItemCompanion extends UpdateCompanion<GongKeItemData> {
+  final Value<int> id;
+  final Value<DateTime> createDateTime;
+  final Value<String?> remarks;
+  final Value<String?> bk1;
+  final Value<String?> bk2;
+  final Value<String> name;
+  final Value<int> fayuanId;
+  final Value<String> gongketype;
+  final Value<int> cnt;
+  final Value<String> gongKeDay;
+  final Value<bool> isComplete;
+  final Value<int> idx;
+  const GongKeItemCompanion({
+    this.id = const Value.absent(),
+    this.createDateTime = const Value.absent(),
+    this.remarks = const Value.absent(),
+    this.bk1 = const Value.absent(),
+    this.bk2 = const Value.absent(),
+    this.name = const Value.absent(),
+    this.fayuanId = const Value.absent(),
+    this.gongketype = const Value.absent(),
+    this.cnt = const Value.absent(),
+    this.gongKeDay = const Value.absent(),
+    this.isComplete = const Value.absent(),
+    this.idx = const Value.absent(),
+  });
+  GongKeItemCompanion.insert({
+    this.id = const Value.absent(),
+    this.createDateTime = const Value.absent(),
+    this.remarks = const Value.absent(),
+    this.bk1 = const Value.absent(),
+    this.bk2 = const Value.absent(),
+    required String name,
+    required int fayuanId,
+    required String gongketype,
+    this.cnt = const Value.absent(),
+    required String gongKeDay,
+    this.isComplete = const Value.absent(),
+    this.idx = const Value.absent(),
+  }) : name = Value(name),
+       fayuanId = Value(fayuanId),
+       gongketype = Value(gongketype),
+       gongKeDay = Value(gongKeDay);
+  static Insertable<GongKeItemData> custom({
+    Expression<int>? id,
+    Expression<DateTime>? createDateTime,
+    Expression<String>? remarks,
+    Expression<String>? bk1,
+    Expression<String>? bk2,
+    Expression<String>? name,
+    Expression<int>? fayuanId,
+    Expression<String>? gongketype,
+    Expression<int>? cnt,
+    Expression<String>? gongKeDay,
+    Expression<bool>? isComplete,
+    Expression<int>? idx,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createDateTime != null) 'create_date_time': createDateTime,
+      if (remarks != null) 'remarks': remarks,
+      if (bk1 != null) 'bk1': bk1,
+      if (bk2 != null) 'bk2': bk2,
+      if (name != null) 'name': name,
+      if (fayuanId != null) 'fayuan_id': fayuanId,
+      if (gongketype != null) 'gongketype': gongketype,
+      if (cnt != null) 'cnt': cnt,
+      if (gongKeDay != null) 'gong_ke_day': gongKeDay,
+      if (isComplete != null) 'is_complete': isComplete,
+      if (idx != null) 'idx': idx,
+    });
+  }
+
+  GongKeItemCompanion copyWith({
+    Value<int>? id,
+    Value<DateTime>? createDateTime,
+    Value<String?>? remarks,
+    Value<String?>? bk1,
+    Value<String?>? bk2,
+    Value<String>? name,
+    Value<int>? fayuanId,
+    Value<String>? gongketype,
+    Value<int>? cnt,
+    Value<String>? gongKeDay,
+    Value<bool>? isComplete,
+    Value<int>? idx,
+  }) {
+    return GongKeItemCompanion(
+      id: id ?? this.id,
+      createDateTime: createDateTime ?? this.createDateTime,
+      remarks: remarks ?? this.remarks,
+      bk1: bk1 ?? this.bk1,
+      bk2: bk2 ?? this.bk2,
+      name: name ?? this.name,
+      fayuanId: fayuanId ?? this.fayuanId,
+      gongketype: gongketype ?? this.gongketype,
+      cnt: cnt ?? this.cnt,
+      gongKeDay: gongKeDay ?? this.gongKeDay,
+      isComplete: isComplete ?? this.isComplete,
+      idx: idx ?? this.idx,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (createDateTime.present) {
+      map['create_date_time'] = Variable<DateTime>(createDateTime.value);
+    }
+    if (remarks.present) {
+      map['remarks'] = Variable<String>(remarks.value);
+    }
+    if (bk1.present) {
+      map['bk1'] = Variable<String>(bk1.value);
+    }
+    if (bk2.present) {
+      map['bk2'] = Variable<String>(bk2.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (fayuanId.present) {
+      map['fayuan_id'] = Variable<int>(fayuanId.value);
+    }
+    if (gongketype.present) {
+      map['gongketype'] = Variable<String>(gongketype.value);
+    }
+    if (cnt.present) {
+      map['cnt'] = Variable<int>(cnt.value);
+    }
+    if (gongKeDay.present) {
+      map['gong_ke_day'] = Variable<String>(gongKeDay.value);
+    }
+    if (isComplete.present) {
+      map['is_complete'] = Variable<bool>(isComplete.value);
+    }
+    if (idx.present) {
+      map['idx'] = Variable<int>(idx.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GongKeItemCompanion(')
+          ..write('id: $id, ')
+          ..write('createDateTime: $createDateTime, ')
+          ..write('remarks: $remarks, ')
+          ..write('bk1: $bk1, ')
+          ..write('bk2: $bk2, ')
+          ..write('name: $name, ')
+          ..write('fayuanId: $fayuanId, ')
+          ..write('gongketype: $gongketype, ')
+          ..write('cnt: $cnt, ')
+          ..write('gongKeDay: $gongKeDay, ')
+          ..write('isComplete: $isComplete, ')
+          ..write('idx: $idx')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $JingShuTable extends JingShu with TableInfo<$JingShuTable, JingShuData> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -53,9 +1974,9 @@ class $JingShuTable extends JingShu with TableInfo<$JingShuTable, JingShuData> {
   late final GeneratedColumn<String> remarks = GeneratedColumn<String>(
     'remarks',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _bk1Meta = const VerificationMeta('bk1');
   @override
@@ -290,8 +2211,6 @@ class $JingShuTable extends JingShu with TableInfo<$JingShuTable, JingShuData> {
         _remarksMeta,
         remarks.isAcceptableOrUnknown(data['remarks']!, _remarksMeta),
       );
-    } else if (isInserting) {
-      context.missing(_remarksMeta);
     }
     if (data.containsKey('bk1')) {
       context.handle(
@@ -432,7 +2351,7 @@ class $JingShuTable extends JingShu with TableInfo<$JingShuTable, JingShuData> {
       remarks: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}remarks'],
-      )!,
+      ),
       bk1: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}bk1'],
@@ -510,7 +2429,7 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
   final int id;
   final DateTime createDateTime;
   final DateTime? favoriteDateTime;
-  final String remarks;
+  final String? remarks;
   final String? bk1;
   final String? bk2;
   final String name;
@@ -531,7 +2450,7 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
     required this.id,
     required this.createDateTime,
     this.favoriteDateTime,
-    required this.remarks,
+    this.remarks,
     this.bk1,
     this.bk2,
     required this.name,
@@ -557,7 +2476,9 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
     if (!nullToAbsent || favoriteDateTime != null) {
       map['favorite_date_time'] = Variable<DateTime>(favoriteDateTime);
     }
-    map['remarks'] = Variable<String>(remarks);
+    if (!nullToAbsent || remarks != null) {
+      map['remarks'] = Variable<String>(remarks);
+    }
     if (!nullToAbsent || bk1 != null) {
       map['bk1'] = Variable<String>(bk1);
     }
@@ -602,7 +2523,9 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
       favoriteDateTime: favoriteDateTime == null && nullToAbsent
           ? const Value.absent()
           : Value(favoriteDateTime),
-      remarks: Value(remarks),
+      remarks: remarks == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remarks),
       bk1: bk1 == null && nullToAbsent ? const Value.absent() : Value(bk1),
       bk2: bk2 == null && nullToAbsent ? const Value.absent() : Value(bk2),
       name: Value(name),
@@ -647,7 +2570,7 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
       favoriteDateTime: serializer.fromJson<DateTime?>(
         json['favoriteDateTime'],
       ),
-      remarks: serializer.fromJson<String>(json['remarks']),
+      remarks: serializer.fromJson<String?>(json['remarks']),
       bk1: serializer.fromJson<String?>(json['bk1']),
       bk2: serializer.fromJson<String?>(json['bk2']),
       name: serializer.fromJson<String>(json['name']),
@@ -673,7 +2596,7 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
       'id': serializer.toJson<int>(id),
       'createDateTime': serializer.toJson<DateTime>(createDateTime),
       'favoriteDateTime': serializer.toJson<DateTime?>(favoriteDateTime),
-      'remarks': serializer.toJson<String>(remarks),
+      'remarks': serializer.toJson<String?>(remarks),
       'bk1': serializer.toJson<String?>(bk1),
       'bk2': serializer.toJson<String?>(bk2),
       'name': serializer.toJson<String>(name),
@@ -697,7 +2620,7 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
     int? id,
     DateTime? createDateTime,
     Value<DateTime?> favoriteDateTime = const Value.absent(),
-    String? remarks,
+    Value<String?> remarks = const Value.absent(),
     Value<String?> bk1 = const Value.absent(),
     Value<String?> bk2 = const Value.absent(),
     String? name,
@@ -720,7 +2643,7 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
     favoriteDateTime: favoriteDateTime.present
         ? favoriteDateTime.value
         : this.favoriteDateTime,
-    remarks: remarks ?? this.remarks,
+    remarks: remarks.present ? remarks.value : this.remarks,
     bk1: bk1.present ? bk1.value : this.bk1,
     bk2: bk2.present ? bk2.value : this.bk2,
     name: name ?? this.name,
@@ -853,7 +2776,7 @@ class JingShuCompanion extends UpdateCompanion<JingShuData> {
   final Value<int> id;
   final Value<DateTime> createDateTime;
   final Value<DateTime?> favoriteDateTime;
-  final Value<String> remarks;
+  final Value<String?> remarks;
   final Value<String?> bk1;
   final Value<String?> bk2;
   final Value<String> name;
@@ -896,7 +2819,7 @@ class JingShuCompanion extends UpdateCompanion<JingShuData> {
     this.id = const Value.absent(),
     this.createDateTime = const Value.absent(),
     this.favoriteDateTime = const Value.absent(),
-    required String remarks,
+    this.remarks = const Value.absent(),
     this.bk1 = const Value.absent(),
     this.bk2 = const Value.absent(),
     required String name,
@@ -913,8 +2836,7 @@ class JingShuCompanion extends UpdateCompanion<JingShuData> {
     this.muyuCount = const Value.absent(),
     this.muyuInterval = const Value.absent(),
     this.muyuDuration = const Value.absent(),
-  }) : remarks = Value(remarks),
-       name = Value(name),
+  }) : name = Value(name),
        type = Value(type),
        image = Value(image),
        fileUrl = Value(fileUrl),
@@ -969,7 +2891,7 @@ class JingShuCompanion extends UpdateCompanion<JingShuData> {
     Value<int>? id,
     Value<DateTime>? createDateTime,
     Value<DateTime?>? favoriteDateTime,
-    Value<String>? remarks,
+    Value<String?>? remarks,
     Value<String?>? bk1,
     Value<String?>? bk2,
     Value<String>? name,
@@ -1155,9 +3077,9 @@ class $TipBookTable extends TipBook with TableInfo<$TipBookTable, TipBookData> {
   late final GeneratedColumn<String> remarks = GeneratedColumn<String>(
     'remarks',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _bk1Meta = const VerificationMeta('bk1');
   @override
@@ -1244,8 +3166,6 @@ class $TipBookTable extends TipBook with TableInfo<$TipBookTable, TipBookData> {
         _remarksMeta,
         remarks.isAcceptableOrUnknown(data['remarks']!, _remarksMeta),
       );
-    } else if (isInserting) {
-      context.missing(_remarksMeta);
     }
     if (data.containsKey('bk1')) {
       context.handle(
@@ -1299,7 +3219,7 @@ class $TipBookTable extends TipBook with TableInfo<$TipBookTable, TipBookData> {
       remarks: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}remarks'],
-      )!,
+      ),
       bk1: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}bk1'],
@@ -1329,7 +3249,7 @@ class TipBookData extends DataClass implements Insertable<TipBookData> {
   final int id;
   final DateTime createDateTime;
   final DateTime? favoriteDateTime;
-  final String remarks;
+  final String? remarks;
   final String? bk1;
   final String? bk2;
   final String name;
@@ -1338,7 +3258,7 @@ class TipBookData extends DataClass implements Insertable<TipBookData> {
     required this.id,
     required this.createDateTime,
     this.favoriteDateTime,
-    required this.remarks,
+    this.remarks,
     this.bk1,
     this.bk2,
     required this.name,
@@ -1352,7 +3272,9 @@ class TipBookData extends DataClass implements Insertable<TipBookData> {
     if (!nullToAbsent || favoriteDateTime != null) {
       map['favorite_date_time'] = Variable<DateTime>(favoriteDateTime);
     }
-    map['remarks'] = Variable<String>(remarks);
+    if (!nullToAbsent || remarks != null) {
+      map['remarks'] = Variable<String>(remarks);
+    }
     if (!nullToAbsent || bk1 != null) {
       map['bk1'] = Variable<String>(bk1);
     }
@@ -1371,7 +3293,9 @@ class TipBookData extends DataClass implements Insertable<TipBookData> {
       favoriteDateTime: favoriteDateTime == null && nullToAbsent
           ? const Value.absent()
           : Value(favoriteDateTime),
-      remarks: Value(remarks),
+      remarks: remarks == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remarks),
       bk1: bk1 == null && nullToAbsent ? const Value.absent() : Value(bk1),
       bk2: bk2 == null && nullToAbsent ? const Value.absent() : Value(bk2),
       name: Value(name),
@@ -1390,7 +3314,7 @@ class TipBookData extends DataClass implements Insertable<TipBookData> {
       favoriteDateTime: serializer.fromJson<DateTime?>(
         json['favoriteDateTime'],
       ),
-      remarks: serializer.fromJson<String>(json['remarks']),
+      remarks: serializer.fromJson<String?>(json['remarks']),
       bk1: serializer.fromJson<String?>(json['bk1']),
       bk2: serializer.fromJson<String?>(json['bk2']),
       name: serializer.fromJson<String>(json['name']),
@@ -1404,7 +3328,7 @@ class TipBookData extends DataClass implements Insertable<TipBookData> {
       'id': serializer.toJson<int>(id),
       'createDateTime': serializer.toJson<DateTime>(createDateTime),
       'favoriteDateTime': serializer.toJson<DateTime?>(favoriteDateTime),
-      'remarks': serializer.toJson<String>(remarks),
+      'remarks': serializer.toJson<String?>(remarks),
       'bk1': serializer.toJson<String?>(bk1),
       'bk2': serializer.toJson<String?>(bk2),
       'name': serializer.toJson<String>(name),
@@ -1416,7 +3340,7 @@ class TipBookData extends DataClass implements Insertable<TipBookData> {
     int? id,
     DateTime? createDateTime,
     Value<DateTime?> favoriteDateTime = const Value.absent(),
-    String? remarks,
+    Value<String?> remarks = const Value.absent(),
     Value<String?> bk1 = const Value.absent(),
     Value<String?> bk2 = const Value.absent(),
     String? name,
@@ -1427,7 +3351,7 @@ class TipBookData extends DataClass implements Insertable<TipBookData> {
     favoriteDateTime: favoriteDateTime.present
         ? favoriteDateTime.value
         : this.favoriteDateTime,
-    remarks: remarks ?? this.remarks,
+    remarks: remarks.present ? remarks.value : this.remarks,
     bk1: bk1.present ? bk1.value : this.bk1,
     bk2: bk2.present ? bk2.value : this.bk2,
     name: name ?? this.name,
@@ -1494,7 +3418,7 @@ class TipBookCompanion extends UpdateCompanion<TipBookData> {
   final Value<int> id;
   final Value<DateTime> createDateTime;
   final Value<DateTime?> favoriteDateTime;
-  final Value<String> remarks;
+  final Value<String?> remarks;
   final Value<String?> bk1;
   final Value<String?> bk2;
   final Value<String> name;
@@ -1513,13 +3437,12 @@ class TipBookCompanion extends UpdateCompanion<TipBookData> {
     this.id = const Value.absent(),
     this.createDateTime = const Value.absent(),
     this.favoriteDateTime = const Value.absent(),
-    required String remarks,
+    this.remarks = const Value.absent(),
     this.bk1 = const Value.absent(),
     this.bk2 = const Value.absent(),
     required String name,
     required String image,
-  }) : remarks = Value(remarks),
-       name = Value(name),
+  }) : name = Value(name),
        image = Value(image);
   static Insertable<TipBookData> custom({
     Expression<int>? id,
@@ -1547,7 +3470,7 @@ class TipBookCompanion extends UpdateCompanion<TipBookData> {
     Value<int>? id,
     Value<DateTime>? createDateTime,
     Value<DateTime?>? favoriteDateTime,
-    Value<String>? remarks,
+    Value<String?>? remarks,
     Value<String?>? bk1,
     Value<String?>? bk2,
     Value<String>? name,
@@ -1650,9 +3573,9 @@ class $TipRecordTable extends TipRecord
   late final GeneratedColumn<String> remarks = GeneratedColumn<String>(
     'remarks',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _bk1Meta = const VerificationMeta('bk1');
   @override
@@ -1731,8 +3654,6 @@ class $TipRecordTable extends TipRecord
         _remarksMeta,
         remarks.isAcceptableOrUnknown(data['remarks']!, _remarksMeta),
       );
-    } else if (isInserting) {
-      context.missing(_remarksMeta);
     }
     if (data.containsKey('bk1')) {
       context.handle(
@@ -1782,7 +3703,7 @@ class $TipRecordTable extends TipRecord
       remarks: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}remarks'],
-      )!,
+      ),
       bk1: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}bk1'],
@@ -1811,7 +3732,7 @@ class $TipRecordTable extends TipRecord
 class TipRecordData extends DataClass implements Insertable<TipRecordData> {
   final int id;
   final DateTime createDateTime;
-  final String remarks;
+  final String? remarks;
   final String? bk1;
   final String? bk2;
   final String content;
@@ -1819,7 +3740,7 @@ class TipRecordData extends DataClass implements Insertable<TipRecordData> {
   const TipRecordData({
     required this.id,
     required this.createDateTime,
-    required this.remarks,
+    this.remarks,
     this.bk1,
     this.bk2,
     required this.content,
@@ -1830,7 +3751,9 @@ class TipRecordData extends DataClass implements Insertable<TipRecordData> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['create_date_time'] = Variable<DateTime>(createDateTime);
-    map['remarks'] = Variable<String>(remarks);
+    if (!nullToAbsent || remarks != null) {
+      map['remarks'] = Variable<String>(remarks);
+    }
     if (!nullToAbsent || bk1 != null) {
       map['bk1'] = Variable<String>(bk1);
     }
@@ -1846,7 +3769,9 @@ class TipRecordData extends DataClass implements Insertable<TipRecordData> {
     return TipRecordCompanion(
       id: Value(id),
       createDateTime: Value(createDateTime),
-      remarks: Value(remarks),
+      remarks: remarks == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remarks),
       bk1: bk1 == null && nullToAbsent ? const Value.absent() : Value(bk1),
       bk2: bk2 == null && nullToAbsent ? const Value.absent() : Value(bk2),
       content: Value(content),
@@ -1862,7 +3787,7 @@ class TipRecordData extends DataClass implements Insertable<TipRecordData> {
     return TipRecordData(
       id: serializer.fromJson<int>(json['id']),
       createDateTime: serializer.fromJson<DateTime>(json['createDateTime']),
-      remarks: serializer.fromJson<String>(json['remarks']),
+      remarks: serializer.fromJson<String?>(json['remarks']),
       bk1: serializer.fromJson<String?>(json['bk1']),
       bk2: serializer.fromJson<String?>(json['bk2']),
       content: serializer.fromJson<String>(json['content']),
@@ -1875,7 +3800,7 @@ class TipRecordData extends DataClass implements Insertable<TipRecordData> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'createDateTime': serializer.toJson<DateTime>(createDateTime),
-      'remarks': serializer.toJson<String>(remarks),
+      'remarks': serializer.toJson<String?>(remarks),
       'bk1': serializer.toJson<String?>(bk1),
       'bk2': serializer.toJson<String?>(bk2),
       'content': serializer.toJson<String>(content),
@@ -1886,7 +3811,7 @@ class TipRecordData extends DataClass implements Insertable<TipRecordData> {
   TipRecordData copyWith({
     int? id,
     DateTime? createDateTime,
-    String? remarks,
+    Value<String?> remarks = const Value.absent(),
     Value<String?> bk1 = const Value.absent(),
     Value<String?> bk2 = const Value.absent(),
     String? content,
@@ -1894,7 +3819,7 @@ class TipRecordData extends DataClass implements Insertable<TipRecordData> {
   }) => TipRecordData(
     id: id ?? this.id,
     createDateTime: createDateTime ?? this.createDateTime,
-    remarks: remarks ?? this.remarks,
+    remarks: remarks.present ? remarks.value : this.remarks,
     bk1: bk1.present ? bk1.value : this.bk1,
     bk2: bk2.present ? bk2.value : this.bk2,
     content: content ?? this.content,
@@ -1947,7 +3872,7 @@ class TipRecordData extends DataClass implements Insertable<TipRecordData> {
 class TipRecordCompanion extends UpdateCompanion<TipRecordData> {
   final Value<int> id;
   final Value<DateTime> createDateTime;
-  final Value<String> remarks;
+  final Value<String?> remarks;
   final Value<String?> bk1;
   final Value<String?> bk2;
   final Value<String> content;
@@ -1964,13 +3889,12 @@ class TipRecordCompanion extends UpdateCompanion<TipRecordData> {
   TipRecordCompanion.insert({
     this.id = const Value.absent(),
     this.createDateTime = const Value.absent(),
-    required String remarks,
+    this.remarks = const Value.absent(),
     this.bk1 = const Value.absent(),
     this.bk2 = const Value.absent(),
     required String content,
     required int bookId,
-  }) : remarks = Value(remarks),
-       content = Value(content),
+  }) : content = Value(content),
        bookId = Value(bookId);
   static Insertable<TipRecordData> custom({
     Expression<int>? id,
@@ -1995,7 +3919,7 @@ class TipRecordCompanion extends UpdateCompanion<TipRecordData> {
   TipRecordCompanion copyWith({
     Value<int>? id,
     Value<DateTime>? createDateTime,
-    Value<String>? remarks,
+    Value<String?>? remarks,
     Value<String?>? bk1,
     Value<String?>? bk2,
     Value<String>? content,
@@ -2057,6 +3981,10 @@ class TipRecordCompanion extends UpdateCompanion<TipRecordData> {
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
+  late final $FaYuanTable faYuan = $FaYuanTable(this);
+  late final $GongKeItemsOneDayTable gongKeItemsOneDay =
+      $GongKeItemsOneDayTable(this);
+  late final $GongKeItemTable gongKeItem = $GongKeItemTable(this);
   late final $JingShuTable jingShu = $JingShuTable(this);
   late final $TipBookTable tipBook = $TipBookTable(this);
   late final $TipRecordTable tipRecord = $TipRecordTable(this);
@@ -2065,18 +3993,970 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
+    faYuan,
+    gongKeItemsOneDay,
+    gongKeItem,
     jingShu,
     tipBook,
     tipRecord,
   ];
 }
 
+typedef $$FaYuanTableCreateCompanionBuilder =
+    FaYuanCompanion Function({
+      Value<int> id,
+      Value<DateTime> createDateTime,
+      Value<DateTime> modifyDateTime,
+      Value<String?> remarks,
+      Value<String?> bk1,
+      Value<String?> bk2,
+      required String name,
+      required String fodiziname,
+      required DateTime startDate,
+      required DateTime endDate,
+      required String yuanwang,
+      Value<bool> isComplete,
+      required String fayuanwen,
+      Value<String> sts,
+      Value<double> percentValue,
+    });
+typedef $$FaYuanTableUpdateCompanionBuilder =
+    FaYuanCompanion Function({
+      Value<int> id,
+      Value<DateTime> createDateTime,
+      Value<DateTime> modifyDateTime,
+      Value<String?> remarks,
+      Value<String?> bk1,
+      Value<String?> bk2,
+      Value<String> name,
+      Value<String> fodiziname,
+      Value<DateTime> startDate,
+      Value<DateTime> endDate,
+      Value<String> yuanwang,
+      Value<bool> isComplete,
+      Value<String> fayuanwen,
+      Value<String> sts,
+      Value<double> percentValue,
+    });
+
+class $$FaYuanTableFilterComposer
+    extends Composer<_$AppDatabase, $FaYuanTable> {
+  $$FaYuanTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createDateTime => $composableBuilder(
+    column: $table.createDateTime,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get modifyDateTime => $composableBuilder(
+    column: $table.modifyDateTime,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remarks => $composableBuilder(
+    column: $table.remarks,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bk1 => $composableBuilder(
+    column: $table.bk1,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bk2 => $composableBuilder(
+    column: $table.bk2,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fodiziname => $composableBuilder(
+    column: $table.fodiziname,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get endDate => $composableBuilder(
+    column: $table.endDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get yuanwang => $composableBuilder(
+    column: $table.yuanwang,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isComplete => $composableBuilder(
+    column: $table.isComplete,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fayuanwen => $composableBuilder(
+    column: $table.fayuanwen,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sts => $composableBuilder(
+    column: $table.sts,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get percentValue => $composableBuilder(
+    column: $table.percentValue,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$FaYuanTableOrderingComposer
+    extends Composer<_$AppDatabase, $FaYuanTable> {
+  $$FaYuanTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createDateTime => $composableBuilder(
+    column: $table.createDateTime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get modifyDateTime => $composableBuilder(
+    column: $table.modifyDateTime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get remarks => $composableBuilder(
+    column: $table.remarks,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bk1 => $composableBuilder(
+    column: $table.bk1,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bk2 => $composableBuilder(
+    column: $table.bk2,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fodiziname => $composableBuilder(
+    column: $table.fodiziname,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get endDate => $composableBuilder(
+    column: $table.endDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get yuanwang => $composableBuilder(
+    column: $table.yuanwang,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isComplete => $composableBuilder(
+    column: $table.isComplete,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fayuanwen => $composableBuilder(
+    column: $table.fayuanwen,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sts => $composableBuilder(
+    column: $table.sts,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get percentValue => $composableBuilder(
+    column: $table.percentValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$FaYuanTableAnnotationComposer
+    extends Composer<_$AppDatabase, $FaYuanTable> {
+  $$FaYuanTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createDateTime => $composableBuilder(
+    column: $table.createDateTime,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get modifyDateTime => $composableBuilder(
+    column: $table.modifyDateTime,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get remarks =>
+      $composableBuilder(column: $table.remarks, builder: (column) => column);
+
+  GeneratedColumn<String> get bk1 =>
+      $composableBuilder(column: $table.bk1, builder: (column) => column);
+
+  GeneratedColumn<String> get bk2 =>
+      $composableBuilder(column: $table.bk2, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get fodiziname => $composableBuilder(
+    column: $table.fodiziname,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get startDate =>
+      $composableBuilder(column: $table.startDate, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get endDate =>
+      $composableBuilder(column: $table.endDate, builder: (column) => column);
+
+  GeneratedColumn<String> get yuanwang =>
+      $composableBuilder(column: $table.yuanwang, builder: (column) => column);
+
+  GeneratedColumn<bool> get isComplete => $composableBuilder(
+    column: $table.isComplete,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get fayuanwen =>
+      $composableBuilder(column: $table.fayuanwen, builder: (column) => column);
+
+  GeneratedColumn<String> get sts =>
+      $composableBuilder(column: $table.sts, builder: (column) => column);
+
+  GeneratedColumn<double> get percentValue => $composableBuilder(
+    column: $table.percentValue,
+    builder: (column) => column,
+  );
+}
+
+class $$FaYuanTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $FaYuanTable,
+          FaYuanData,
+          $$FaYuanTableFilterComposer,
+          $$FaYuanTableOrderingComposer,
+          $$FaYuanTableAnnotationComposer,
+          $$FaYuanTableCreateCompanionBuilder,
+          $$FaYuanTableUpdateCompanionBuilder,
+          (FaYuanData, BaseReferences<_$AppDatabase, $FaYuanTable, FaYuanData>),
+          FaYuanData,
+          PrefetchHooks Function()
+        > {
+  $$FaYuanTableTableManager(_$AppDatabase db, $FaYuanTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FaYuanTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FaYuanTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$FaYuanTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<DateTime> createDateTime = const Value.absent(),
+                Value<DateTime> modifyDateTime = const Value.absent(),
+                Value<String?> remarks = const Value.absent(),
+                Value<String?> bk1 = const Value.absent(),
+                Value<String?> bk2 = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> fodiziname = const Value.absent(),
+                Value<DateTime> startDate = const Value.absent(),
+                Value<DateTime> endDate = const Value.absent(),
+                Value<String> yuanwang = const Value.absent(),
+                Value<bool> isComplete = const Value.absent(),
+                Value<String> fayuanwen = const Value.absent(),
+                Value<String> sts = const Value.absent(),
+                Value<double> percentValue = const Value.absent(),
+              }) => FaYuanCompanion(
+                id: id,
+                createDateTime: createDateTime,
+                modifyDateTime: modifyDateTime,
+                remarks: remarks,
+                bk1: bk1,
+                bk2: bk2,
+                name: name,
+                fodiziname: fodiziname,
+                startDate: startDate,
+                endDate: endDate,
+                yuanwang: yuanwang,
+                isComplete: isComplete,
+                fayuanwen: fayuanwen,
+                sts: sts,
+                percentValue: percentValue,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<DateTime> createDateTime = const Value.absent(),
+                Value<DateTime> modifyDateTime = const Value.absent(),
+                Value<String?> remarks = const Value.absent(),
+                Value<String?> bk1 = const Value.absent(),
+                Value<String?> bk2 = const Value.absent(),
+                required String name,
+                required String fodiziname,
+                required DateTime startDate,
+                required DateTime endDate,
+                required String yuanwang,
+                Value<bool> isComplete = const Value.absent(),
+                required String fayuanwen,
+                Value<String> sts = const Value.absent(),
+                Value<double> percentValue = const Value.absent(),
+              }) => FaYuanCompanion.insert(
+                id: id,
+                createDateTime: createDateTime,
+                modifyDateTime: modifyDateTime,
+                remarks: remarks,
+                bk1: bk1,
+                bk2: bk2,
+                name: name,
+                fodiziname: fodiziname,
+                startDate: startDate,
+                endDate: endDate,
+                yuanwang: yuanwang,
+                isComplete: isComplete,
+                fayuanwen: fayuanwen,
+                sts: sts,
+                percentValue: percentValue,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$FaYuanTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $FaYuanTable,
+      FaYuanData,
+      $$FaYuanTableFilterComposer,
+      $$FaYuanTableOrderingComposer,
+      $$FaYuanTableAnnotationComposer,
+      $$FaYuanTableCreateCompanionBuilder,
+      $$FaYuanTableUpdateCompanionBuilder,
+      (FaYuanData, BaseReferences<_$AppDatabase, $FaYuanTable, FaYuanData>),
+      FaYuanData,
+      PrefetchHooks Function()
+    >;
+typedef $$GongKeItemsOneDayTableCreateCompanionBuilder =
+    GongKeItemsOneDayCompanion Function({
+      Value<int> id,
+      required int fayuanId,
+      Value<String> gongketype,
+      required String name,
+      Value<int> cnt,
+      Value<int> idx,
+    });
+typedef $$GongKeItemsOneDayTableUpdateCompanionBuilder =
+    GongKeItemsOneDayCompanion Function({
+      Value<int> id,
+      Value<int> fayuanId,
+      Value<String> gongketype,
+      Value<String> name,
+      Value<int> cnt,
+      Value<int> idx,
+    });
+
+class $$GongKeItemsOneDayTableFilterComposer
+    extends Composer<_$AppDatabase, $GongKeItemsOneDayTable> {
+  $$GongKeItemsOneDayTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get fayuanId => $composableBuilder(
+    column: $table.fayuanId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get gongketype => $composableBuilder(
+    column: $table.gongketype,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get cnt => $composableBuilder(
+    column: $table.cnt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get idx => $composableBuilder(
+    column: $table.idx,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$GongKeItemsOneDayTableOrderingComposer
+    extends Composer<_$AppDatabase, $GongKeItemsOneDayTable> {
+  $$GongKeItemsOneDayTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get fayuanId => $composableBuilder(
+    column: $table.fayuanId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get gongketype => $composableBuilder(
+    column: $table.gongketype,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get cnt => $composableBuilder(
+    column: $table.cnt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get idx => $composableBuilder(
+    column: $table.idx,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$GongKeItemsOneDayTableAnnotationComposer
+    extends Composer<_$AppDatabase, $GongKeItemsOneDayTable> {
+  $$GongKeItemsOneDayTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get fayuanId =>
+      $composableBuilder(column: $table.fayuanId, builder: (column) => column);
+
+  GeneratedColumn<String> get gongketype => $composableBuilder(
+    column: $table.gongketype,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get cnt =>
+      $composableBuilder(column: $table.cnt, builder: (column) => column);
+
+  GeneratedColumn<int> get idx =>
+      $composableBuilder(column: $table.idx, builder: (column) => column);
+}
+
+class $$GongKeItemsOneDayTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $GongKeItemsOneDayTable,
+          GongKeItemsOneDayData,
+          $$GongKeItemsOneDayTableFilterComposer,
+          $$GongKeItemsOneDayTableOrderingComposer,
+          $$GongKeItemsOneDayTableAnnotationComposer,
+          $$GongKeItemsOneDayTableCreateCompanionBuilder,
+          $$GongKeItemsOneDayTableUpdateCompanionBuilder,
+          (
+            GongKeItemsOneDayData,
+            BaseReferences<
+              _$AppDatabase,
+              $GongKeItemsOneDayTable,
+              GongKeItemsOneDayData
+            >,
+          ),
+          GongKeItemsOneDayData,
+          PrefetchHooks Function()
+        > {
+  $$GongKeItemsOneDayTableTableManager(
+    _$AppDatabase db,
+    $GongKeItemsOneDayTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$GongKeItemsOneDayTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$GongKeItemsOneDayTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$GongKeItemsOneDayTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> fayuanId = const Value.absent(),
+                Value<String> gongketype = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<int> cnt = const Value.absent(),
+                Value<int> idx = const Value.absent(),
+              }) => GongKeItemsOneDayCompanion(
+                id: id,
+                fayuanId: fayuanId,
+                gongketype: gongketype,
+                name: name,
+                cnt: cnt,
+                idx: idx,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int fayuanId,
+                Value<String> gongketype = const Value.absent(),
+                required String name,
+                Value<int> cnt = const Value.absent(),
+                Value<int> idx = const Value.absent(),
+              }) => GongKeItemsOneDayCompanion.insert(
+                id: id,
+                fayuanId: fayuanId,
+                gongketype: gongketype,
+                name: name,
+                cnt: cnt,
+                idx: idx,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$GongKeItemsOneDayTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $GongKeItemsOneDayTable,
+      GongKeItemsOneDayData,
+      $$GongKeItemsOneDayTableFilterComposer,
+      $$GongKeItemsOneDayTableOrderingComposer,
+      $$GongKeItemsOneDayTableAnnotationComposer,
+      $$GongKeItemsOneDayTableCreateCompanionBuilder,
+      $$GongKeItemsOneDayTableUpdateCompanionBuilder,
+      (
+        GongKeItemsOneDayData,
+        BaseReferences<
+          _$AppDatabase,
+          $GongKeItemsOneDayTable,
+          GongKeItemsOneDayData
+        >,
+      ),
+      GongKeItemsOneDayData,
+      PrefetchHooks Function()
+    >;
+typedef $$GongKeItemTableCreateCompanionBuilder =
+    GongKeItemCompanion Function({
+      Value<int> id,
+      Value<DateTime> createDateTime,
+      Value<String?> remarks,
+      Value<String?> bk1,
+      Value<String?> bk2,
+      required String name,
+      required int fayuanId,
+      required String gongketype,
+      Value<int> cnt,
+      required String gongKeDay,
+      Value<bool> isComplete,
+      Value<int> idx,
+    });
+typedef $$GongKeItemTableUpdateCompanionBuilder =
+    GongKeItemCompanion Function({
+      Value<int> id,
+      Value<DateTime> createDateTime,
+      Value<String?> remarks,
+      Value<String?> bk1,
+      Value<String?> bk2,
+      Value<String> name,
+      Value<int> fayuanId,
+      Value<String> gongketype,
+      Value<int> cnt,
+      Value<String> gongKeDay,
+      Value<bool> isComplete,
+      Value<int> idx,
+    });
+
+class $$GongKeItemTableFilterComposer
+    extends Composer<_$AppDatabase, $GongKeItemTable> {
+  $$GongKeItemTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createDateTime => $composableBuilder(
+    column: $table.createDateTime,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remarks => $composableBuilder(
+    column: $table.remarks,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bk1 => $composableBuilder(
+    column: $table.bk1,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bk2 => $composableBuilder(
+    column: $table.bk2,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get fayuanId => $composableBuilder(
+    column: $table.fayuanId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get gongketype => $composableBuilder(
+    column: $table.gongketype,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get cnt => $composableBuilder(
+    column: $table.cnt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get gongKeDay => $composableBuilder(
+    column: $table.gongKeDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isComplete => $composableBuilder(
+    column: $table.isComplete,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get idx => $composableBuilder(
+    column: $table.idx,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$GongKeItemTableOrderingComposer
+    extends Composer<_$AppDatabase, $GongKeItemTable> {
+  $$GongKeItemTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createDateTime => $composableBuilder(
+    column: $table.createDateTime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get remarks => $composableBuilder(
+    column: $table.remarks,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bk1 => $composableBuilder(
+    column: $table.bk1,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bk2 => $composableBuilder(
+    column: $table.bk2,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get fayuanId => $composableBuilder(
+    column: $table.fayuanId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get gongketype => $composableBuilder(
+    column: $table.gongketype,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get cnt => $composableBuilder(
+    column: $table.cnt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get gongKeDay => $composableBuilder(
+    column: $table.gongKeDay,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isComplete => $composableBuilder(
+    column: $table.isComplete,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get idx => $composableBuilder(
+    column: $table.idx,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$GongKeItemTableAnnotationComposer
+    extends Composer<_$AppDatabase, $GongKeItemTable> {
+  $$GongKeItemTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createDateTime => $composableBuilder(
+    column: $table.createDateTime,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get remarks =>
+      $composableBuilder(column: $table.remarks, builder: (column) => column);
+
+  GeneratedColumn<String> get bk1 =>
+      $composableBuilder(column: $table.bk1, builder: (column) => column);
+
+  GeneratedColumn<String> get bk2 =>
+      $composableBuilder(column: $table.bk2, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get fayuanId =>
+      $composableBuilder(column: $table.fayuanId, builder: (column) => column);
+
+  GeneratedColumn<String> get gongketype => $composableBuilder(
+    column: $table.gongketype,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get cnt =>
+      $composableBuilder(column: $table.cnt, builder: (column) => column);
+
+  GeneratedColumn<String> get gongKeDay =>
+      $composableBuilder(column: $table.gongKeDay, builder: (column) => column);
+
+  GeneratedColumn<bool> get isComplete => $composableBuilder(
+    column: $table.isComplete,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get idx =>
+      $composableBuilder(column: $table.idx, builder: (column) => column);
+}
+
+class $$GongKeItemTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $GongKeItemTable,
+          GongKeItemData,
+          $$GongKeItemTableFilterComposer,
+          $$GongKeItemTableOrderingComposer,
+          $$GongKeItemTableAnnotationComposer,
+          $$GongKeItemTableCreateCompanionBuilder,
+          $$GongKeItemTableUpdateCompanionBuilder,
+          (
+            GongKeItemData,
+            BaseReferences<_$AppDatabase, $GongKeItemTable, GongKeItemData>,
+          ),
+          GongKeItemData,
+          PrefetchHooks Function()
+        > {
+  $$GongKeItemTableTableManager(_$AppDatabase db, $GongKeItemTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$GongKeItemTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$GongKeItemTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$GongKeItemTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<DateTime> createDateTime = const Value.absent(),
+                Value<String?> remarks = const Value.absent(),
+                Value<String?> bk1 = const Value.absent(),
+                Value<String?> bk2 = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<int> fayuanId = const Value.absent(),
+                Value<String> gongketype = const Value.absent(),
+                Value<int> cnt = const Value.absent(),
+                Value<String> gongKeDay = const Value.absent(),
+                Value<bool> isComplete = const Value.absent(),
+                Value<int> idx = const Value.absent(),
+              }) => GongKeItemCompanion(
+                id: id,
+                createDateTime: createDateTime,
+                remarks: remarks,
+                bk1: bk1,
+                bk2: bk2,
+                name: name,
+                fayuanId: fayuanId,
+                gongketype: gongketype,
+                cnt: cnt,
+                gongKeDay: gongKeDay,
+                isComplete: isComplete,
+                idx: idx,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<DateTime> createDateTime = const Value.absent(),
+                Value<String?> remarks = const Value.absent(),
+                Value<String?> bk1 = const Value.absent(),
+                Value<String?> bk2 = const Value.absent(),
+                required String name,
+                required int fayuanId,
+                required String gongketype,
+                Value<int> cnt = const Value.absent(),
+                required String gongKeDay,
+                Value<bool> isComplete = const Value.absent(),
+                Value<int> idx = const Value.absent(),
+              }) => GongKeItemCompanion.insert(
+                id: id,
+                createDateTime: createDateTime,
+                remarks: remarks,
+                bk1: bk1,
+                bk2: bk2,
+                name: name,
+                fayuanId: fayuanId,
+                gongketype: gongketype,
+                cnt: cnt,
+                gongKeDay: gongKeDay,
+                isComplete: isComplete,
+                idx: idx,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$GongKeItemTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $GongKeItemTable,
+      GongKeItemData,
+      $$GongKeItemTableFilterComposer,
+      $$GongKeItemTableOrderingComposer,
+      $$GongKeItemTableAnnotationComposer,
+      $$GongKeItemTableCreateCompanionBuilder,
+      $$GongKeItemTableUpdateCompanionBuilder,
+      (
+        GongKeItemData,
+        BaseReferences<_$AppDatabase, $GongKeItemTable, GongKeItemData>,
+      ),
+      GongKeItemData,
+      PrefetchHooks Function()
+    >;
 typedef $$JingShuTableCreateCompanionBuilder =
     JingShuCompanion Function({
       Value<int> id,
       Value<DateTime> createDateTime,
       Value<DateTime?> favoriteDateTime,
-      required String remarks,
+      Value<String?> remarks,
       Value<String?> bk1,
       Value<String?> bk2,
       required String name,
@@ -2099,7 +4979,7 @@ typedef $$JingShuTableUpdateCompanionBuilder =
       Value<int> id,
       Value<DateTime> createDateTime,
       Value<DateTime?> favoriteDateTime,
-      Value<String> remarks,
+      Value<String?> remarks,
       Value<String?> bk1,
       Value<String?> bk2,
       Value<String> name,
@@ -2452,7 +5332,7 @@ class $$JingShuTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<DateTime> createDateTime = const Value.absent(),
                 Value<DateTime?> favoriteDateTime = const Value.absent(),
-                Value<String> remarks = const Value.absent(),
+                Value<String?> remarks = const Value.absent(),
                 Value<String?> bk1 = const Value.absent(),
                 Value<String?> bk2 = const Value.absent(),
                 Value<String> name = const Value.absent(),
@@ -2496,7 +5376,7 @@ class $$JingShuTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<DateTime> createDateTime = const Value.absent(),
                 Value<DateTime?> favoriteDateTime = const Value.absent(),
-                required String remarks,
+                Value<String?> remarks = const Value.absent(),
                 Value<String?> bk1 = const Value.absent(),
                 Value<String?> bk2 = const Value.absent(),
                 required String name,
@@ -2562,7 +5442,7 @@ typedef $$TipBookTableCreateCompanionBuilder =
       Value<int> id,
       Value<DateTime> createDateTime,
       Value<DateTime?> favoriteDateTime,
-      required String remarks,
+      Value<String?> remarks,
       Value<String?> bk1,
       Value<String?> bk2,
       required String name,
@@ -2573,7 +5453,7 @@ typedef $$TipBookTableUpdateCompanionBuilder =
       Value<int> id,
       Value<DateTime> createDateTime,
       Value<DateTime?> favoriteDateTime,
-      Value<String> remarks,
+      Value<String?> remarks,
       Value<String?> bk1,
       Value<String?> bk2,
       Value<String> name,
@@ -2752,7 +5632,7 @@ class $$TipBookTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<DateTime> createDateTime = const Value.absent(),
                 Value<DateTime?> favoriteDateTime = const Value.absent(),
-                Value<String> remarks = const Value.absent(),
+                Value<String?> remarks = const Value.absent(),
                 Value<String?> bk1 = const Value.absent(),
                 Value<String?> bk2 = const Value.absent(),
                 Value<String> name = const Value.absent(),
@@ -2772,7 +5652,7 @@ class $$TipBookTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<DateTime> createDateTime = const Value.absent(),
                 Value<DateTime?> favoriteDateTime = const Value.absent(),
-                required String remarks,
+                Value<String?> remarks = const Value.absent(),
                 Value<String?> bk1 = const Value.absent(),
                 Value<String?> bk2 = const Value.absent(),
                 required String name,
@@ -2813,7 +5693,7 @@ typedef $$TipRecordTableCreateCompanionBuilder =
     TipRecordCompanion Function({
       Value<int> id,
       Value<DateTime> createDateTime,
-      required String remarks,
+      Value<String?> remarks,
       Value<String?> bk1,
       Value<String?> bk2,
       required String content,
@@ -2823,7 +5703,7 @@ typedef $$TipRecordTableUpdateCompanionBuilder =
     TipRecordCompanion Function({
       Value<int> id,
       Value<DateTime> createDateTime,
-      Value<String> remarks,
+      Value<String?> remarks,
       Value<String?> bk1,
       Value<String?> bk2,
       Value<String> content,
@@ -2986,7 +5866,7 @@ class $$TipRecordTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<DateTime> createDateTime = const Value.absent(),
-                Value<String> remarks = const Value.absent(),
+                Value<String?> remarks = const Value.absent(),
                 Value<String?> bk1 = const Value.absent(),
                 Value<String?> bk2 = const Value.absent(),
                 Value<String> content = const Value.absent(),
@@ -3004,7 +5884,7 @@ class $$TipRecordTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<DateTime> createDateTime = const Value.absent(),
-                required String remarks,
+                Value<String?> remarks = const Value.absent(),
                 Value<String?> bk1 = const Value.absent(),
                 Value<String?> bk2 = const Value.absent(),
                 required String content,
@@ -3047,6 +5927,12 @@ typedef $$TipRecordTableProcessedTableManager =
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
+  $$FaYuanTableTableManager get faYuan =>
+      $$FaYuanTableTableManager(_db, _db.faYuan);
+  $$GongKeItemsOneDayTableTableManager get gongKeItemsOneDay =>
+      $$GongKeItemsOneDayTableTableManager(_db, _db.gongKeItemsOneDay);
+  $$GongKeItemTableTableManager get gongKeItem =>
+      $$GongKeItemTableTableManager(_db, _db.gongKeItem);
   $$JingShuTableTableManager get jingShu =>
       $$JingShuTableTableManager(_db, _db.jingShu);
   $$TipBookTableTableManager get tipBook =>

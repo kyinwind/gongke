@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:gongke/comm/shared_preferences.dart';
+import 'package:gongke/view/gongke/fayuan_wizard.dart';
 import 'dart:io';
 import 'view/gongke/gongke.dart';
 import 'database.dart';
 import 'view/songjing/songjing.dart';
-import 'view/tips/Tip.dart';
-import 'view/tips/AddTip.dart';
-import 'view/tips/TipRecord.dart';
-import 'view/tips/AddTipRecord.dart';
-import 'view/tips/ImportTips.dart';
+import 'view/tips/tip.dart';
+import 'view/tips/add_tip.dart';
+import 'view/tips/tip_record.dart';
+import 'view/tips/add_tip_record.dart';
+import 'view/tips/import_tips.dart';
 // 导入 path_provider 库以使用 getApplicationDocumentsDirectory 函数
-import 'package:path_provider/path_provider.dart';
+//import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // 声明全局数据库变量
 late AppDatabase globalDB; // 在main函数中创建单一实例;
@@ -19,15 +21,22 @@ late AppDatabase globalDB; // 在main函数中创建单一实例;
 late String? firstDate;
 
 void main() async {
+  // 添加这一行来初始化 Flutter 绑定
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 等待 SharedPreferences 初始化
+  await SharedPreferences.getInstance();
+
+  // 初始化数据库
   globalDB = AppDatabase();
-  //final dbFolder = getApplicationDocumentsDirectory();
+
   // 检查并存储首次运行时间
   firstDate = await getDateValue('firstDate');
   if (firstDate == null) {
     await saveDateValue('firstDate', DateTime.now());
   }
-  print(firstDate);
-  runApp(MyApp(db: globalDB));
+  //print(firstDate);
+  runApp(MyApp(db: globalDB)); // 传入数据库实例
 }
 
 class MyApp extends StatefulWidget {
@@ -64,6 +73,7 @@ class _MyAppState extends State<MyApp> {
         '/ImportTip': (context) => const ImportTipPage(),
         '/TipRecord': (context) => const TipRecordPage(),
         '/AddTipRecord': (context) => const AddTipRecordPage(),
+        '/FaYuanWizard': (context) => const FaYuanWizardPage(),
       },
       initialRoute: '/',
     );

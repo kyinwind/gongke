@@ -4,7 +4,9 @@ import 'package:path_provider/path_provider.dart';
 import 'model/tables.dart';
 part 'database.g.dart';
 
-@DriftDatabase(tables: [JingShu, TipBook, TipRecord])
+@DriftDatabase(
+  tables: [FaYuan, GongKeItemsOneDay, GongKeItem, JingShu, TipBook, TipRecord],
+)
 class AppDatabase extends _$AppDatabase {
   // After generating code, this class needs to define a `schemaVersion` getter
   // and a constructor telling drift where the database should be stored.

@@ -4,10 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:gongke/main.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:styled_widget/styled_widget.dart';
-import '../../database.dart';
+//import '../../database.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/services.dart';
-import 'dart:typed_data';
 
 class AddTipPage extends StatefulWidget {
   const AddTipPage({super.key});
@@ -66,7 +65,7 @@ class _AddTipPageState extends State<AddTipPage> {
         .getSingle();
     setState(() {
       _nameController.text = data.name;
-      _remarksController.text = data.remarks;
+      _remarksController.text = data.remarks ?? '';
       _base64Image = data.image;
     });
   }
@@ -120,7 +119,7 @@ class _AddTipPageState extends State<AddTipPage> {
         await globalDB.managers.tipBook.create(
           (o) => o(
             name: _nameController.text,
-            remarks: _remarksController.text,
+            remarks: Value(_remarksController.text),
             image: _base64Image ?? '',
           ),
           mode: InsertMode.replace,

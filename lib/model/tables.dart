@@ -63,7 +63,7 @@ class FaYuan extends Table
 //    case others
 //}
 class GongKeItemsOneDay extends Table with AutoIncrementingPrimaryKey {
-  TextColumn get fayuanid => text()();
+  IntColumn get fayuanId => integer()();
   TextColumn get gongketype => text().withDefault(const Constant('songjing'))();
   TextColumn get name => text()();
   IntColumn get cnt => integer().withDefault(const Constant(0))();
@@ -74,7 +74,7 @@ class GongKeItemsOneDay extends Table with AutoIncrementingPrimaryKey {
 class GongKeItem extends Table
     with AutoIncrementingPrimaryKey, CreateDateTimeColumn, RemarksColumn {
   TextColumn get name => text()();
-  TextColumn get fayuanid => text()();
+  IntColumn get fayuanId => integer()();
   TextColumn get gongketype => text()();
   IntColumn get cnt => integer().withDefault(const Constant(0))(); // 遍数
   TextColumn get gongKeDay => text()(); // 是哪一天的功课
@@ -139,7 +139,7 @@ mixin ModifyDateTimeColumn on Table {
 }
 
 mixin RemarksColumn on Table {
-  TextColumn get remarks => text()(); // 用于记录备注信息
+  TextColumn get remarks => text().nullable()(); // 用于记录备注信息
   TextColumn get bk1 => text().nullable()(); // 备用字段1
   TextColumn get bk2 => text().nullable()(); // 备用字段2
 }

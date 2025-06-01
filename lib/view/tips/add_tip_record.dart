@@ -43,8 +43,7 @@ class _AddTipRecordPageState extends State<AddTipRecordPage> {
     if (_formKey.currentState!.validate()) {
       if (acttype == 'new') {
         await globalDB.managers.tipRecord.create(
-          (o) =>
-              o(content: _contentController.text, bookId: bookId, remarks: ''),
+          (o) => o(content: _contentController.text, bookId: bookId),
           mode: InsertMode.replace,
         );
       }

@@ -6,8 +6,7 @@ import 'package:drift/drift.dart' hide Column;
 import 'package:flutter_slidable/flutter_slidable.dart'; // 导入 Slidable 库
 import 'dart:convert'; // 导入 dart:convert 库，确保已导入
 import 'package:flutter/services.dart';
-import '../../viewmodel/CurrentRecord.dart';
-import '../../main.dart'; // 导入 main.dart 以访问 firstDate 和 globalDB
+import '../../viewmodel/current_record.dart';
 import 'package:intl/intl.dart';
 
 // 为了让页面能够上下滑动，将 Scaffold 的 body 用 SingleChildScrollView 包裹
@@ -69,7 +68,7 @@ class _TipPageState extends State<TipPage> {
                   .filter((t) => t.bookId.equals(book.id))
                   .orderBy((t) => t.id.asc()))
               .get();
-      print('Book: ${book.name}, Records Count: ${temprecords.length}');
+      //print('Book: ${book.name}, Records Count: ${temprecords.length}');
       allRecords.addAll(temprecords);
       // 打印前五个记录的id
       // for (var i = 0; i < 5 && i < allRecords.length; i++) {
@@ -113,7 +112,7 @@ class _TipPageState extends State<TipPage> {
             TipBookCompanion.insert(
               name: quotation['name'],
               image: quotation['image'],
-              remarks: quotation['remarks'],
+              remarks: Value(quotation['remarks']),
               favoriteDateTime: const Value(null),
               createDateTime: Value(DateTime.now()),
             ),
@@ -129,7 +128,6 @@ class _TipPageState extends State<TipPage> {
             final tipRecordCompanion = TipRecordCompanion.insert(
               bookId: bookId,
               content: recordData['content'],
-              remarks: '',
             );
 
             // 插入 TipRecord 记录
@@ -138,7 +136,7 @@ class _TipPageState extends State<TipPage> {
         }
       } catch (e) {
         // 出现错误，回滚事务
-        print('导入数据时出错: $e');
+        //print('导入数据时出错: $e');
         rethrow;
       }
     });
@@ -303,7 +301,7 @@ class _TipPageState extends State<TipPage> {
                               arguments: {'bookId': record.id},
                             );
                           },
-                          leading: (record.image != null && record.image != '')
+                          leading: (record.image != '')
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(8.0),
                                   child: Image.memory(

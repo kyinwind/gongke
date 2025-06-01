@@ -7,6 +7,8 @@ import 'package:gongke/main.dart';
 import 'package:drift/drift.dart' hide Column;
 
 class SongJingPage extends StatefulWidget {
+  const SongJingPage({super.key});
+
   @override
   _SongJingPageState createState() => _SongJingPageState();
 }
@@ -487,7 +489,7 @@ class _SongJingPageState extends State<SongJingPage> {
         jingshudatalist = list;
       });
     } catch (e) {
-      print('根据关键字查询记录时出错: $e');
+      // print('根据关键字查询记录时出错: $e');
       // 可以在这里设置一个空的 Stream 或者错误提示的 Stream
       setState(() {
         jingshudatalist = Stream.error(e);

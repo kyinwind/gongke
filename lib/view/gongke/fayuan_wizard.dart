@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:drift/drift.dart' hide Column;
+import 'package:gongke/database.dart';
 //import '../../database.dart';
 import '../../main.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -359,6 +360,34 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
     );
   }
 
+  String getFaYuanWen() {
+    var gongketext = "弟子每天\n";
+    var cnt = 0;
+
+    if (_data.fodiziName?.isEmpty == true || _data.yuanwang?.isEmpty == true) {
+      return "未完成发愿设置，请完成发愿设置";
+    }
+
+    for (var i = 0; i < _data.gkiODList.length; i++) {
+      var rec = _data.gkiODList[i];
+      cnt = rec.cnt;
+      gongketext += "(${i + 1})${rec.gongketype.label}${rec.name}${cnt}遍。";
+      if (i < _data.gkiODList.length - 1) {
+        gongketext += "\n";
+      }
+    }
+
+    var fayuanwen = "今佛弟子${_data.fodiziName}发愿：\n";
+    fayuanwen += "  在从${DateTools.getDateStringByDate(_data.startDate!)}";
+    fayuanwen += "到${DateTools.getDateStringByDate(_data.endDate!)}";
+    fayuanwen += "共${_data.getDurationDays()}天内，";
+    fayuanwen += gongketext;
+    fayuanwen += "\n  以此功德回向，请佛菩萨加持弟子实现愿望：\n${_data.yuanwang}\n  请佛菩萨可许则许。";
+
+    _data.fayuanwen = fayuanwen;
+    return fayuanwen;
+  }
+
   Future<void> _showAddGongKeDialog() async {
     GongKeType? selectedType;
     String? name;
@@ -466,7 +495,8 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
             .filter((t) => t.fayuanId(fayuanId!))
             .delete();
       }
-
+      // 保存发愿文
+      _data.fayuanwen = getFaYuanWen();
       // 插入或更新发愿记录
       final newFaYuanId = await globalDB.managers.faYuan.create(
         (o) => o(

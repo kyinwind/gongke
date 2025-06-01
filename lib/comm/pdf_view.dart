@@ -16,7 +16,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   PdfDocument? _document;
   PdfController? _pdfController;
   PageController? _pageController;
-  ScrollController _thumbnailScrollController = ScrollController();
+  final ScrollController _thumbnailScrollController = ScrollController();
 
   int _pages = 0;
   int _currentIndex = 0;

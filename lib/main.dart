@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:gongke/comm/shared_preferences.dart';
 import 'package:gongke/view/gongke/fayuan_wizard.dart';
 import 'dart:io';
 import 'view/gongke/gongke.dart';
+import 'view/gongke/modify_fayuanwen.dart';
 import 'database.dart';
 import 'view/songjing/songjing.dart';
 import 'view/tips/tip.dart';
@@ -10,6 +12,7 @@ import 'view/tips/add_tip.dart';
 import 'view/tips/tip_record.dart';
 import 'view/tips/add_tip_record.dart';
 import 'view/tips/import_tips.dart';
+
 // 导入 path_provider 库以使用 getApplicationDocumentsDirectory 函数
 //import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -74,8 +77,16 @@ class _MyAppState extends State<MyApp> {
         '/TipRecord': (context) => const TipRecordPage(),
         '/AddTipRecord': (context) => const AddTipRecordPage(),
         '/FaYuanWizard': (context) => const FaYuanWizardPage(),
+        '/ModifyFaYuanWen': (context) => const ModifyFaYuanWenPage(),
       },
       initialRoute: '/',
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('zh', 'CN')],
+      locale: const Locale('zh', 'CN'),
     );
   }
 

@@ -6,7 +6,7 @@ import 'package:flutter_slidable/flutter_slidable.dart'; // 导入 Slidable 库
 
 // 假设这是一个StatefulWidget页面
 class TipRecordPage extends StatefulWidget {
-  const TipRecordPage({Key? key}) : super(key: key);
+  const TipRecordPage({super.key});
 
   @override
   _TipRecordPageState createState() => _TipRecordPageState();

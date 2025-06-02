@@ -1,6 +1,9 @@
+import 'dart:ffi';
+
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:gongke/database.dart';
+import 'package:gongke/model/tables.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:lunar/lunar.dart';
@@ -26,16 +29,25 @@ class _GongKePageState extends State<GongKePage> {
   DateTime? _selectedDay; // 当前选中的日期
   Map<int, double> _fayuanCompletionRates = {}; // 存储每一个发愿的功课完成率
   Map<String, double> _completionRates = {}; // 存储每一天的功课完成率
+  // 按日期分组处理当月所有的gongkeitem记录
+  Map<String, List<GongKeItemData>> groupedRecords = {};
+
+  Future<void> _refreshAllData() async {
+    await fetchAllFaYuan().then((value) {
+      // 这里可以添加其他需要在刷新时执行的操作
+      print(_fayuanCompletionRates.toString());
+      print(_completionRates.toString());
+    });
+    await _loadCompletionRates(_focusedDay);
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    fetchAllFaYuan().then((_) {
-      print(_fayuanCompletionRates.toString());
-    });
-    _loadCompletionRates(DateTime.now()).then((_) {
-      print(_completionRates.toString());
-    });
+    _refreshAllData();
   }
 
   // 查询所有记录,以及计算功课完成率
@@ -83,6 +95,7 @@ class _GongKePageState extends State<GongKePage> {
   Future<void> _loadCompletionRates(DateTime month) async {
     // TODO: 从数据库加载当月的功课完成率
     _completionRates.clear();
+    groupedRecords.clear();
     // 获取当月的第一天和最后一天
     DateTime firstDayOfMonth = DateTime(month.year, month.month, 1);
     DateTime lastDayOfMonth = DateTime(month.year, month.month + 1, 0);
@@ -95,8 +108,7 @@ class _GongKePageState extends State<GongKePage> {
           ),
         )
         .get();
-    // 按日期分组处理记录
-    Map<String, List<GongKeItemData>> groupedRecords = {};
+
     for (var record in allItems) {
       String dateKey = record.gongKeDay;
       if (!groupedRecords.containsKey(dateKey)) {
@@ -195,118 +207,121 @@ class _GongKePageState extends State<GongKePage> {
   // 自定义日期单元格构建器
   Widget _buildCalendarCell(
     BuildContext context,
-    DateTime day,
-    DateTime focusedDay,
+    DateTime day, // 当前日期，就是遍历到哪一天的日期，日期单元格
+    DateTime focusedDay, // 当前聚焦的日期，如果用户选择了某年某月，那么就是聚焦的日期
   ) {
-    // 获取农历日期
     final lunar = Lunar.fromDate(day);
-    final completion = _completionRates[day] ?? 0.0;
+    final dateString = DateTools.getStringByDate(day);
+    final completion = _completionRates[dateString] ?? 0.0;
+    final todayString = DateTools.getStringByDate(DateTime.now());
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          '/GongKeSetting',
+          arguments: {
+            'date': dateString,
+            'groupedRecords': groupedRecords, // 通过引用传递 Map
+            'updateCallback': () async {
+              // 修改为 async
+              // 等待数据更新完成
+              await _refreshAllData();
+              // 强制更新状态
+              if (mounted) {
+                setState(() {});
+              }
+            },
+          },
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(
+          horizontal: 1,
+          vertical: 2,
+        ), // 减小水平边距，保持垂直边距
+        padding: const EdgeInsets.all(2), // 添加内边距
+        width: 45, // 让容器尽可能宽
 
-    // 获取农历日期文本
-    String getLunarDayText() {
-      // 获取农历节日
-      final festival = lunar.getFestivals();
-      if (festival.isNotEmpty) {
-        return festival.first;
-      }
-
-      // 如果不是节日，显示农历日期
-      final lunarDay = lunar.getDay();
-      switch (lunarDay) {
-        case 1:
-          return '初一';
-        case 2:
-          return '初二';
-        case 3:
-          return '初三';
-        case 4:
-          return '初四';
-        case 5:
-          return '初五';
-        case 6:
-          return '初六';
-        case 7:
-          return '初七';
-        case 8:
-          return '初八';
-        case 9:
-          return '初九';
-        case 10:
-          return '初十';
-        case 11:
-          return '十一';
-        case 12:
-          return '十二';
-        case 13:
-          return '十三';
-        case 14:
-          return '十四';
-        case 15:
-          return '十五';
-        case 16:
-          return '十六';
-        case 17:
-          return '十七';
-        case 18:
-          return '十八';
-        case 19:
-          return '十九';
-        case 20:
-          return '二十';
-        case 21:
-          return '廿一';
-        case 22:
-          return '廿二';
-        case 23:
-          return '廿三';
-        case 24:
-          return '廿四';
-        case 25:
-          return '廿五';
-        case 26:
-          return '廿六';
-        case 27:
-          return '廿七';
-        case 28:
-          return '廿八';
-        case 29:
-          return '廿九';
-        case 30:
-          return '三十';
-        default:
-          return '未知';
-      }
-    }
-
-    return Container(
-      margin: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade200),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // 阳历日期
-          Text('${day.day}', style: const TextStyle(fontSize: 14)),
-          // 农历日期
-          Text(
-            getLunarDayText(),
-            style: TextStyle(
-              fontSize: 10,
-              // 节日显示红色
-              color: lunar.getFestivals().isNotEmpty ? Colors.red : Colors.grey,
-            ),
+        decoration: BoxDecoration(
+          color: groupedRecords[dateString] == null
+              ? Colors
+                    .white // 有功课记录时背景为白色
+              : (completion > 0 ? Colors.green : Colors.yellow), // 没有记录时背景为浅灰色
+          // 添加背景颜色
+          border: Border.all(
+            color: dateString == todayString
+                ? Colors.red
+                : Colors.grey.shade200,
+            width: 1.5,
           ),
-          // 完成度进度条
-          if (completion > 0)
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 阳历日期
+            Text('${day.day}', style: const TextStyle(fontSize: 14)),
+            // 完成度进度条
+            if (completion >= 0)
+              Text(
+                '${(completion * 100).toInt()}%',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: completion > 0 ? Colors.white : Colors.blue,
+                ),
+              ),
+            // 农历日期
             Text(
-              '${(completion * 100).toInt()}%',
+              _getLunarDayText(lunar),
               style: TextStyle(
                 fontSize: 10,
-                color: Theme.of(context).primaryColor,
+                // 节日显示红色
+                color: lunar.getFestivals().isNotEmpty
+                    ? Colors.red
+                    : Colors.black,
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _PercentChart(BuildContext context, double percent) {
+    return SizedBox(
+      height: 60,
+      width: 60,
+      child: SfCircularChart(
+        margin: EdgeInsets.zero,
+        annotations: [
+          CircularChartAnnotation(
+            widget: Text(
+              '${(percent * 100).toStringAsFixed(0)}%',
+              style: const TextStyle(fontSize: 12),
+            ),
+          ),
+        ],
+        series: <CircularSeries>[
+          // 背景环
+          DoughnutSeries<dynamic, dynamic>(
+            dataSource: [1],
+            pointColorMapper: (_, __) => Colors.grey.shade300,
+            xValueMapper: (_, __) => '',
+            yValueMapper: (_, __) => 100,
+            radius: '100%',
+            innerRadius: '80%', // 添加内半径
+          ),
+          // 进度环
+          DoughnutSeries<dynamic, dynamic>(
+            dataSource: [1],
+            pointColorMapper: (_, __) => Theme.of(context).primaryColor,
+            xValueMapper: (_, __) => '',
+            yValueMapper: (_, __) => percent * 100,
+            radius: '100%',
+            innerRadius: '80%', // 添加内半径
+            startAngle: 270, // 设置起始角度
+            endAngle: 270, // 设置结束角度
+          ),
         ],
       ),
     );
@@ -332,7 +347,7 @@ class _GongKePageState extends State<GongKePage> {
                     context,
                     '/FaYuanWizard',
                     arguments: {'acttype': 'A'},
-                  );
+                  ).then((_) => _refreshAllData());
                 },
               ),
             ),
@@ -373,7 +388,7 @@ class _GongKePageState extends State<GongKePage> {
                                   'acttype': 'M',
                                   'fayuanId': fayuan.id,
                                 },
-                              );
+                              ).then((_) => _refreshAllData());
                             },
                           ),
                           SlidableAction(
@@ -453,45 +468,9 @@ class _GongKePageState extends State<GongKePage> {
                         child: ListTile(
                           title: Row(
                             children: [
-                              SizedBox(
-                                height: 60,
-                                width: 60,
-                                child: SfCircularChart(
-                                  margin: EdgeInsets.zero,
-                                  annotations: [
-                                    CircularChartAnnotation(
-                                      widget: Text(
-                                        '${((DateTime.now().difference(fayuan.startDate).inDays / fayuan.endDate.difference(fayuan.startDate).inDays) * 100).toStringAsFixed(0)}%',
-                                        style: TextStyle(fontSize: 12),
-                                      ),
-                                    ),
-                                  ],
-                                  series: <CircularSeries>[
-                                    DoughnutSeries<dynamic, dynamic>(
-                                      dataSource: [1],
-                                      pointColorMapper: (_, __) =>
-                                          Colors.grey.shade300,
-                                      xValueMapper: (_, __) => '',
-                                      yValueMapper: (_, __) => 100,
-                                      radius: '100%',
-                                    ),
-                                    DoughnutSeries<dynamic, dynamic>(
-                                      dataSource: [1],
-                                      pointColorMapper: (_, __) =>
-                                          Theme.of(context).primaryColor,
-                                      xValueMapper: (_, __) => '',
-                                      yValueMapper: (_, __) =>
-                                          (DateTime.now()
-                                                  .difference(fayuan.startDate)
-                                                  .inDays /
-                                              fayuan.endDate
-                                                  .difference(fayuan.startDate)
-                                                  .inDays) *
-                                          100,
-                                      radius: '100%',
-                                    ),
-                                  ],
-                                ),
+                              _PercentChart(
+                                context,
+                                _fayuanCompletionRates[fayuan.id] ?? 0.0,
                               ),
                               const SizedBox(width: 8),
                               Text(
@@ -589,6 +568,7 @@ class _GongKePageState extends State<GongKePage> {
                   weekdayStyle: TextStyle(color: Colors.black87),
                   weekendStyle: TextStyle(color: Colors.red),
                 ),
+                rowHeight: 60, // 增加行高，可以根据需要调整这个值
               ),
             ),
           ],

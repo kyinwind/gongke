@@ -20,6 +20,16 @@ enum GongKeType {
   const GongKeType(this.label);
 }
 
+String getLabelSafely(String typeString) {
+  try {
+    return GongKeType.values
+        .firstWhere((type) => type.name == typeString)
+        .label;
+  } catch (e) {
+    return '未知类型'; // 返回默认值
+  }
+}
+
 class VMFaYuanData {
   String? name; // 发愿名称
   String? fodiziName; // 佛弟子名称

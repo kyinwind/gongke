@@ -5,6 +5,7 @@ import 'package:gongke/view/gongke/fayuan_wizard.dart';
 import 'dart:io';
 import 'view/gongke/gongke.dart';
 import 'view/gongke/modify_fayuanwen.dart';
+import 'view/gongke/gongke_setting.dart';
 import 'database.dart';
 import 'view/songjing/songjing.dart';
 import 'view/tips/tip.dart';
@@ -78,6 +79,7 @@ class _MyAppState extends State<MyApp> {
         '/AddTipRecord': (context) => const AddTipRecordPage(),
         '/FaYuanWizard': (context) => const FaYuanWizardPage(),
         '/ModifyFaYuanWen': (context) => const ModifyFaYuanWenPage(),
+        '/GongKeSetting': (context) => const GongKeSettingPage(),
       },
       initialRoute: '/',
       localizationsDelegates: const [

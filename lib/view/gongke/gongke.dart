@@ -1,5 +1,4 @@
 import 'dart:ffi';
-
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:gongke/database.dart';
@@ -22,6 +21,7 @@ class GongKePage extends StatefulWidget {
 }
 
 class _GongKePageState extends State<GongKePage> {
+  // 添加发愿列表的Stream
   Stream<List<FaYuanData>> fayuandatalist = Stream.value([]);
 
   // 添加日历控制变量
@@ -216,23 +216,26 @@ class _GongKePageState extends State<GongKePage> {
     final todayString = DateTools.getStringByDate(DateTime.now());
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(
-          context,
-          '/GongKeSetting',
-          arguments: {
-            'date': dateString,
-            'groupedRecords': groupedRecords, // 通过引用传递 Map
-            'updateCallback': () async {
-              // 修改为 async
-              // 等待数据更新完成
-              await _refreshAllData();
-              // 强制更新状态
-              if (mounted) {
-                setState(() {});
-              }
-            },
-          },
-        );
+        // 点击日期单元格时，跳转到功课设置页面
+        groupedRecords[DateTools.getStringByDate(day)] == null
+            ? null
+            : Navigator.pushNamed(
+                context,
+                '/GongKe/GongKeSetting',
+                arguments: {
+                  'date': dateString,
+                  'groupedRecords': groupedRecords, // 通过引用传递 Map
+                  'updateCallback': () async {
+                    // 修改为 async
+                    // 等待数据更新完成
+                    await _refreshAllData();
+                    // 强制更新状态
+                    if (mounted) {
+                      setState(() {});
+                    }
+                  },
+                },
+              );
       },
       child: Container(
         margin: const EdgeInsets.symmetric(
@@ -345,7 +348,7 @@ class _GongKePageState extends State<GongKePage> {
                 onPressed: () {
                   Navigator.pushNamed(
                     context,
-                    '/FaYuanWizard',
+                    '/GongKe/FaYuanWizard',
                     arguments: {'acttype': 'A'},
                   ).then((_) => _refreshAllData());
                 },
@@ -383,7 +386,7 @@ class _GongKePageState extends State<GongKePage> {
                             onPressed: (context) {
                               Navigator.pushNamed(
                                 context,
-                                '/FaYuanWizard',
+                                '/GongKe/FaYuanWizard',
                                 arguments: {
                                   'acttype': 'M',
                                   'fayuanId': fayuan.id,
@@ -399,7 +402,7 @@ class _GongKePageState extends State<GongKePage> {
                             onPressed: (context) {
                               Navigator.pushNamed(
                                 context,
-                                '/ModifyFaYuanWen',
+                                '/GongKe/ModifyFaYuanWen',
                                 arguments: {'fayuanId': fayuan.id},
                               );
                             },
@@ -459,6 +462,10 @@ class _GongKePageState extends State<GongKePage> {
                                     globalDB.faYuan,
                                   )..where((t) => t.id.equals(fayuan.id))).go();
                                 });
+                                setState(() {
+                                  // 刷新数据
+                                  _refreshAllData();
+                                });
                               }
                             },
                           ),
@@ -491,7 +498,7 @@ class _GongKePageState extends State<GongKePage> {
                           onTap: () {
                             Navigator.pushNamed(
                               context,
-                              '/ModifyFaYuanWen',
+                              '/GongKe/ModifyFaYuanWen',
                               arguments: {'fayuanId': fayuan.id},
                             );
                           },

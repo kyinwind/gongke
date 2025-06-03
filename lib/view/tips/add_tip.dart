@@ -7,6 +7,7 @@ import 'package:styled_widget/styled_widget.dart';
 //import '../../database.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/services.dart';
+import '../../comm/pub_tools.dart';
 
 class AddTipPage extends StatefulWidget {
   const AddTipPage({super.key});
@@ -176,7 +177,11 @@ class _AddTipPageState extends State<AddTipPage> {
                 ),
                 maxLines: 5,
               ).padding(bottom: 16),
-              ElevatedButton(onPressed: _pickImage, child: const Text('选择图片')),
+              ElevatedButton(
+                style: AppButtonStyle.primaryButton,
+                onPressed: _pickImage,
+                child: const Text('选择图片'),
+              ),
               if (_base64Image != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 16),

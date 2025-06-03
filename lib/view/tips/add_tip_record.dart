@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gongke/main.dart';
 import 'package:styled_widget/styled_widget.dart';
 import 'package:drift/drift.dart' hide Column;
+import '../../comm/pub_tools.dart';
 
 class AddTipRecordPage extends StatefulWidget {
   const AddTipRecordPage({super.key});
@@ -84,7 +85,11 @@ class _AddTipRecordPageState extends State<AddTipRecordPage> {
                   return null;
                 },
               ).padding(bottom: 16),
-              ElevatedButton(onPressed: _submitForm, child: const Text('提交')),
+              ElevatedButton(
+                style: AppButtonStyle.primaryButton,
+                onPressed: _submitForm,
+                child: const Text('提交'),
+              ),
             ],
           ),
         ),

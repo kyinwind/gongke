@@ -6,29 +6,7 @@ import '../../main.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../../comm/date_tools.dart';
 import '../../comm/shared_preferences.dart';
-
-enum GongKeType {
-  songjing('诵经'),
-  nianzhou('念咒'),
-  nianshenghao('念圣号'),
-  ketou('磕头'),
-  baichan('拜忏'),
-  dazuo('打坐'),
-  others('其他');
-
-  final String label;
-  const GongKeType(this.label);
-}
-
-String getLabelSafely(String typeString) {
-  try {
-    return GongKeType.values
-        .firstWhere((type) => type.name == typeString)
-        .label;
-  } catch (e) {
-    return '未知类型'; // 返回默认值
-  }
-}
+import '../../comm/pub_tools.dart';
 
 class VMFaYuanData {
   String? name; // 发愿名称
@@ -44,7 +22,11 @@ class VMFaYuanData {
   }
 
   bool isDateValid() {
-    return startDate != null && endDate != null;
+    print('isDateValid: startDate=$startDate, endDate=$endDate');
+    if (startDate == null || endDate == null) return false;
+    // 确保结束日期不早于开始日期
+    if (endDate!.isBefore(startDate!)) return false;
+    return true;
   }
 
   bool isGongKeValid() {
@@ -94,12 +76,18 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
   // 添加状态变量跟踪时长
   int _durationDays = 0;
 
+  // 添加 controller 作为类成员
+  late TextEditingController nameController;
+  late TextEditingController fodiziNameController;
+
   @override
   void initState() {
     super.initState();
+    // 初始化 controllers
+    nameController = TextEditingController();
+    fodiziNameController = TextEditingController();
     // 不需要在这里初始化控制器了
     _data.startDate = DateTime.now();
-    _updateDateControllers(); // 初始化时更新控制器的值
   }
 
   @override
@@ -121,6 +109,9 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
 
   @override
   void dispose() {
+    // 释放 controllers
+    nameController.dispose();
+    fodiziNameController.dispose();
     // 释放 controller
     startDateController.dispose();
     endDateController.dispose();
@@ -136,7 +127,9 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
 
     setState(() {
       _data.name = fayuan.name;
+      nameController.text = fayuan.name;
       _data.fodiziName = fayuan.fodiziname;
+      fodiziNameController.text = fayuan.fodiziname;
       _data.startDate = fayuan.startDate;
       _data.endDate = fayuan.endDate;
       _data.yuanwang = fayuan.yuanwang;
@@ -168,20 +161,36 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
     });
   }
 
+  // 修改 _loadInitialValues 方法
   Future<void> _loadInitialValues() async {
-    _data.name = await getStringValue('fayuanName');
-    _data.fodiziName = await getStringValue('fodiziName');
-    _data.yuanwang = await getStringValue('yuanwang');
-    _data.startDate = DateTools.getDateByString(
-      await getDateValue('startDate') ?? DateTime.now().toString(),
-      'yyyy-MM-dd',
-    );
-    _data.endDate = DateTools.getDateByString(
-      await getDateValue('endDate') ??
-          DateTools.getDateAfterDays(DateTime.now(), 30).toString(),
-      'yyyy-MM-dd',
-    );
-    setState(() {});
+    // 1. 先获取所有异步数据
+    final name = await getStringValue('fayuanName');
+    final fodiziName = await getStringValue('fodiziName');
+    final yuanwang = await getStringValue('yuanwang');
+    late DateTime startDate, endDate;
+    // 2. 获取当前日期作为默认起始日期
+    startDate = DateTime.now();
+    endDate = DateTools.getDateAfterDays(startDate, 30); // 默认30天后
+
+    // 3. 在 setState 中同步更新状态
+    setState(() {
+      _data.name = name;
+      nameController.text = name ?? '';
+      _data.fodiziName = fodiziName;
+      fodiziNameController.text = fodiziName ?? '';
+      _data.yuanwang = yuanwang;
+      // 如果没有有效的日期，则使用默认值
+      _data.startDate ??= startDate;
+      _data.endDate ??= endDate;
+
+      print('------------------loadInitialValues----');
+      print('startDate: $startDate');
+      print('endDate: $endDate');
+      print('_data.startDate: ${_data.startDate}');
+      print('_data.endDate: ${_data.endDate}');
+      startDateController.text = DateTools.getStringByDate(_data.startDate!);
+      endDateController.text = DateTools.getStringByDate(_data.endDate!);
+    });
   }
 
   Widget _buildStep1() {
@@ -190,8 +199,7 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
       child: Column(
         children: [
           TextFormField(
-            // 使用 controller 替代 initialValue
-            controller: TextEditingController(text: _data.name),
+            controller: nameController,
             decoration: const InputDecoration(labelText: '发愿名称'),
             validator: (value) {
               if (value?.isEmpty ?? true) {
@@ -205,8 +213,7 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
             },
           ),
           TextFormField(
-            // 使用 controller 替代 initialValue
-            controller: TextEditingController(text: _data.fodiziName),
+            controller: fodiziNameController,
             decoration: const InputDecoration(labelText: '佛弟子名称'),
             validator: (value) {
               if (value?.isEmpty ?? true) {
@@ -226,6 +233,8 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
 
   // 修改 _updateDateControllers 方法
   void _updateDateControllers() {
+    print('Updating date controllers...');
+
     startDateController.text = _data.startDate != null
         ? DateTools.getDateStringByDate(_data.startDate!)
         : '';
@@ -233,6 +242,9 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
         ? DateTools.getDateStringByDate(_data.endDate!)
         : '';
     _durationDays = _data.getDurationDays(); // 更新时长
+    print(' Start Date: ${_data.startDate}');
+    print(' End Date: ${_data.endDate}');
+    print(' Duration Days: $_durationDays');
   }
 
   Widget _buildStep2() {
@@ -275,12 +287,15 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
                 onChanged: (value) {
                   if (value != null && _data.startDate != null) {
                     setState(() {
-                      _data.endDate = DateTime(
+                      // 使用 DateTime 的加减法来计算结束日期
+                      final endDate = DateTime(
                         _data.startDate!.year,
                         _data.startDate!.month + value,
-                        _data.startDate!.day - 1,
+                        _data.startDate!.day,
                       );
-                      _updateDateControllers(); // 更新结束日期显示
+                      // 减去一天得到最后一天
+                      _data.endDate = endDate.subtract(const Duration(days: 1));
+                      _updateDateControllers();
                     });
                   }
                 },
@@ -357,11 +372,13 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             ElevatedButton(
+              style: AppButtonStyle.primaryButton,
               onPressed: () => _showAddGongKeDialog(),
               child: const Text('新增功课'),
             ),
             ElevatedButton(
-              onPressed: () {}, // TODO: 实现复制功能
+              style: AppButtonStyle.primaryButton,
+              onPressed: () => _showCopyGongKeDialog(),
               child: const Text('复制功课'),
             ),
           ],
@@ -396,6 +413,88 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
 
     _data.fayuanwen = fayuanwen;
     return fayuanwen;
+  }
+
+  Future<void> _showCopyGongKeDialog() async {
+    final allItems = await globalDB.managers.gongKeItemsOneDay.get();
+    final uniqueItems = <String>{};
+    final itemMap = <String, VMGongKeItemOneDayData>{};
+    final selectedItems = <String>{}; // 移到这里
+
+    for (var item in allItems) {
+      final displayText = '${item.name} x ${item.cnt}';
+      uniqueItems.add(displayText);
+      itemMap[displayText] = VMGongKeItemOneDayData(
+        gongketype: GongKeType.values.firstWhere(
+          (t) => t.name == item.gongketype,
+        ),
+        name: item.name,
+        cnt: item.cnt,
+        idx: item.idx,
+      );
+    }
+
+    await showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        // 添加 StatefulBuilder
+        builder: (context, setState) => AlertDialog(
+          title: const Text('复制功课'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: uniqueItems.length,
+              itemBuilder: (context, index) {
+                final item = uniqueItems.elementAt(index);
+                return CheckboxListTile(
+                  title: Text(item),
+                  value: selectedItems.contains(item),
+                  onChanged: (bool? value) {
+                    setState(() {
+                      // 使用 StatefulBuilder 的 setState
+                      if (value == true) {
+                        selectedItems.add(item);
+                      } else {
+                        selectedItems.remove(item);
+                      }
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () {
+                // 将选中的项目添加到功课列表
+                for (var selected in selectedItems) {
+                  if (itemMap.containsKey(selected)) {
+                    final item = itemMap[selected]!;
+                    setState(() {
+                      _data.gkiODList.add(
+                        VMGongKeItemOneDayData(
+                          gongketype: item.gongketype,
+                          name: item.name,
+                          cnt: item.cnt,
+                          idx: _data.gkiODList.length + 1,
+                        ),
+                      );
+                    });
+                  }
+                }
+                Navigator.pop(context);
+              },
+              child: const Text('确定'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _showAddGongKeDialog() async {
@@ -468,7 +567,10 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
         hintText: '请输入您的愿望...',
       ),
       maxLines: 5,
-      onChanged: (value) => _data.yuanwang = value,
+      onChanged: (value) {
+        _data.yuanwang = value;
+        saveStringValue('yuanwang', _data.yuanwang ?? '');
+      },
     );
   }
 
@@ -494,6 +596,7 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
   }
 
   Future<void> _handleSave() async {
+    late int newFaYuanId;
     // 开启事务
     await globalDB.transaction(() async {
       if (actType == 'M' && fayuanId != null) {
@@ -508,17 +611,33 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
       // 保存发愿文
       _data.fayuanwen = getFaYuanWen();
       // 插入或更新发愿记录
-      final newFaYuanId = await globalDB.managers.faYuan.create(
-        (o) => o(
-          name: _data.name!,
-          fodiziname: _data.fodiziName!,
-          startDate: _data.startDate!,
-          endDate: _data.endDate!,
-          yuanwang: _data.yuanwang ?? '',
-          fayuanwen: _data.fayuanwen ?? '',
-          remarks: Value(''),
-        ),
-      );
+      if (actType == 'M' && fayuanId != null) {
+        // 更新现有发愿记录
+        await globalDB.managers.faYuan
+            .filter((f) => f.id.equals(fayuanId))
+            .update(
+              (o) => o(
+                name: Value(_data.name!),
+                fodiziname: Value(_data.fodiziName!),
+                startDate: Value(_data.startDate!),
+                endDate: Value(_data.endDate!),
+                yuanwang: Value(_data.yuanwang ?? ''),
+                fayuanwen: Value(_data.fayuanwen ?? ''),
+              ),
+            );
+      } else {
+        newFaYuanId = await globalDB.managers.faYuan.create(
+          (o) => o(
+            name: _data.name!,
+            fodiziname: _data.fodiziName!,
+            startDate: _data.startDate!,
+            endDate: _data.endDate!,
+            yuanwang: _data.yuanwang ?? '',
+            fayuanwen: _data.fayuanwen ?? '',
+            remarks: Value(''),
+          ),
+        );
+      }
 
       // 插入每日功课
       for (var item in _data.gkiODList) {
@@ -579,7 +698,7 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
                 } else {
                   ScaffoldMessenger.of(
                     context,
-                  ).showSnackBar(const SnackBar(content: Text('请选择起止日期和截止日期')));
+                  ).showSnackBar(const SnackBar(content: Text('请选择起始日期和截止日期')));
                 }
                 break;
               case 2:
@@ -618,12 +737,14 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
               if (_currentStep > 0) ...[
                 const SizedBox(width: 8),
                 ElevatedButton(
+                  style: AppButtonStyle.primaryButton,
                   onPressed: controls.onStepCancel,
                   child: const Text('上一步'),
                 ),
               ],
               const Spacer(),
               ElevatedButton(
+                style: AppButtonStyle.primaryButton,
                 onPressed: controls.onStepContinue,
                 child: Text(_currentStep < 4 ? '下一步' : '保存'),
               ),

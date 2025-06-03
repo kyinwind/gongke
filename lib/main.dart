@@ -6,6 +6,9 @@ import 'dart:io';
 import 'view/gongke/gongke.dart';
 import 'view/gongke/modify_fayuanwen.dart';
 import 'view/gongke/gongke_setting.dart';
+import 'view/gongke/nianshenghao.dart';
+import 'view/gongke/dazuo.dart';
+import 'view/gongke/nianzhou.dart';
 import 'database.dart';
 import 'view/songjing/songjing.dart';
 import 'view/tips/tip.dart';
@@ -77,9 +80,13 @@ class _MyAppState extends State<MyApp> {
         '/ImportTip': (context) => const ImportTipPage(),
         '/TipRecord': (context) => const TipRecordPage(),
         '/AddTipRecord': (context) => const AddTipRecordPage(),
-        '/FaYuanWizard': (context) => const FaYuanWizardPage(),
-        '/ModifyFaYuanWen': (context) => const ModifyFaYuanWenPage(),
-        '/GongKeSetting': (context) => const GongKeSettingPage(),
+        '/GongKe/FaYuanWizard': (context) => const FaYuanWizardPage(),
+        '/GongKe/ModifyFaYuanWen': (context) => const ModifyFaYuanWenPage(),
+        '/GongKe/GongKeSetting': (context) => const GongKeSettingPage(),
+        '/GongKe/GongKeSetting/nianzhou': (context) => const NianzhouPage(),
+        '/GongKe/GongKeSetting/nianshenghao': (context) =>
+            const NianShengHaoPage(),
+        '/GongKe/GongKeSetting/dazuo': (context) => const DaZuoPage(),
       },
       initialRoute: '/',
       localizationsDelegates: const [

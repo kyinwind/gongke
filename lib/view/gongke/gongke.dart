@@ -571,11 +571,22 @@ class _GongKePageState extends State<GongKePage> {
                 calendarStyle: const CalendarStyle(
                   outsideDaysVisible: false, // 隐藏非当前月份的日期
                 ),
+                daysOfWeekHeight: 32, // 增加星期标题行高度
                 daysOfWeekStyle: const DaysOfWeekStyle(
                   weekdayStyle: TextStyle(color: Colors.black87),
                   weekendStyle: TextStyle(color: Colors.red),
+                  // 添加下边距
+                  dowTextFormatter: null,
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Colors.transparent,
+                        width: 8, // 增加底部间距
+                      ),
+                    ),
+                  ),
                 ),
-                rowHeight: 60, // 增加行高，可以根据需要调整这个值
+                rowHeight: 65, // 增加行高，可以根据需要调整这个值
               ),
             ),
           ],

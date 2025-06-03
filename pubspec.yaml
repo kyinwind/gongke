@@ -128,6 +128,19 @@ flutter_launcher_icons:
   ios: false
   image_path: "assets/icons/icon.png"
   adaptive_icon_background: "#FFFFFF"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  web:
+    generate: true
+    image_path: "assets/icons/icon.png"
+    background_color: "#hexcode"
+    theme_color: "#hexcode"
+  windows:
+    generate: true
+    image_path: "assets/icons/icon.png"
+    icon_size: 48 # min:48, max:256, default: 48
+  macos:
+    generate: true
+    image_path: "assets/icons/icon.png"
 #adaptive_icon_foreground: "assets/icons/app_icon_foreground.png"
 
 #- android ：指定 Android 平台图标的名称，默认是 launcher_icon 。

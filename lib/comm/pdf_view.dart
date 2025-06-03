@@ -40,9 +40,14 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   }
 
   Future<void> _loadPdf() async {
-    final doc = await PdfDocument.openAsset(
-      'assets/pdfs/${widget.pdfFileName}',
-    );
+    final doc = await PdfDocument.openAsset('assets/pdfs/${widget.pdfFileName}')
+        .timeout(
+          const Duration(seconds: 10),
+          onTimeout: () {
+            throw Exception('PDF loading timed out');
+          },
+        );
+    if (!mounted) return;
     setState(() {
       _document = doc;
       _pdfController = PdfController(
@@ -424,7 +429,10 @@ class PdfPageView extends StatelessWidget {
             fit: BoxFit.contain, // Ensures the image is contained within bounds
           );
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error loading page $pageNumber'));
+          print('Error loading page $pageNumber: ${snapshot.error}');
+          return Center(
+            child: Text('Error loading page $pageNumber: ${snapshot.error}'),
+          );
         } else {
           return const Center(child: CircularProgressIndicator());
         }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:drift/drift.dart' hide Column;
-import 'package:gongke/database.dart';
+//import 'package:gongke/database.dart';
 //import '../../database.dart';
 import '../../main.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -79,6 +79,8 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
   // 添加 controller 作为类成员
   late TextEditingController nameController;
   late TextEditingController fodiziNameController;
+  // 添加初始化标记，避免重复初始化
+  bool _initialized = false; // 添加初始化标记
 
   @override
   void initState() {
@@ -92,18 +94,22 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
 
   @override
   void didChangeDependencies() {
-    super.didChangeDependencies();
-    final args = ModalRoute.of(context)?.settings.arguments;
-    if (args is Map<String, dynamic> &&
-        args['acttype'] != null &&
-        args['fayuanId'] != null) {
-      actType = args['acttype'];
-      fayuanId = args['fayuanId'];
-      _loadExistingData();
-    } else {
-      actType = 'A';
-      fayuanId = null;
-      _loadInitialValues();
+    if (!_initialized) {
+      // 只在首次初始化时执行
+      super.didChangeDependencies();
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is Map<String, dynamic> &&
+          args['acttype'] != null &&
+          args['fayuanId'] != null) {
+        actType = args['acttype'];
+        fayuanId = args['fayuanId'];
+        _loadExistingData();
+      } else {
+        actType = 'A';
+        fayuanId = null;
+        _loadInitialValues();
+      }
+      _initialized = true; // 标记已初始化
     }
   }
 
@@ -125,22 +131,21 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
         .filter((t) => t.id(fayuanId!))
         .getSingle();
 
-    setState(() {
-      _data.name = fayuan.name;
-      nameController.text = fayuan.name;
-      _data.fodiziName = fayuan.fodiziname;
-      fodiziNameController.text = fayuan.fodiziname;
-      _data.startDate = fayuan.startDate;
-      _data.endDate = fayuan.endDate;
-      _data.yuanwang = fayuan.yuanwang;
-      _updateDateControllers(); // 加载数据后更新控制器
-    });
+    // 移除这个 setState，使用单个 setState
+    _data.name = fayuan.name;
+    nameController.text = fayuan.name;
+    _data.fodiziName = fayuan.fodiziname;
+    fodiziNameController.text = fayuan.fodiziname;
+    _data.startDate = fayuan.startDate;
+    _data.endDate = fayuan.endDate;
+    _data.yuanwang = fayuan.yuanwang;
 
     final items = await globalDB.managers.gongKeItemsOneDay
         .filter((t) => t.fayuanId(fayuanId!))
         .get();
 
     setState(() {
+      // 在这里统一更新状态
       _data.gkiODList = items
           .map(
             (item) => VMGongKeItemOneDayData(
@@ -153,11 +158,9 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
             ),
           )
           .toList();
-      print(_data.name);
-      print(_data.fodiziName);
-      print(_data.startDate);
-      print(_data.endDate);
-      print(_data.yuanwang);
+
+      // 在最后调用一次 _updateDateControllers
+      _updateDateControllers();
     });
   }
 
@@ -234,7 +237,9 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
   // 修改 _updateDateControllers 方法
   void _updateDateControllers() {
     print('Updating date controllers...');
-
+    print('1 Start Date: ${_data.startDate}');
+    print('1 End Date: ${_data.endDate}');
+    print('1 Duration Days: $_durationDays');
     startDateController.text = _data.startDate != null
         ? DateTools.getDateStringByDate(_data.startDate!)
         : '';
@@ -242,9 +247,9 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
         ? DateTools.getDateStringByDate(_data.endDate!)
         : '';
     _durationDays = _data.getDurationDays(); // 更新时长
-    print(' Start Date: ${_data.startDate}');
-    print(' End Date: ${_data.endDate}');
-    print(' Duration Days: $_durationDays');
+    print('2 Start Date: ${_data.startDate}');
+    print('2 End Date: ${_data.endDate}');
+    print('2 Duration Days: $_durationDays');
   }
 
   Widget _buildStep2() {
@@ -287,15 +292,17 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
                 onChanged: (value) {
                   if (value != null && _data.startDate != null) {
                     setState(() {
-                      // 使用 DateTime 的加减法来计算结束日期
+                      // 直接更新 endDate，不调用 _updateDateControllers
                       final endDate = DateTime(
                         _data.startDate!.year,
                         _data.startDate!.month + value,
                         _data.startDate!.day,
                       );
-                      // 减去一天得到最后一天
                       _data.endDate = endDate.subtract(const Duration(days: 1));
-                      _updateDateControllers();
+                      endDateController.text = DateTools.getDateStringByDate(
+                        _data.endDate!,
+                      );
+                      _durationDays = _data.getDurationDays();
                     });
                   }
                 },
@@ -497,63 +504,187 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
     );
   }
 
+  // Future<void> _showAddGongKeDialog() async {
+  //   GongKeType? selectedType;
+  //   String? name;
+  //   int? count;
+
+  //   await showDialog(
+  //     context: context,
+  //     builder: (context) => AlertDialog(
+  //       title: const Text('新增功课'),
+  //       content: Column(
+  //         mainAxisSize: MainAxisSize.min,
+  //         children: [
+  //           DropdownButtonFormField<GongKeType>(
+  //             decoration: const InputDecoration(labelText: '功课类型'),
+  //             items: GongKeType.values.map((type) {
+  //               return DropdownMenuItem(value: type, child: Text(type.label));
+  //             }).toList(),
+  //             onChanged: (value) => selectedType = value,
+  //           ),
+  //           TextFormField(
+  //             decoration: const InputDecoration(labelText: '功课名称'),
+  //             onChanged: (value) => name = value,
+  //           ),
+  //           TextFormField(
+  //             decoration: const InputDecoration(labelText: '数量'),
+  //             keyboardType: TextInputType.number,
+  //             onChanged: (value) => count = int.tryParse(value) ?? 0,
+  //           ),
+  //         ],
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.pop(context),
+  //           child: const Text('取消'),
+  //         ),
+  //         TextButton(
+  //           onPressed: () {
+  //             if (selectedType != null &&
+  //                 name?.isNotEmpty == true &&
+  //                 count != null &&
+  //                 count! > 0) {
+  //               setState(() {
+  //                 _data.gkiODList.add(
+  //                   VMGongKeItemOneDayData(
+  //                     gongketype: selectedType!,
+  //                     name: name!,
+  //                     cnt: count!,
+  //                     idx: _data.gkiODList.length + 1, // 序号从1开始
+  //                   ),
+  //                 );
+  //               });
+  //               Navigator.pop(context);
+  //             }
+  //           },
+  //           child: const Text('确定'),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
   Future<void> _showAddGongKeDialog() async {
     GongKeType? selectedType;
-    String? name;
-    int? count;
+    String? selectedJingShu;
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController cntController = TextEditingController();
 
     await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('新增功课'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            DropdownButtonFormField<GongKeType>(
-              decoration: const InputDecoration(labelText: '功课类型'),
-              items: GongKeType.values.map((type) {
-                return DropdownMenuItem(value: type, child: Text(type.label));
-              }).toList(),
-              onChanged: (value) => selectedType = value,
-            ),
-            TextFormField(
-              decoration: const InputDecoration(labelText: '功课名称'),
-              onChanged: (value) => name = value,
-            ),
-            TextFormField(
-              decoration: const InputDecoration(labelText: '数量'),
-              keyboardType: TextInputType.number,
-              onChanged: (value) => count = int.tryParse(value) ?? 0,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('添加功课'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 功课类型下拉框
+              DropdownButtonFormField<GongKeType>(
+                decoration: const InputDecoration(labelText: '功课类型'),
+                value: selectedType,
+                items: GongKeType.values.map((type) {
+                  return DropdownMenuItem(value: type, child: Text(type.label));
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedType = value;
+                    // 清除之前的选择或输入
+                    selectedJingShu = null;
+                    nameController.clear();
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // 根据选择的类型显示不同的输入方式
+              if (selectedType == GongKeType.songjing)
+                // 经书下拉列表
+                DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(labelText: '选择经书'),
+                  value: selectedJingShu,
+                  items: jingShuFiles.keys.map((name) {
+                    return DropdownMenuItem(value: name, child: Text(name));
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedJingShu = value;
+                    });
+                  },
+                )
+              else if (selectedType != null)
+                // 其他类型显示输入框
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: '功课名称'),
+                ),
+
+              const SizedBox(height: 16),
+              // 数量输入框
+              TextField(
+                controller: cntController,
+                decoration: const InputDecoration(labelText: '数量'),
+                keyboardType: TextInputType.number,
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              if (selectedType != null &&
-                  name?.isNotEmpty == true &&
-                  count != null &&
-                  count! > 0) {
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (selectedType == null) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('请选择功课类型')));
+                  return;
+                }
+
+                final String name;
+                if (selectedType == GongKeType.songjing) {
+                  if (selectedJingShu == null) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text('请选择经书')));
+                    return;
+                  }
+                  name = selectedJingShu!;
+                } else {
+                  if (nameController.text.isEmpty) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text('请输入功课名称')));
+                    return;
+                  }
+                  name = nameController.text;
+                }
+
+                if (cntController.text.isEmpty) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('请输入数量')));
+                  return;
+                }
+
+                // 添加功课
                 setState(() {
                   _data.gkiODList.add(
                     VMGongKeItemOneDayData(
                       gongketype: selectedType!,
-                      name: name!,
-                      cnt: count!,
-                      idx: _data.gkiODList.length + 1, // 序号从1开始
+                      name: name,
+                      cnt: int.parse(cntController.text),
+                      idx: _data.gkiODList.length + 1,
                     ),
                   );
                 });
+
                 Navigator.pop(context);
-              }
-            },
-            child: const Text('确定'),
-          ),
-        ],
+              },
+              child: const Text('确定'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -596,25 +727,24 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
   }
 
   Future<void> _handleSave() async {
-    late int newFaYuanId;
-    // 开启事务
+    // 将 newFaYuanId 移到事务内部声明
     await globalDB.transaction(() async {
+      int currentFaYuanId;
+
       if (actType == 'M' && fayuanId != null) {
+        // 修改模式
+        currentFaYuanId = fayuanId!;
         // 删除原有记录
         await globalDB.managers.gongKeItem
-            .filter((t) => t.fayuanId(fayuanId!))
+            .filter((t) => t.fayuanId(currentFaYuanId))
             .delete();
         await globalDB.managers.gongKeItemsOneDay
-            .filter((t) => t.fayuanId(fayuanId!))
+            .filter((t) => t.fayuanId(currentFaYuanId))
             .delete();
-      }
-      // 保存发愿文
-      _data.fayuanwen = getFaYuanWen();
-      // 插入或更新发愿记录
-      if (actType == 'M' && fayuanId != null) {
+
         // 更新现有发愿记录
         await globalDB.managers.faYuan
-            .filter((f) => f.id.equals(fayuanId))
+            .filter((f) => f.id.equals(currentFaYuanId))
             .update(
               (o) => o(
                 name: Value(_data.name!),
@@ -626,7 +756,8 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
               ),
             );
       } else {
-        newFaYuanId = await globalDB.managers.faYuan.create(
+        // 新增模式
+        currentFaYuanId = await globalDB.managers.faYuan.create(
           (o) => o(
             name: _data.name!,
             fodiziname: _data.fodiziName!,
@@ -643,20 +774,21 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
       for (var item in _data.gkiODList) {
         await globalDB.managers.gongKeItemsOneDay.create(
           (o) => o(
-            fayuanId: newFaYuanId,
+            fayuanId: currentFaYuanId, // 使用 currentFaYuanId
             gongketype: Value(item.gongketype.name),
             name: item.name,
             cnt: Value(item.cnt),
-            idx: Value(_data.gkiODList.indexOf(item) + 1), // 序号从1开始
+            idx: Value(_data.gkiODList.indexOf(item) + 1),
           ),
         );
       }
+
       // 插入具体功课记录
       for (var day = 0; day < _data.getDurationDays(); day++) {
         for (var item in _data.gkiODList) {
           await globalDB.managers.gongKeItem.create(
             (o) => o(
-              fayuanId: newFaYuanId,
+              fayuanId: currentFaYuanId, // 使用 currentFaYuanId
               gongKeDay: DateTools.getDateStringByDate(
                 DateTools.getDateAfterDays(
                   _data.startDate ?? DateTime.now(),
@@ -667,7 +799,7 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
               name: item.name,
               cnt: Value(item.cnt),
               isComplete: Value(false),
-              idx: Value(item.idx), // 每天的功课项序号
+              idx: Value(item.idx),
             ),
           );
         }

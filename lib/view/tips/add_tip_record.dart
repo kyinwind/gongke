@@ -48,6 +48,7 @@ class _AddTipRecordPageState extends State<AddTipRecordPage> {
           mode: InsertMode.replace,
         );
       }
+      if (!mounted) return; // 添加这行检查
       // 返回上一级路由
       Navigator.of(context).pop();
     }

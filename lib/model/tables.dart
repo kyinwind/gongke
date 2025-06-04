@@ -80,6 +80,7 @@ class GongKeItem extends Table
   TextColumn get gongKeDay => text()(); // 是哪一天的功课
   BoolColumn get isComplete => boolean().withDefault(const Constant(false))();
   IntColumn get idx => integer().withDefault(const Constant(0))(); // 功课项的排序
+  IntColumn get curCnt => integer().withDefault(const Constant(0))(); // 当前完成的遍数
 }
 
 class JingShu extends Table

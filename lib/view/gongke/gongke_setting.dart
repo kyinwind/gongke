@@ -202,18 +202,20 @@ class _GongKeSettingPageState extends State<GongKeSettingPage> {
                                   context,
                                   '/GongKe/GongKeSetting/nianzhou',
                                   arguments: {
-                                    'name': item.name,
-                                    'cnt': item.cnt,
+                                    'gongkeitem': item,
+                                    'onUpdated': () {
+                                      // 这里是你希望子页面执行完后调用的刷新函数
+                                      setState(() {
+                                        updateCallback();
+                                      });
+                                    },
                                   },
                                 );
                               case 'nianshenghao':
                                 Navigator.pushNamed(
                                   context,
                                   '/GongKe/GongKeSetting/nianshenghao',
-                                  arguments: {
-                                    'name': item.name,
-                                    'cnt': item.cnt,
-                                  },
+                                  arguments: {'gongkeitem': item},
                                 );
                               case 'ketou':
                               case 'baichan':
@@ -221,10 +223,7 @@ class _GongKeSettingPageState extends State<GongKeSettingPage> {
                                 Navigator.pushNamed(
                                   context,
                                   '/GongKe/GongKeSetting/dazuo',
-                                  arguments: {
-                                    'name': item.name,
-                                    'cnt': item.cnt,
-                                  },
+                                  arguments: {'gongkeitem': item},
                                 );
                                 break;
                               default:

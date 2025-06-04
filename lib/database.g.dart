@@ -1374,6 +1374,16 @@ class $GongKeItemTable extends GongKeItem
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _curCntMeta = const VerificationMeta('curCnt');
+  @override
+  late final GeneratedColumn<int> curCnt = GeneratedColumn<int>(
+    'cur_cnt',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1388,6 +1398,7 @@ class $GongKeItemTable extends GongKeItem
     gongKeDay,
     isComplete,
     idx,
+    curCnt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1481,6 +1492,12 @@ class $GongKeItemTable extends GongKeItem
         idx.isAcceptableOrUnknown(data['idx']!, _idxMeta),
       );
     }
+    if (data.containsKey('cur_cnt')) {
+      context.handle(
+        _curCntMeta,
+        curCnt.isAcceptableOrUnknown(data['cur_cnt']!, _curCntMeta),
+      );
+    }
     return context;
   }
 
@@ -1538,6 +1555,10 @@ class $GongKeItemTable extends GongKeItem
         DriftSqlType.int,
         data['${effectivePrefix}idx'],
       )!,
+      curCnt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}cur_cnt'],
+      )!,
     );
   }
 
@@ -1560,6 +1581,7 @@ class GongKeItemData extends DataClass implements Insertable<GongKeItemData> {
   final String gongKeDay;
   final bool isComplete;
   final int idx;
+  final int curCnt;
   const GongKeItemData({
     required this.id,
     required this.createDateTime,
@@ -1573,6 +1595,7 @@ class GongKeItemData extends DataClass implements Insertable<GongKeItemData> {
     required this.gongKeDay,
     required this.isComplete,
     required this.idx,
+    required this.curCnt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1595,6 +1618,7 @@ class GongKeItemData extends DataClass implements Insertable<GongKeItemData> {
     map['gong_ke_day'] = Variable<String>(gongKeDay);
     map['is_complete'] = Variable<bool>(isComplete);
     map['idx'] = Variable<int>(idx);
+    map['cur_cnt'] = Variable<int>(curCnt);
     return map;
   }
 
@@ -1614,6 +1638,7 @@ class GongKeItemData extends DataClass implements Insertable<GongKeItemData> {
       gongKeDay: Value(gongKeDay),
       isComplete: Value(isComplete),
       idx: Value(idx),
+      curCnt: Value(curCnt),
     );
   }
 
@@ -1635,6 +1660,7 @@ class GongKeItemData extends DataClass implements Insertable<GongKeItemData> {
       gongKeDay: serializer.fromJson<String>(json['gongKeDay']),
       isComplete: serializer.fromJson<bool>(json['isComplete']),
       idx: serializer.fromJson<int>(json['idx']),
+      curCnt: serializer.fromJson<int>(json['curCnt']),
     );
   }
   @override
@@ -1653,6 +1679,7 @@ class GongKeItemData extends DataClass implements Insertable<GongKeItemData> {
       'gongKeDay': serializer.toJson<String>(gongKeDay),
       'isComplete': serializer.toJson<bool>(isComplete),
       'idx': serializer.toJson<int>(idx),
+      'curCnt': serializer.toJson<int>(curCnt),
     };
   }
 
@@ -1669,6 +1696,7 @@ class GongKeItemData extends DataClass implements Insertable<GongKeItemData> {
     String? gongKeDay,
     bool? isComplete,
     int? idx,
+    int? curCnt,
   }) => GongKeItemData(
     id: id ?? this.id,
     createDateTime: createDateTime ?? this.createDateTime,
@@ -1682,6 +1710,7 @@ class GongKeItemData extends DataClass implements Insertable<GongKeItemData> {
     gongKeDay: gongKeDay ?? this.gongKeDay,
     isComplete: isComplete ?? this.isComplete,
     idx: idx ?? this.idx,
+    curCnt: curCnt ?? this.curCnt,
   );
   GongKeItemData copyWithCompanion(GongKeItemCompanion data) {
     return GongKeItemData(
@@ -1703,6 +1732,7 @@ class GongKeItemData extends DataClass implements Insertable<GongKeItemData> {
           ? data.isComplete.value
           : this.isComplete,
       idx: data.idx.present ? data.idx.value : this.idx,
+      curCnt: data.curCnt.present ? data.curCnt.value : this.curCnt,
     );
   }
 
@@ -1720,7 +1750,8 @@ class GongKeItemData extends DataClass implements Insertable<GongKeItemData> {
           ..write('cnt: $cnt, ')
           ..write('gongKeDay: $gongKeDay, ')
           ..write('isComplete: $isComplete, ')
-          ..write('idx: $idx')
+          ..write('idx: $idx, ')
+          ..write('curCnt: $curCnt')
           ..write(')'))
         .toString();
   }
@@ -1739,6 +1770,7 @@ class GongKeItemData extends DataClass implements Insertable<GongKeItemData> {
     gongKeDay,
     isComplete,
     idx,
+    curCnt,
   );
   @override
   bool operator ==(Object other) =>
@@ -1755,7 +1787,8 @@ class GongKeItemData extends DataClass implements Insertable<GongKeItemData> {
           other.cnt == this.cnt &&
           other.gongKeDay == this.gongKeDay &&
           other.isComplete == this.isComplete &&
-          other.idx == this.idx);
+          other.idx == this.idx &&
+          other.curCnt == this.curCnt);
 }
 
 class GongKeItemCompanion extends UpdateCompanion<GongKeItemData> {
@@ -1771,6 +1804,7 @@ class GongKeItemCompanion extends UpdateCompanion<GongKeItemData> {
   final Value<String> gongKeDay;
   final Value<bool> isComplete;
   final Value<int> idx;
+  final Value<int> curCnt;
   const GongKeItemCompanion({
     this.id = const Value.absent(),
     this.createDateTime = const Value.absent(),
@@ -1784,6 +1818,7 @@ class GongKeItemCompanion extends UpdateCompanion<GongKeItemData> {
     this.gongKeDay = const Value.absent(),
     this.isComplete = const Value.absent(),
     this.idx = const Value.absent(),
+    this.curCnt = const Value.absent(),
   });
   GongKeItemCompanion.insert({
     this.id = const Value.absent(),
@@ -1798,6 +1833,7 @@ class GongKeItemCompanion extends UpdateCompanion<GongKeItemData> {
     required String gongKeDay,
     this.isComplete = const Value.absent(),
     this.idx = const Value.absent(),
+    this.curCnt = const Value.absent(),
   }) : name = Value(name),
        fayuanId = Value(fayuanId),
        gongketype = Value(gongketype),
@@ -1815,6 +1851,7 @@ class GongKeItemCompanion extends UpdateCompanion<GongKeItemData> {
     Expression<String>? gongKeDay,
     Expression<bool>? isComplete,
     Expression<int>? idx,
+    Expression<int>? curCnt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1829,6 +1866,7 @@ class GongKeItemCompanion extends UpdateCompanion<GongKeItemData> {
       if (gongKeDay != null) 'gong_ke_day': gongKeDay,
       if (isComplete != null) 'is_complete': isComplete,
       if (idx != null) 'idx': idx,
+      if (curCnt != null) 'cur_cnt': curCnt,
     });
   }
 
@@ -1845,6 +1883,7 @@ class GongKeItemCompanion extends UpdateCompanion<GongKeItemData> {
     Value<String>? gongKeDay,
     Value<bool>? isComplete,
     Value<int>? idx,
+    Value<int>? curCnt,
   }) {
     return GongKeItemCompanion(
       id: id ?? this.id,
@@ -1859,6 +1898,7 @@ class GongKeItemCompanion extends UpdateCompanion<GongKeItemData> {
       gongKeDay: gongKeDay ?? this.gongKeDay,
       isComplete: isComplete ?? this.isComplete,
       idx: idx ?? this.idx,
+      curCnt: curCnt ?? this.curCnt,
     );
   }
 
@@ -1901,6 +1941,9 @@ class GongKeItemCompanion extends UpdateCompanion<GongKeItemData> {
     if (idx.present) {
       map['idx'] = Variable<int>(idx.value);
     }
+    if (curCnt.present) {
+      map['cur_cnt'] = Variable<int>(curCnt.value);
+    }
     return map;
   }
 
@@ -1918,7 +1961,8 @@ class GongKeItemCompanion extends UpdateCompanion<GongKeItemData> {
           ..write('cnt: $cnt, ')
           ..write('gongKeDay: $gongKeDay, ')
           ..write('isComplete: $isComplete, ')
-          ..write('idx: $idx')
+          ..write('idx: $idx, ')
+          ..write('curCnt: $curCnt')
           ..write(')'))
         .toString();
   }
@@ -4632,6 +4676,7 @@ typedef $$GongKeItemTableCreateCompanionBuilder =
       required String gongKeDay,
       Value<bool> isComplete,
       Value<int> idx,
+      Value<int> curCnt,
     });
 typedef $$GongKeItemTableUpdateCompanionBuilder =
     GongKeItemCompanion Function({
@@ -4647,6 +4692,7 @@ typedef $$GongKeItemTableUpdateCompanionBuilder =
       Value<String> gongKeDay,
       Value<bool> isComplete,
       Value<int> idx,
+      Value<int> curCnt,
     });
 
 class $$GongKeItemTableFilterComposer
@@ -4715,6 +4761,11 @@ class $$GongKeItemTableFilterComposer
 
   ColumnFilters<int> get idx => $composableBuilder(
     column: $table.idx,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get curCnt => $composableBuilder(
+    column: $table.curCnt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -4787,6 +4838,11 @@ class $$GongKeItemTableOrderingComposer
     column: $table.idx,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get curCnt => $composableBuilder(
+    column: $table.curCnt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$GongKeItemTableAnnotationComposer
@@ -4839,6 +4895,9 @@ class $$GongKeItemTableAnnotationComposer
 
   GeneratedColumn<int> get idx =>
       $composableBuilder(column: $table.idx, builder: (column) => column);
+
+  GeneratedColumn<int> get curCnt =>
+      $composableBuilder(column: $table.curCnt, builder: (column) => column);
 }
 
 class $$GongKeItemTableTableManager
@@ -4884,6 +4943,7 @@ class $$GongKeItemTableTableManager
                 Value<String> gongKeDay = const Value.absent(),
                 Value<bool> isComplete = const Value.absent(),
                 Value<int> idx = const Value.absent(),
+                Value<int> curCnt = const Value.absent(),
               }) => GongKeItemCompanion(
                 id: id,
                 createDateTime: createDateTime,
@@ -4897,6 +4957,7 @@ class $$GongKeItemTableTableManager
                 gongKeDay: gongKeDay,
                 isComplete: isComplete,
                 idx: idx,
+                curCnt: curCnt,
               ),
           createCompanionCallback:
               ({
@@ -4912,6 +4973,7 @@ class $$GongKeItemTableTableManager
                 required String gongKeDay,
                 Value<bool> isComplete = const Value.absent(),
                 Value<int> idx = const Value.absent(),
+                Value<int> curCnt = const Value.absent(),
               }) => GongKeItemCompanion.insert(
                 id: id,
                 createDateTime: createDateTime,
@@ -4925,6 +4987,7 @@ class $$GongKeItemTableTableManager
                 gongKeDay: gongKeDay,
                 isComplete: isComplete,
                 idx: idx,
+                curCnt: curCnt,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

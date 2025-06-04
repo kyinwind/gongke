@@ -64,7 +64,7 @@ dependencies:
   flutter_image_compress: ^2.1.0
   table_calendar: ^3.2.0  # 用于日历显示
   lunar: ^1.7.5  # 用于农历转换
-
+  sensors_plus: ^6.1.1  # 用于传感器数据获取
 dev_dependencies:
   flutter_test:
     sdk: flutter

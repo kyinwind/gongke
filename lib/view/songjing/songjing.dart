@@ -570,12 +570,12 @@ class _SongJingPageState extends State<SongJingPage> {
                             ),
                           );
                         },
-                        backgroundColor: Colors.yellow,
-                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.white,
+                        foregroundColor: Color.fromARGB(255, 226, 203, 50),
                         icon: Icons.favorite,
                         label: list[index].favoriteDateTime != null
                             ? '取消'
-                            : '设为最爱',
+                            : '最爱',
                       ),
                     ],
                   ),

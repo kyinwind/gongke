@@ -730,7 +730,7 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
     // 将 newFaYuanId 移到事务内部声明
     await globalDB.transaction(() async {
       int currentFaYuanId;
-
+      _data.fayuanwen = getFaYuanWen();
       if (actType == 'M' && fayuanId != null) {
         // 修改模式
         currentFaYuanId = fayuanId!;
@@ -782,23 +782,31 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
           ),
         );
       }
-
+      String gongkedaystr = '';
+      bool iscomplete = false;
       // 插入具体功课记录
       for (var day = 0; day < _data.getDurationDays(); day++) {
         for (var item in _data.gkiODList) {
+          gongkedaystr = DateTools.getDateStringByDate(
+            DateTools.getDateAfterDays(_data.startDate ?? DateTime.now(), day),
+          );
+          if (DateTools.getDateByString(
+            gongkedaystr,
+            'yyyy-MM-dd',
+          ).isBefore(DateTime.now())) {
+            // 如果日期早于今天，则设置为已完成
+            iscomplete = true;
+          } else {
+            iscomplete = false;
+          }
           await globalDB.managers.gongKeItem.create(
             (o) => o(
               fayuanId: currentFaYuanId, // 使用 currentFaYuanId
-              gongKeDay: DateTools.getDateStringByDate(
-                DateTools.getDateAfterDays(
-                  _data.startDate ?? DateTime.now(),
-                  day,
-                ),
-              ),
+              gongKeDay: gongkedaystr,
               gongketype: item.gongketype.name,
               name: item.name,
               cnt: Value(item.cnt),
-              isComplete: Value(false),
+              isComplete: Value(iscomplete),
               idx: Value(item.idx),
             ),
           );

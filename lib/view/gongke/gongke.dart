@@ -13,6 +13,13 @@ import '../../main.dart';
 import '../../comm/date_tools.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
+// 添加数据模型类
+class _ChartData {
+  _ChartData(this.x, this.y);
+  final String x;
+  final double y;
+}
+
 class GongKePage extends StatefulWidget {
   const GongKePage({super.key});
 
@@ -21,6 +28,8 @@ class GongKePage extends StatefulWidget {
 }
 
 class _GongKePageState extends State<GongKePage> {
+  //默认显示当前还有效的发愿，用户可以自己设定过滤条件
+  int flagFaYuanFilter = 0; //默认0，只显示有效的发愿 1：显示所有发愿（包括已过期的）
   // 添加发愿列表的Stream
   Stream<List<FaYuanData>> fayuandatalist = Stream.value([]);
 
@@ -53,13 +62,22 @@ class _GongKePageState extends State<GongKePage> {
   // 查询所有记录,以及计算功课完成率
   Future<void> fetchAllFaYuan() async {
     try {
-      final query = globalDB.managers.faYuan
-          .filter(
-            (f) =>
-                f.startDate.isBeforeOrOn(DateTime.now()) &
-                f.endDate.isAfterOrOn(DateTime.now()),
-          )
-          .orderBy((o) => o.createDateTime.desc());
+      final query;
+      if (flagFaYuanFilter == 0) {
+        // 只显示有效的发愿
+        query = globalDB.managers.faYuan
+            .filter(
+              (f) =>
+                  f.startDate.isBeforeOrOn(DateTime.now()) &
+                  f.endDate.isAfterOrOn(DateTime.now()),
+            )
+            .orderBy((o) => o.createDateTime.desc());
+      } else {
+        query = globalDB.managers.faYuan.orderBy(
+          (o) => o.createDateTime.desc(),
+        );
+      }
+
       final result = await query.watch();
       final tempfayuanlist = await query.get();
       //print(tempfayuanlist.toString());
@@ -265,13 +283,17 @@ class _GongKePageState extends State<GongKePage> {
             // 阳历日期
             Text('${day.day}', style: const TextStyle(fontSize: 14)),
             // 完成度进度条
-            if (completion >= 0)
+            if (groupedRecords[dateString] != null && completion >= 0)
               Text(
                 '${(completion * 100).toInt()}%',
                 style: TextStyle(
                   fontSize: 10,
                   color: completion > 0 ? Colors.white : Colors.blue,
                 ),
+              )
+            else
+              SizedBox(
+                height: 15, // 没有记录时占位
               ),
             // 农历日期
             Text(
@@ -306,24 +328,28 @@ class _GongKePageState extends State<GongKePage> {
         ],
         series: <CircularSeries>[
           // 背景环
-          DoughnutSeries<dynamic, dynamic>(
-            dataSource: [1],
-            pointColorMapper: (_, __) => Colors.grey.shade300,
-            xValueMapper: (_, __) => '',
-            yValueMapper: (_, __) => 100,
+          DoughnutSeries<_ChartData, String>(
+            dataSource: [_ChartData('background', 100)],
+            xValueMapper: (_ChartData data, _) => data.x,
+            yValueMapper: (_ChartData data, _) => data.y,
+            pointColorMapper: (_, __) => Colors.yellow,
             radius: '100%',
-            innerRadius: '80%', // 添加内半径
+            innerRadius: '0%',
+            animationDuration: 0, // 背景环不需要动画
           ),
           // 进度环
-          DoughnutSeries<dynamic, dynamic>(
-            dataSource: [1],
-            pointColorMapper: (_, __) => Theme.of(context).primaryColor,
-            xValueMapper: (_, __) => '',
-            yValueMapper: (_, __) => percent * 100,
+          DoughnutSeries<_ChartData, String>(
+            dataSource: [_ChartData('progress', percent * 100)],
+            xValueMapper: (_ChartData data, _) => data.x,
+            yValueMapper: (_ChartData data, _) => data.y,
+            pointColorMapper: (_, __) => Colors.green,
             radius: '100%',
-            innerRadius: '80%', // 添加内半径
-            startAngle: 270, // 设置起始角度
-            endAngle: 270, // 设置结束角度
+            innerRadius: '60%',
+            startAngle: 270,
+            endAngle: 270 + (percent * 360).toInt(),
+            animationDuration: 800, // 动画持续时间（毫秒）
+            animationDelay: 0, // 动画延迟时间
+            enableTooltip: false, // 禁用工具提示
           ),
         ],
       ),
@@ -343,15 +369,60 @@ class _GongKePageState extends State<GongKePage> {
                 '发愿一览',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              trailing: IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: () {
-                  Navigator.pushNamed(
-                    context,
-                    '/GongKe/FaYuanWizard',
-                    arguments: {'acttype': 'A'},
-                  ).then((_) => _refreshAllData());
-                },
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min, // 让 Row 宽度适应内容
+                children: [
+                  // 添加文字和开关的组合
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Tooltip(
+                        message: '切换显示全部发愿记录或仅显示有效发愿', // 提示文字
+                        waitDuration: const Duration(
+                          milliseconds: 500,
+                        ), // 悬停多久后显示提示
+                        showDuration: const Duration(seconds: 2), // 提示显示多久
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              '显示全部发愿',
+                              style: TextStyle(fontSize: 14),
+                            ),
+                            Transform.scale(
+                              scale: 0.5,
+                              child: Switch(
+                                value: flagFaYuanFilter == 1,
+                                onChanged: (value) {
+                                  setState(() {
+                                    flagFaYuanFilter = value ? 1 : 0;
+                                    _refreshAllData();
+                                  });
+                                },
+                                activeColor: Theme.of(context).primaryColor,
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Tooltip(
+                        message: '添加新的发愿', // 为添加按钮也添加提示
+                        child: IconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/GongKe/FaYuanWizard',
+                              arguments: {'acttype': 'A'},
+                            ).then((_) => _refreshAllData());
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
 
@@ -398,7 +469,7 @@ class _GongKePageState extends State<GongKePage> {
                             backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
                             icon: Icons.check_circle,
-                            label: '修改发愿文',
+                            label: '发愿文',
                             onPressed: (context) {
                               Navigator.pushNamed(
                                 context,
@@ -518,11 +589,18 @@ class _GongKePageState extends State<GongKePage> {
                   '功课一览',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/GongKeStat', arguments: {});
-                  },
+                trailing: Tooltip(
+                  message: '功课统计',
+                  child: IconButton(
+                    icon: const Icon(Icons.bar_chart),
+                    onPressed: () {
+                      Navigator.pushNamed(
+                        context,
+                        '/GongKeStat',
+                        arguments: {},
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
@@ -535,7 +613,7 @@ class _GongKePageState extends State<GongKePage> {
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
+                    color: Colors.grey.withAlpha(26), // 0.1 * 255 ≈ 26
                     spreadRadius: 1,
                     blurRadius: 1,
                   ),

@@ -27,13 +27,17 @@ class _TipPageState extends State<TipPage> {
   void initState() {
     super.initState();
     fetchTip();
-    records.first.then((value) {
-      if (value.isEmpty) {
-        importTip();
-        fetchTip();
-      }
-    });
-    _loadCurrentRecord();
+    _checkRecords();
+  }
+
+  Future<void> _checkRecords() async {
+    // 监听 Stream 的第一个值
+    final firstValue = await records.first;
+    if (firstValue.isEmpty) {
+      await importTip();
+      fetchTip();
+    }
+    await _loadCurrentRecord();
   }
 
   // 新增方法处理异步加载
@@ -269,8 +273,8 @@ class _TipPageState extends State<TipPage> {
                               ),
                               icon: Icons.favorite,
                               label: record.favoriteDateTime == null
-                                  ? '设为最爱'
-                                  : '取消最爱',
+                                  ? '最爱'
+                                  : '取消',
                             ),
                           ],
                         ),
@@ -285,6 +289,7 @@ class _TipPageState extends State<TipPage> {
                                     .delete();
                                 // 重新获取数据
                                 await fetchTip();
+                                _checkRecords();
                               },
                               backgroundColor: Color(0xFFFE4A49),
                               foregroundColor: Colors.white,
@@ -342,12 +347,26 @@ class _TipPageState extends State<TipPage> {
                     mainAxisAlignment: MainAxisAlignment.center, // 添加水平居中
                     crossAxisAlignment: CrossAxisAlignment.center, //
                     children: [
-                      Image.asset(
-                        'assets/images/jingshu.png',
-                        height: 100,
-                        fit: BoxFit.fitHeight, // 确保图片按高度适配
-                      ).padding(all: 10),
-                      const SizedBox(width: 10),
+                      (curRec.bookImage != '')
+                          ? ClipOval(
+                              // 改用 ClipOval
+                              child: Image.memory(
+                                const Base64Codec().decode(curRec.bookImage),
+                                height: 100,
+                                width: 100, // 添加宽度确保是圆形
+                                fit: BoxFit.cover, // 确保图片填充整个圆形
+                              ),
+                            )
+                          : ClipOval(
+                              // 默认图片也使用圆形
+                              child: Image.asset(
+                                'assets/images/jingshu.png',
+                                height: 100,
+                                width: 100,
+                                fit: BoxFit.cover,
+                              ),
+                            ).padding(all: 10),
+                      const SizedBox(width: 30),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -376,7 +395,7 @@ class _TipPageState extends State<TipPage> {
                             style: const TextStyle(fontSize: 12),
                           ),
                         ],
-                      ),
+                      ).padding(all: 10),
                     ],
                   ),
                   Column(

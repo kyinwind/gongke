@@ -2,7 +2,6 @@ import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:gongke/database.dart';
 import '../../main.dart';
-import 'fayuan_wizard.dart';
 import '../../comm/pdf_view.dart';
 import '../../comm/pub_tools.dart';
 import 'package:flutter/services.dart';
@@ -16,7 +15,7 @@ class GongKeSettingPage extends StatefulWidget {
 
 class _GongKeSettingPageState extends State<GongKeSettingPage> {
   late String date;
-  late Map<String, List<GongKeItemData>> groupedRecords;
+  late Map<String, List<GongKeItemData>> groupedCurrentMonthRecords;
   late Function() updateCallback;
   late List<GongKeItemData> dayRecords;
   // 按发愿ID分组
@@ -52,20 +51,14 @@ class _GongKeSettingPageState extends State<GongKeSettingPage> {
     });
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final args =
-        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
-    date = args['date'] as String;
-    groupedRecords =
-        args['groupedRecords'] as Map<String, List<GongKeItemData>>;
-    updateCallback = args['updateCallback'] as Function();
-
+  Future<void> _refreshAllData() async {
+    //print(
+    //  '--------------------------------GongKeSettingPage _refreshAllData开始--------------------------------',
+    //);
     // 初始化编辑状态
     _updateEditState(date);
 
-    dayRecords = groupedRecords[date] ?? [];
+    dayRecords = groupedCurrentMonthRecords[date] ?? [];
     // 按发愿ID分组
     dayRecordsGroupedByFaYuan.clear();
     for (var record in dayRecords) {
@@ -74,11 +67,26 @@ class _GongKeSettingPageState extends State<GongKeSettingPage> {
       }
       dayRecordsGroupedByFaYuan[record.fayuanId]!.add(record);
     }
-
+    //print('${dayRecordsGroupedByFaYuan.toString()}');
     // 初始化开关状态
     for (var record in dayRecords) {
       _switchStates[record.id] = record.isComplete;
     }
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+    date = args['date'] as String;
+    groupedCurrentMonthRecords =
+        args['groupedRecords'] as Map<String, List<GongKeItemData>>;
+    updateCallback = args['updateCallback'] as Function();
+    _refreshAllData();
   }
 
   @override
@@ -176,8 +184,7 @@ class _GongKeSettingPageState extends State<GongKeSettingPage> {
                 ...fayuanItems.map(
                   (item) => SwitchListTile(
                     value: _switchStates[item.id] ?? false,
-                    onChanged:
-                        _canEdit // 根据_canEdit控制是否可点击
+                    onChanged: _canEdit
                         ? (value) async {
                             setState(() {
                               _switchStates[item.id] = value;
@@ -187,63 +194,70 @@ class _GongKeSettingPageState extends State<GongKeSettingPage> {
                                 .update((o) => o(isComplete: Value(value)));
                             updateCallback();
                           }
-                        : null, // 不可编辑时设为null
-                    title: Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            if (!_canEdit) return;
-                            switch (item.gongketype) {
-                              case 'songjing':
-                                _navigateToPdfView(getPdfFileByName(item.name));
-                                break;
-                              case 'nianzhou':
-                                Navigator.pushNamed(
-                                  context,
-                                  '/GongKe/GongKeSetting/nianzhou',
-                                  arguments: {
-                                    'gongkeitem': item,
-                                    'onUpdated': () {
-                                      // 这里是你希望子页面执行完后调用的刷新函数
-                                      setState(() {
-                                        updateCallback();
-                                      });
+                        : null,
+                    title: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return Container(
+                          width: constraints.maxWidth,
+                          child: GestureDetector(
+                            onTap: () {
+                              if (!_canEdit) return;
+                              switch (item.gongketype) {
+                                case 'songjing':
+                                  _navigateToPdfView(
+                                    getPdfFileByName(item.name),
+                                  );
+                                  break;
+                                case 'nianzhou':
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/GongKe/GongKeSetting/nianzhou',
+                                    arguments: {
+                                      'gongkeitem': item,
+                                      'onUpdated': () async {
+                                        // 这里是你希望子页面执行完后调用的刷新函数
+                                        await updateCallback(); //先让gongke页面刷新数据，更新groupedCurrentMonthRecords
+                                        await _refreshAllData(); // 再刷新当前页面数据
+                                        setState(() {});
+                                      },
                                     },
-                                  },
-                                );
-                              case 'nianshenghao':
-                                Navigator.pushNamed(
-                                  context,
-                                  '/GongKe/GongKeSetting/nianshenghao',
-                                  arguments: {'gongkeitem': item},
-                                );
-                              case 'ketou':
-                              case 'baichan':
-                              case 'dazuo':
-                                Navigator.pushNamed(
-                                  context,
-                                  '/GongKe/GongKeSetting/dazuo',
-                                  arguments: {'gongkeitem': item},
-                                );
-                                break;
-                              default:
-                                // 其他类型不做处理
-                                break;
-                            }
-                          }, // 不可编辑时禁用点击
-                          child: Text(
-                            getGongkeItemLabel(item),
-                            style: TextStyle(
-                              //fontSize: 16,
-                              color:
-                                  item.gongketype == 'songjing' ||
-                                      item.gongketype == 'nianzhou'
-                                  ? Colors.blue
-                                  : Colors.black,
+                                  );
+                                case 'nianshenghao':
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/GongKe/GongKeSetting/nianshenghao',
+                                    arguments: {'gongkeitem': item},
+                                  );
+                                case 'ketou':
+                                case 'baichan':
+                                case 'dazuo':
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/GongKe/GongKeSetting/dazuo',
+                                    arguments: {'gongkeitem': item},
+                                  );
+                                  break;
+                                default:
+                                  // 其他类型不做处理
+                                  break;
+                              }
+                            },
+                            child: Text(
+                              getGongkeItemLabel(item),
+                              style: TextStyle(
+                                color:
+                                    item.gongketype == 'songjing' ||
+                                        item.gongketype == 'nianzhou'
+                                    ? Colors.blue
+                                    : Colors.black,
+                              ),
+                              softWrap: true,
+                              maxLines: 2, // 允许最多2行
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
                     subtitle: Text(
                       _switchStates[item.id] == true ? '已完成' : '未完成',
@@ -284,7 +298,7 @@ class _GongKeSettingPageState extends State<GongKeSettingPage> {
                     updateCallback();
                   }
                 : null, // 不可编辑时禁用按钮
-            child: const Text('全部设为完成', style: TextStyle(color: Colors.white)),
+            child: const Text('全部完成', style: TextStyle(color: Colors.white)),
           ),
         ),
         const SizedBox(width: 30),
@@ -304,7 +318,7 @@ class _GongKeSettingPageState extends State<GongKeSettingPage> {
                 context,
               ).showSnackBar(const SnackBar(content: Text('已复制到剪贴板')));
             },
-            child: const Text('生成报课文本', style: TextStyle(color: Colors.white)),
+            child: const Text('报课文本', style: TextStyle(color: Colors.white)),
           ),
         ),
         const SizedBox(width: 30),

@@ -7,6 +7,7 @@ import 'dart:async';
 import '../../main.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'dart:io' show Platform;
+import 'package:flutter/scheduler.dart';
 
 class NianzhouPage extends StatefulWidget {
   const NianzhouPage({Key? key}) : super(key: key);
@@ -94,9 +95,17 @@ class _NianzhouPageState extends State<NianzhouPage> {
   @override
   void dispose() {
     _accelerometerSubscription?.cancel();
-    _updateCountBeforeExit();
-    // 调用父页面传来的回调
-    onUpdated?.call();
+
+    // 先保存数据
+    _updateCountBeforeExit().then((_) {
+      // 数据保存完成后，使用 SchedulerBinding 在下一帧回调
+
+      //print('-----------开始onUpdated?.call();');
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        onUpdated?.call();
+        //print('-----------onUpdated?.call()完成');
+      });
+    });
 
     super.dispose();
   }

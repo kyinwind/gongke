@@ -23,6 +23,52 @@ String getLabelSafely(String typeString) {
   }
 }
 
+String getDanWeiByLabel(String typeLabelString) {
+  try {
+    switch (typeLabelString) {
+      case '诵经':
+        return '部';
+      case '念咒':
+        return '遍';
+      case '念圣号':
+        return '声';
+      case '磕头':
+        return '个';
+      case '拜忏':
+        return '次';
+      case '打坐':
+        return '分钟';
+      default:
+        return '遍';
+    }
+  } catch (e) {
+    return '遍'; // 返回默认值
+  }
+}
+
+String getDanWei(String typeString) {
+  try {
+    switch (typeString) {
+      case 'songjing':
+        return '部';
+      case 'nianzhou':
+        return '遍';
+      case 'nianshenghao':
+        return '声';
+      case 'ketou':
+        return '个';
+      case 'baichan':
+        return '次';
+      case 'dazuo':
+        return '分钟';
+      default:
+        return '遍';
+    }
+  } catch (e) {
+    return '遍'; // 返回默认值
+  }
+}
+
 // 定义经书名称到文件URL的映射
 final Map<String, String> jingShuFiles = {
   '《一切如来心秘密全身舍利宝箧印陀罗尼经》': '1.pdf',

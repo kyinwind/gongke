@@ -659,11 +659,17 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
                   }
                   name = nameController.text;
                 }
-
                 if (cntController.text.isEmpty) {
                   ScaffoldMessenger.of(
                     context,
-                  ).showSnackBar(const SnackBar(content: Text('请输入数量')));
+                  ).showSnackBar(const SnackBar(content: Text('请输入功课数量')));
+                  return;
+                }
+                final cnt = int.tryParse(cntController.text);
+                if (cnt == null || cnt <= 0) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('请输入有效的整数')));
                   return;
                 }
 

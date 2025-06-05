@@ -9,6 +9,7 @@ import 'view/gongke/gongke_setting.dart';
 import 'view/gongke/nianshenghao.dart';
 import 'view/gongke/dazuo.dart';
 import 'view/gongke/nianzhou.dart';
+import 'view/gongke/gongke_stat.dart';
 import 'database.dart';
 import 'view/songjing/songjing.dart';
 import 'view/tips/tip.dart';
@@ -87,6 +88,7 @@ class _MyAppState extends State<MyApp> {
         '/GongKe/GongKeSetting/nianshenghao': (context) =>
             const NianShengHaoPage(),
         '/GongKe/GongKeSetting/dazuo': (context) => const DaZuoPage(),
+        '/GongKeStat': (context) => const GongKeStatPage(),
       },
       initialRoute: '/',
       localizationsDelegates: const [

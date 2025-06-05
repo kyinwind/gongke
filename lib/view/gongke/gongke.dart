@@ -39,15 +39,16 @@ class _GongKePageState extends State<GongKePage> {
   Map<int, double> _fayuanCompletionRates = {}; // 存储每一个发愿的功课完成率
   Map<String, double> _completionRates = {}; // 存储每一天的功课完成率
   // 按日期分组处理当月所有的gongkeitem记录
-  Map<String, List<GongKeItemData>> groupedRecords = {};
+  Map<String, List<GongKeItemData>> groupedCurrentMonthRecords = {};
 
   Future<void> _refreshAllData() async {
-    await fetchAllFaYuan().then((value) {
-      // 这里可以添加其他需要在刷新时执行的操作
-      print(_fayuanCompletionRates.toString());
-      print(_completionRates.toString());
-    });
+    // print(
+    //   '--------------------------------GongKePage发愿数据刷新开始--------------------------------',
+    // );
+    await fetchAllFaYuan();
     await _loadCompletionRates(_focusedDay);
+    //print(_fayuanCompletionRates.toString());
+    //print(_completionRates.length.toString());
     if (mounted) {
       setState(() {});
     }
@@ -87,7 +88,7 @@ class _GongKePageState extends State<GongKePage> {
         final gongkeItems = await globalDB.managers.gongKeItem
             .filter((f) => f.fayuanId.equals(fayuan.id))
             .get();
-        print(gongkeItems.length);
+        //print(gongkeItems.length);
         if (gongkeItems.isNotEmpty) {
           // 计算完成率
           int completedCount = gongkeItems
@@ -113,7 +114,7 @@ class _GongKePageState extends State<GongKePage> {
   Future<void> _loadCompletionRates(DateTime month) async {
     // TODO: 从数据库加载当月的功课完成率
     _completionRates.clear();
-    groupedRecords.clear();
+    groupedCurrentMonthRecords.clear();
     // 获取当月的第一天和最后一天
     DateTime firstDayOfMonth = DateTime(month.year, month.month, 1);
     DateTime lastDayOfMonth = DateTime(month.year, month.month + 1, 0);
@@ -129,14 +130,14 @@ class _GongKePageState extends State<GongKePage> {
 
     for (var record in allItems) {
       String dateKey = record.gongKeDay;
-      if (!groupedRecords.containsKey(dateKey)) {
-        groupedRecords[dateKey] = [];
+      if (!groupedCurrentMonthRecords.containsKey(dateKey)) {
+        groupedCurrentMonthRecords[dateKey] = [];
       }
-      groupedRecords[dateKey]!.add(record);
+      groupedCurrentMonthRecords[dateKey]!.add(record);
     }
 
     // 计算每天的完成率
-    groupedRecords.forEach((date, dayRecords) {
+    groupedCurrentMonthRecords.forEach((date, dayRecords) {
       int totalItems = dayRecords.length;
       int completedItems = dayRecords.where((item) => item.isComplete).length;
       double completionRate = totalItems > 0
@@ -235,14 +236,14 @@ class _GongKePageState extends State<GongKePage> {
     return GestureDetector(
       onTap: () {
         // 点击日期单元格时，跳转到功课设置页面
-        groupedRecords[DateTools.getStringByDate(day)] == null
+        groupedCurrentMonthRecords[DateTools.getStringByDate(day)] == null
             ? null
             : Navigator.pushNamed(
                 context,
                 '/GongKe/GongKeSetting',
                 arguments: {
                   'date': dateString,
-                  'groupedRecords': groupedRecords, // 通过引用传递 Map
+                  'groupedRecords': groupedCurrentMonthRecords, // 通过引用传递 Map
                   'updateCallback': () async {
                     // 修改为 async
                     // 等待数据更新完成
@@ -264,7 +265,7 @@ class _GongKePageState extends State<GongKePage> {
         width: 45, // 让容器尽可能宽
 
         decoration: BoxDecoration(
-          color: groupedRecords[dateString] == null
+          color: groupedCurrentMonthRecords[dateString] == null
               ? Colors
                     .white // 有功课记录时背景为白色
               : (completion > 0 ? Colors.green : Colors.yellow), // 没有记录时背景为浅灰色
@@ -283,7 +284,8 @@ class _GongKePageState extends State<GongKePage> {
             // 阳历日期
             Text('${day.day}', style: const TextStyle(fontSize: 14)),
             // 完成度进度条
-            if (groupedRecords[dateString] != null && completion >= 0)
+            if (groupedCurrentMonthRecords[dateString] != null &&
+                completion >= 0)
               Text(
                 '${(completion * 100).toInt()}%',
                 style: TextStyle(

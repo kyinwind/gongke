@@ -65,6 +65,8 @@ dependencies:
   table_calendar: ^3.2.0  # 用于日历显示
   lunar: ^1.7.5  # 用于农历转换
   sensors_plus: ^6.1.1  # 用于传感器数据获取
+  flutter_svg: ^2.0.9  # 用于SVG图标支持
+  audioplayers: ^5.1.0  # 引入音频播放插件
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -93,6 +95,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/tips/
+    - assets/mp3/
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

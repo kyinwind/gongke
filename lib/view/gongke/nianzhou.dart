@@ -8,6 +8,9 @@ import '../../main.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'dart:io' show Platform;
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:audioplayers/audioplayers.dart';
+import '../../comm/audio_tools.dart';
 
 class NianzhouPage extends StatefulWidget {
   const NianzhouPage({Key? key}) : super(key: key);
@@ -207,13 +210,24 @@ class _NianzhouPageState extends State<NianzhouPage> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              icon: const Icon(Icons.spa_rounded, color: Colors.white),
+              icon: SvgPicture.asset(
+                'assets/images/muyu-yellow-32.svg',
+                colorFilter: const ColorFilter.mode(
+                  Colors.yellow,
+                  BlendMode.srcIn,
+                ),
+                width: 24,
+                height: 24,
+              ),
               label: Text(
                 '功课计数\n($count)',
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.white, fontSize: 16),
               ),
-              onPressed: _incrementCount,
+              onPressed: () async {
+                _incrementCount();
+                await AudioTools.playLocalAsset('mp3/muyu.wav');
+              },
             ),
             const SizedBox(width: 16),
             IconButton(

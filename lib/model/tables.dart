@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:drift/drift.dart';
 
 class SoftwareVersion extends Table with AutoIncrementingPrimaryKey {
@@ -18,11 +20,11 @@ class BaiChan extends Table
   TextColumn get image => text()();
   TextColumn get chanhuiWenStart => text()();
   TextColumn get chanhuiWenEnd => text()();
-  RealColumn get baichanTimes => real().withDefault(const Constant(88.0))();
-  RealColumn get baichanInterval1 =>
-      real().withDefault(const Constant(7.0))(); //每一拜花费的时间 单位秒
-  RealColumn get baichanInterval2 =>
-      real().withDefault(const Constant(5.0))(); //每一拜之间间隔的时间 单位秒
+  IntColumn get baichanTimes => integer().withDefault(const Constant(88))();
+  IntColumn get baichanInterval1 =>
+      integer().withDefault(const Constant(7))(); //每一拜花费的时间 单位秒
+  IntColumn get baichanInterval2 =>
+      integer().withDefault(const Constant(5))(); //每一拜之间间隔的时间 单位秒
   BoolColumn get flagOrderNumber =>
       boolean().withDefault(const Constant(true))(); //每一拜，是否含序号，即第几拜
   BoolColumn get flagQiShen =>

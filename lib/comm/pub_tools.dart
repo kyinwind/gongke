@@ -1,5 +1,58 @@
 import 'package:flutter/material.dart';
 
+enum FoPuShaImageType {
+  amituofo('阿弥陀佛圣像'),
+  ziangpusashengxiang('地藏菩萨圣像'),
+  dashizhipusashengxiang('大势至菩萨圣像'),
+  guanyinpusashengxiang('观音菩萨圣像'),
+  guanshiyinpusashengxiang('观世音菩萨圣像'),
+  shijiamounifoshengxiang('释迦牟尼佛圣像'),
+  xifangsanshengxiang('西方三圣像');
+
+  final String label;
+  const FoPuShaImageType(this.label);
+}
+
+String getLabelByFoPuSaType(String typeString) {
+  try {
+    return FoPuShaImageType.values
+        .firstWhere((type) => type.name == typeString)
+        .label;
+  } catch (e) {
+    return '未知类型'; // 返回默认值
+  }
+}
+
+String getFoPuSaImagePath(String label) {
+  final type = getTypeByFoPuSaLabel(label);
+  return 'assets/images/$type.jpg';
+}
+
+String getTypeByFoPuSaLabel(String fopusaLabel) {
+  try {
+    switch (fopusaLabel) {
+      case '阿弥陀佛圣像':
+        return 'amituofo';
+      case '地藏菩萨圣像':
+        return 'ziangpusashengxiang';
+      case '大势至菩萨圣像':
+        return 'dashizhipusashengxiang';
+      case '观音菩萨圣像':
+        return 'guanyinpusashengxiang';
+      case '观世音菩萨圣像':
+        return 'guanshiyinpusashengxiang';
+      case '释迦牟尼佛圣像':
+        return 'shijiamounifoshengxiang';
+      case '西方三圣像':
+        return 'xifangsanshengxiang';
+      default:
+        return 'xifangsanshengxiang';
+    }
+  } catch (e) {
+    return 'xifangsanshengxiang'; // 返回默认值
+  }
+}
+
 enum GongKeType {
   songjing('诵经'),
   nianzhou('念咒'),

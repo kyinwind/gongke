@@ -5,7 +5,15 @@ import 'model/tables.dart';
 part 'database.g.dart';
 
 @DriftDatabase(
-  tables: [FaYuan, GongKeItemsOneDay, GongKeItem, JingShu, TipBook, TipRecord],
+  tables: [
+    FaYuan,
+    GongKeItemsOneDay,
+    GongKeItem,
+    JingShu,
+    TipBook,
+    TipRecord,
+    BaiChan,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   // After generating code, this class needs to define a `schemaVersion` getter

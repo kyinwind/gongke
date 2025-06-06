@@ -223,6 +223,13 @@ class _GongKeSettingPageState extends State<GongKeSettingPage> {
                                     },
                                   );
                                 case 'nianshenghao':
+                                  // Navigator.push(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //     builder: (context) => WoodenFishWidget(),
+                                  //   ),
+                                  // );
+
                                   Navigator.pushNamed(
                                     context,
                                     '/GongKe/GongKeSetting/nianshenghao',

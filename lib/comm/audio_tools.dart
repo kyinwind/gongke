@@ -2,21 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 class AudioTools {
-  static final AudioPlayer audioPlayer = AudioPlayer();
-  static Duration duration = Duration.zero;
-  static Duration position = Duration.zero;
-  static PlayerState playerState = PlayerState.stopped;
-  // 播放本地资源WAV音频（需先将音频文件放入assets目录）
-  static Future<void> playLocalAsset(String file) async {
-    try {
-      final player = AudioPlayer();
-      await player.play(AssetSource(file));
+  static final AudioPlayer _player = AudioPlayer();
+  static bool _isDisposed = false;
 
-      player.onPlayerComplete.listen((event) {
-        player.dispose(); // Clean up after playback
-      });
+  static Future<void> playLocalAsset(String file) async {
+    if (_isDisposed) {
+      await _player.dispose();
+      _isDisposed = false;
+    }
+
+    try {
+      await _player.stop();
+      await _player.play(AssetSource(file));
     } catch (e) {
-      debugPrint("Error playing audio: $e");
+      debugPrint('音频播放出错: $e');
+    }
+  }
+
+  static Future<void> dispose() async {
+    if (!_isDisposed) {
+      await _player.dispose();
+      _isDisposed = true;
     }
   }
 }

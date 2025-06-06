@@ -4,12 +4,10 @@ import 'package:gongke/database.dart';
 import 'package:gongke/main.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'dart:async';
-import '../../main.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'dart:io' show Platform;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:audioplayers/audioplayers.dart';
 import '../../comm/audio_tools.dart';
 
 class NianzhouPage extends StatefulWidget {
@@ -60,10 +58,6 @@ class _NianzhouPageState extends State<NianzhouPage> {
   }
 
   void _startListeningShake() {
-    if (!Platform.isAndroid) {
-      // 只在Android监听，加这句防止调用
-      return;
-    }
     _accelerometerSubscription = accelerometerEventStream().listen((
       AccelerometerEvent event,
     ) {

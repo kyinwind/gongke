@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 enum GongKeType {
   songjing('诵经'),
   nianzhou('念咒'),
-  nianshenghao('念圣号'),
+  nianshenghao('念佛菩萨圣号'),
   ketou('磕头'),
   baichan('拜忏'),
   dazuo('打坐'),

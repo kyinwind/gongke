@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:gongke/database.dart';
-import '../../comm/audio_tools.dart'; // 替换为你的实际路径
+import '../../comm/audio_tools.dart';
 
 class NianShengHaoPage extends StatefulWidget {
   const NianShengHaoPage({super.key});
@@ -11,7 +11,7 @@ class NianShengHaoPage extends StatefulWidget {
 }
 
 class _NianShengHaoPageState extends State<NianShengHaoPage> {
-  GongKeItemData? gongkeItem;
+  GongKeItemData? gongkeitem;
   bool isRunning = false;
   Timer? timer;
   double interval = 1.0;
@@ -22,11 +22,12 @@ class _NianShengHaoPageState extends State<NianShengHaoPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!isLoaded) {
-      final args = ModalRoute.of(context)?.settings.arguments;
-      if (args is GongKeItemData) {
-        gongkeItem = args;
+      final args = ModalRoute.of(context)?.settings.arguments as Map?;
+      if (args != null && args['gongkeitem'] is GongKeItemData) {
+        gongkeitem = args['gongkeitem'] as GongKeItemData;
+        isLoaded = true;
       }
-      isLoaded = true;
+      print(gongkeitem.toString());
     }
   }
 
@@ -43,20 +44,27 @@ class _NianShengHaoPageState extends State<NianShengHaoPage> {
       isRunning = true;
     });
 
-    timer ??= Timer.periodic(
-      Duration(milliseconds: (interval * 1000).toInt()),
-      (timer) async {
-        if (currentCount >= (gongkeItem?.cnt ?? 0)) {
-          stop();
-          return;
-        }
+    timer?.cancel();
+    timer = Timer.periodic(Duration(milliseconds: (interval * 1000).toInt()), (
+      timer,
+    ) async {
+      if (currentCount >= (gongkeitem?.cnt ?? 0)) {
+        stop();
+        return;
+      }
 
+      if (mounted) {
+        // 先播放音频
         await AudioTools.playLocalAsset('mp3/muyu.wav');
-        setState(() {
-          currentCount++;
-        });
-      },
-    );
+
+        // 再更新计数
+        if (mounted) {
+          setState(() {
+            currentCount++;
+          });
+        }
+      }
+    });
   }
 
   void pause() {
@@ -70,7 +78,7 @@ class _NianShengHaoPageState extends State<NianShengHaoPage> {
   void stop() {
     pause();
     setState(() {
-      currentCount = gongkeItem?.cnt ?? 0;
+      currentCount = gongkeitem?.cnt ?? 0;
     });
   }
 
@@ -82,11 +90,14 @@ class _NianShengHaoPageState extends State<NianShengHaoPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (gongkeItem == null) {
-      return const Scaffold(body: Center(child: Text("加载中...")));
+    if (gongkeitem == null) {
+      return Scaffold(
+        appBar: AppBar(leading: BackButton()),
+        body: const Center(child: Text("加载中...")),
+      );
     }
 
-    final total = gongkeItem!.cnt;
+    final total = gongkeitem!.cnt;
     final current = currentCount;
 
     return Scaffold(
@@ -104,14 +115,16 @@ class _NianShengHaoPageState extends State<NianShengHaoPage> {
                 color: Colors.grey[100],
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text("${gongkeItem!.name} ${gongkeItem!.cnt}遍"),
+              child: Text("${gongkeitem!.name} ${gongkeitem!.cnt}遍"),
             ),
             const SizedBox(height: 12),
             Row(
               children: const [
-                Text("请设置电子木鱼时间间隔："),
+                Text(
+                  "请设置电子木鱼时间间隔：",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 SizedBox(width: 4),
-                Icon(Icons.info_outline, size: 18),
               ],
             ),
             Row(
@@ -124,20 +137,30 @@ class _NianShengHaoPageState extends State<NianShengHaoPage> {
                 const Text("单位:秒"),
               ],
             ),
-            Slider(
-              min: 0.5,
-              max: 5.0,
-              value: interval,
-              divisions: 45,
-              onChanged: (value) {
-                setState(() {
-                  interval = value;
-                });
-                if (isRunning) {
-                  pause();
-                  start(); // 重启计时器以应用新间隔
-                }
-              },
+            Row(
+              children: [
+                Text('0.5秒'),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Slider(
+                    min: 0.5,
+                    max: 3.0,
+                    value: interval,
+                    divisions: 45,
+                    onChanged: (value) {
+                      setState(() {
+                        interval = value;
+                      });
+                      if (isRunning) {
+                        pause();
+                        start(); // 重启计时器以应用新间隔
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Text('3秒'),
+              ],
             ),
             const SizedBox(height: 16),
             const Text(
@@ -158,7 +181,7 @@ class _NianShengHaoPageState extends State<NianShengHaoPage> {
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(120, 48),
                     ),
-                    child: Text(isRunning ? "暂停" : "开示"),
+                    child: Text(isRunning ? "暂停" : "开始"),
                   ),
                   const SizedBox(height: 12),
                   Text("总共 $total 声，当前第 $current 声"),

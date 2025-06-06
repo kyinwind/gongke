@@ -1,12 +1,6 @@
 name: gongke
-description: '
-如果您是一个在生活中忙忙碌碌希望能抽时间学佛、完成功课的朋友，那么功课助手app可以帮助您。
-功课助手app是为佛友提供一个管理、记录日常功课的工具。它提供了发愿、日常功课完成、功课日历、功课统计等功能。
-1、支持的功课种类有诵经、诵咒计数、念佛计数、拜忏、打坐等，方便在没有纸质经书的情况下完成佛学功课。
-2、在日常功课中，根据每种功课类型不同，app也提供了电子木鱼、打坐计时、拜忏语音引导等功能。
-3、本app不提供电子版经书，佛友可以自己收集经书并导入app使用。
-4、本app所有功能都是免费的。
-'
+description: '功课助手是一款帮助佛友管理与记录日常佛学修行功课的免费工具。'
+
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -23,7 +17,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 0.9.0+1
 
 environment:
   sdk: ^3.8.0
@@ -66,7 +60,8 @@ dependencies:
   lunar: ^1.7.5  # 用于农历转换
   sensors_plus: ^6.1.1  # 用于传感器数据获取
   flutter_svg: ^2.0.9  # 用于SVG图标支持
-  audioplayers: ^5.1.0  # 引入音频播放插件
+  audioplayers: ^6.4.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

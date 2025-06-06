@@ -43,6 +43,7 @@ void main() async {
   if (firstDate == null) {
     await saveDateValue('firstDate', DateTime.now());
   }
+  WidgetsFlutterBinding.ensureInitialized();
   //print(firstDate);
   runApp(MyApp(db: globalDB)); // 传入数据库实例
 }

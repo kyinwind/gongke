@@ -1,16 +1,7 @@
 # gongke
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+功课助手：
+1、帮助佛友通过发愿建立功课计划，并记录佛友功课完成情况。
+以小组件形式放置桌面，督促佛友每日完成功课，精进修行。
+2、40多部常用佛经，包含金刚经、地藏经、六祖坛经等经书，十多部善书供佛友日常学习、念诵。
+3、可自己制作或导入佛友制作的开示语录，以小组件形式放在桌面，提醒自己每日修行。
+4、经书排版合理，适合手机、pad观看

@@ -17,6 +17,7 @@ import 'view/tips/add_tip.dart';
 import 'view/tips/tip_record.dart';
 import 'view/tips/add_tip_record.dart';
 import 'view/tips/import_tips.dart';
+import 'view/baichan/bai_chan_list.dart';
 
 // 导入 path_provider 库以使用 getApplicationDocumentsDirectory 函数
 //import 'package:path_provider/path_provider.dart';
@@ -122,7 +123,7 @@ class _TabbedHomePageState extends State<TabbedHomePage> {
     GongKePage(),
     SongJingPage(),
     TipPage(), // 传入数据库实例
-    Text('拜忏页面'),
+    BaiChanListPage(),
     Text('设置页面'),
   ];
 

@@ -4022,6 +4022,926 @@ class TipRecordCompanion extends UpdateCompanion<TipRecordData> {
   }
 }
 
+class $BaiChanTable extends BaiChan with TableInfo<$BaiChanTable, BaiChanData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BaiChanTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _createDateTimeMeta = const VerificationMeta(
+    'createDateTime',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createDateTime =
+      GeneratedColumn<DateTime>(
+        'create_date_time',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+        defaultValue: currentDateAndTime,
+      );
+  static const VerificationMeta _favoriteDateTimeMeta = const VerificationMeta(
+    'favoriteDateTime',
+  );
+  @override
+  late final GeneratedColumn<DateTime> favoriteDateTime =
+      GeneratedColumn<DateTime>(
+        'favorite_date_time',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _remarksMeta = const VerificationMeta(
+    'remarks',
+  );
+  @override
+  late final GeneratedColumn<String> remarks = GeneratedColumn<String>(
+    'remarks',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _bk1Meta = const VerificationMeta('bk1');
+  @override
+  late final GeneratedColumn<String> bk1 = GeneratedColumn<String>(
+    'bk1',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _bk2Meta = const VerificationMeta('bk2');
+  @override
+  late final GeneratedColumn<String> bk2 = GeneratedColumn<String>(
+    'bk2',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _imageMeta = const VerificationMeta('image');
+  @override
+  late final GeneratedColumn<String> image = GeneratedColumn<String>(
+    'image',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _chanhuiWenStartMeta = const VerificationMeta(
+    'chanhuiWenStart',
+  );
+  @override
+  late final GeneratedColumn<String> chanhuiWenStart = GeneratedColumn<String>(
+    'chanhui_wen_start',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _chanhuiWenEndMeta = const VerificationMeta(
+    'chanhuiWenEnd',
+  );
+  @override
+  late final GeneratedColumn<String> chanhuiWenEnd = GeneratedColumn<String>(
+    'chanhui_wen_end',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _baichanTimesMeta = const VerificationMeta(
+    'baichanTimes',
+  );
+  @override
+  late final GeneratedColumn<int> baichanTimes = GeneratedColumn<int>(
+    'baichan_times',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(88),
+  );
+  static const VerificationMeta _baichanInterval1Meta = const VerificationMeta(
+    'baichanInterval1',
+  );
+  @override
+  late final GeneratedColumn<int> baichanInterval1 = GeneratedColumn<int>(
+    'baichan_interval1',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(7),
+  );
+  static const VerificationMeta _baichanInterval2Meta = const VerificationMeta(
+    'baichanInterval2',
+  );
+  @override
+  late final GeneratedColumn<int> baichanInterval2 = GeneratedColumn<int>(
+    'baichan_interval2',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(5),
+  );
+  static const VerificationMeta _flagOrderNumberMeta = const VerificationMeta(
+    'flagOrderNumber',
+  );
+  @override
+  late final GeneratedColumn<bool> flagOrderNumber = GeneratedColumn<bool>(
+    'flag_order_number',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("flag_order_number" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _flagQiShenMeta = const VerificationMeta(
+    'flagQiShen',
+  );
+  @override
+  late final GeneratedColumn<bool> flagQiShen = GeneratedColumn<bool>(
+    'flag_qi_shen',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("flag_qi_shen" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _detailMeta = const VerificationMeta('detail');
+  @override
+  late final GeneratedColumn<String> detail = GeneratedColumn<String>(
+    'detail',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createDateTime,
+    favoriteDateTime,
+    remarks,
+    bk1,
+    bk2,
+    name,
+    image,
+    chanhuiWenStart,
+    chanhuiWenEnd,
+    baichanTimes,
+    baichanInterval1,
+    baichanInterval2,
+    flagOrderNumber,
+    flagQiShen,
+    detail,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'bai_chan';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BaiChanData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('create_date_time')) {
+      context.handle(
+        _createDateTimeMeta,
+        createDateTime.isAcceptableOrUnknown(
+          data['create_date_time']!,
+          _createDateTimeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('favorite_date_time')) {
+      context.handle(
+        _favoriteDateTimeMeta,
+        favoriteDateTime.isAcceptableOrUnknown(
+          data['favorite_date_time']!,
+          _favoriteDateTimeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('remarks')) {
+      context.handle(
+        _remarksMeta,
+        remarks.isAcceptableOrUnknown(data['remarks']!, _remarksMeta),
+      );
+    }
+    if (data.containsKey('bk1')) {
+      context.handle(
+        _bk1Meta,
+        bk1.isAcceptableOrUnknown(data['bk1']!, _bk1Meta),
+      );
+    }
+    if (data.containsKey('bk2')) {
+      context.handle(
+        _bk2Meta,
+        bk2.isAcceptableOrUnknown(data['bk2']!, _bk2Meta),
+      );
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('image')) {
+      context.handle(
+        _imageMeta,
+        image.isAcceptableOrUnknown(data['image']!, _imageMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_imageMeta);
+    }
+    if (data.containsKey('chanhui_wen_start')) {
+      context.handle(
+        _chanhuiWenStartMeta,
+        chanhuiWenStart.isAcceptableOrUnknown(
+          data['chanhui_wen_start']!,
+          _chanhuiWenStartMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_chanhuiWenStartMeta);
+    }
+    if (data.containsKey('chanhui_wen_end')) {
+      context.handle(
+        _chanhuiWenEndMeta,
+        chanhuiWenEnd.isAcceptableOrUnknown(
+          data['chanhui_wen_end']!,
+          _chanhuiWenEndMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_chanhuiWenEndMeta);
+    }
+    if (data.containsKey('baichan_times')) {
+      context.handle(
+        _baichanTimesMeta,
+        baichanTimes.isAcceptableOrUnknown(
+          data['baichan_times']!,
+          _baichanTimesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('baichan_interval1')) {
+      context.handle(
+        _baichanInterval1Meta,
+        baichanInterval1.isAcceptableOrUnknown(
+          data['baichan_interval1']!,
+          _baichanInterval1Meta,
+        ),
+      );
+    }
+    if (data.containsKey('baichan_interval2')) {
+      context.handle(
+        _baichanInterval2Meta,
+        baichanInterval2.isAcceptableOrUnknown(
+          data['baichan_interval2']!,
+          _baichanInterval2Meta,
+        ),
+      );
+    }
+    if (data.containsKey('flag_order_number')) {
+      context.handle(
+        _flagOrderNumberMeta,
+        flagOrderNumber.isAcceptableOrUnknown(
+          data['flag_order_number']!,
+          _flagOrderNumberMeta,
+        ),
+      );
+    }
+    if (data.containsKey('flag_qi_shen')) {
+      context.handle(
+        _flagQiShenMeta,
+        flagQiShen.isAcceptableOrUnknown(
+          data['flag_qi_shen']!,
+          _flagQiShenMeta,
+        ),
+      );
+    }
+    if (data.containsKey('detail')) {
+      context.handle(
+        _detailMeta,
+        detail.isAcceptableOrUnknown(data['detail']!, _detailMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_detailMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  BaiChanData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BaiChanData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      createDateTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}create_date_time'],
+      )!,
+      favoriteDateTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}favorite_date_time'],
+      ),
+      remarks: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remarks'],
+      ),
+      bk1: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bk1'],
+      ),
+      bk2: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bk2'],
+      ),
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      image: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image'],
+      )!,
+      chanhuiWenStart: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}chanhui_wen_start'],
+      )!,
+      chanhuiWenEnd: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}chanhui_wen_end'],
+      )!,
+      baichanTimes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}baichan_times'],
+      )!,
+      baichanInterval1: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}baichan_interval1'],
+      )!,
+      baichanInterval2: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}baichan_interval2'],
+      )!,
+      flagOrderNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}flag_order_number'],
+      )!,
+      flagQiShen: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}flag_qi_shen'],
+      )!,
+      detail: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}detail'],
+      )!,
+    );
+  }
+
+  @override
+  $BaiChanTable createAlias(String alias) {
+    return $BaiChanTable(attachedDatabase, alias);
+  }
+}
+
+class BaiChanData extends DataClass implements Insertable<BaiChanData> {
+  final int id;
+  final DateTime createDateTime;
+  final DateTime? favoriteDateTime;
+  final String? remarks;
+  final String? bk1;
+  final String? bk2;
+  final String name;
+  final String image;
+  final String chanhuiWenStart;
+  final String chanhuiWenEnd;
+  final int baichanTimes;
+  final int baichanInterval1;
+  final int baichanInterval2;
+  final bool flagOrderNumber;
+  final bool flagQiShen;
+  final String detail;
+  const BaiChanData({
+    required this.id,
+    required this.createDateTime,
+    this.favoriteDateTime,
+    this.remarks,
+    this.bk1,
+    this.bk2,
+    required this.name,
+    required this.image,
+    required this.chanhuiWenStart,
+    required this.chanhuiWenEnd,
+    required this.baichanTimes,
+    required this.baichanInterval1,
+    required this.baichanInterval2,
+    required this.flagOrderNumber,
+    required this.flagQiShen,
+    required this.detail,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['create_date_time'] = Variable<DateTime>(createDateTime);
+    if (!nullToAbsent || favoriteDateTime != null) {
+      map['favorite_date_time'] = Variable<DateTime>(favoriteDateTime);
+    }
+    if (!nullToAbsent || remarks != null) {
+      map['remarks'] = Variable<String>(remarks);
+    }
+    if (!nullToAbsent || bk1 != null) {
+      map['bk1'] = Variable<String>(bk1);
+    }
+    if (!nullToAbsent || bk2 != null) {
+      map['bk2'] = Variable<String>(bk2);
+    }
+    map['name'] = Variable<String>(name);
+    map['image'] = Variable<String>(image);
+    map['chanhui_wen_start'] = Variable<String>(chanhuiWenStart);
+    map['chanhui_wen_end'] = Variable<String>(chanhuiWenEnd);
+    map['baichan_times'] = Variable<int>(baichanTimes);
+    map['baichan_interval1'] = Variable<int>(baichanInterval1);
+    map['baichan_interval2'] = Variable<int>(baichanInterval2);
+    map['flag_order_number'] = Variable<bool>(flagOrderNumber);
+    map['flag_qi_shen'] = Variable<bool>(flagQiShen);
+    map['detail'] = Variable<String>(detail);
+    return map;
+  }
+
+  BaiChanCompanion toCompanion(bool nullToAbsent) {
+    return BaiChanCompanion(
+      id: Value(id),
+      createDateTime: Value(createDateTime),
+      favoriteDateTime: favoriteDateTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(favoriteDateTime),
+      remarks: remarks == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remarks),
+      bk1: bk1 == null && nullToAbsent ? const Value.absent() : Value(bk1),
+      bk2: bk2 == null && nullToAbsent ? const Value.absent() : Value(bk2),
+      name: Value(name),
+      image: Value(image),
+      chanhuiWenStart: Value(chanhuiWenStart),
+      chanhuiWenEnd: Value(chanhuiWenEnd),
+      baichanTimes: Value(baichanTimes),
+      baichanInterval1: Value(baichanInterval1),
+      baichanInterval2: Value(baichanInterval2),
+      flagOrderNumber: Value(flagOrderNumber),
+      flagQiShen: Value(flagQiShen),
+      detail: Value(detail),
+    );
+  }
+
+  factory BaiChanData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BaiChanData(
+      id: serializer.fromJson<int>(json['id']),
+      createDateTime: serializer.fromJson<DateTime>(json['createDateTime']),
+      favoriteDateTime: serializer.fromJson<DateTime?>(
+        json['favoriteDateTime'],
+      ),
+      remarks: serializer.fromJson<String?>(json['remarks']),
+      bk1: serializer.fromJson<String?>(json['bk1']),
+      bk2: serializer.fromJson<String?>(json['bk2']),
+      name: serializer.fromJson<String>(json['name']),
+      image: serializer.fromJson<String>(json['image']),
+      chanhuiWenStart: serializer.fromJson<String>(json['chanhuiWenStart']),
+      chanhuiWenEnd: serializer.fromJson<String>(json['chanhuiWenEnd']),
+      baichanTimes: serializer.fromJson<int>(json['baichanTimes']),
+      baichanInterval1: serializer.fromJson<int>(json['baichanInterval1']),
+      baichanInterval2: serializer.fromJson<int>(json['baichanInterval2']),
+      flagOrderNumber: serializer.fromJson<bool>(json['flagOrderNumber']),
+      flagQiShen: serializer.fromJson<bool>(json['flagQiShen']),
+      detail: serializer.fromJson<String>(json['detail']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'createDateTime': serializer.toJson<DateTime>(createDateTime),
+      'favoriteDateTime': serializer.toJson<DateTime?>(favoriteDateTime),
+      'remarks': serializer.toJson<String?>(remarks),
+      'bk1': serializer.toJson<String?>(bk1),
+      'bk2': serializer.toJson<String?>(bk2),
+      'name': serializer.toJson<String>(name),
+      'image': serializer.toJson<String>(image),
+      'chanhuiWenStart': serializer.toJson<String>(chanhuiWenStart),
+      'chanhuiWenEnd': serializer.toJson<String>(chanhuiWenEnd),
+      'baichanTimes': serializer.toJson<int>(baichanTimes),
+      'baichanInterval1': serializer.toJson<int>(baichanInterval1),
+      'baichanInterval2': serializer.toJson<int>(baichanInterval2),
+      'flagOrderNumber': serializer.toJson<bool>(flagOrderNumber),
+      'flagQiShen': serializer.toJson<bool>(flagQiShen),
+      'detail': serializer.toJson<String>(detail),
+    };
+  }
+
+  BaiChanData copyWith({
+    int? id,
+    DateTime? createDateTime,
+    Value<DateTime?> favoriteDateTime = const Value.absent(),
+    Value<String?> remarks = const Value.absent(),
+    Value<String?> bk1 = const Value.absent(),
+    Value<String?> bk2 = const Value.absent(),
+    String? name,
+    String? image,
+    String? chanhuiWenStart,
+    String? chanhuiWenEnd,
+    int? baichanTimes,
+    int? baichanInterval1,
+    int? baichanInterval2,
+    bool? flagOrderNumber,
+    bool? flagQiShen,
+    String? detail,
+  }) => BaiChanData(
+    id: id ?? this.id,
+    createDateTime: createDateTime ?? this.createDateTime,
+    favoriteDateTime: favoriteDateTime.present
+        ? favoriteDateTime.value
+        : this.favoriteDateTime,
+    remarks: remarks.present ? remarks.value : this.remarks,
+    bk1: bk1.present ? bk1.value : this.bk1,
+    bk2: bk2.present ? bk2.value : this.bk2,
+    name: name ?? this.name,
+    image: image ?? this.image,
+    chanhuiWenStart: chanhuiWenStart ?? this.chanhuiWenStart,
+    chanhuiWenEnd: chanhuiWenEnd ?? this.chanhuiWenEnd,
+    baichanTimes: baichanTimes ?? this.baichanTimes,
+    baichanInterval1: baichanInterval1 ?? this.baichanInterval1,
+    baichanInterval2: baichanInterval2 ?? this.baichanInterval2,
+    flagOrderNumber: flagOrderNumber ?? this.flagOrderNumber,
+    flagQiShen: flagQiShen ?? this.flagQiShen,
+    detail: detail ?? this.detail,
+  );
+  BaiChanData copyWithCompanion(BaiChanCompanion data) {
+    return BaiChanData(
+      id: data.id.present ? data.id.value : this.id,
+      createDateTime: data.createDateTime.present
+          ? data.createDateTime.value
+          : this.createDateTime,
+      favoriteDateTime: data.favoriteDateTime.present
+          ? data.favoriteDateTime.value
+          : this.favoriteDateTime,
+      remarks: data.remarks.present ? data.remarks.value : this.remarks,
+      bk1: data.bk1.present ? data.bk1.value : this.bk1,
+      bk2: data.bk2.present ? data.bk2.value : this.bk2,
+      name: data.name.present ? data.name.value : this.name,
+      image: data.image.present ? data.image.value : this.image,
+      chanhuiWenStart: data.chanhuiWenStart.present
+          ? data.chanhuiWenStart.value
+          : this.chanhuiWenStart,
+      chanhuiWenEnd: data.chanhuiWenEnd.present
+          ? data.chanhuiWenEnd.value
+          : this.chanhuiWenEnd,
+      baichanTimes: data.baichanTimes.present
+          ? data.baichanTimes.value
+          : this.baichanTimes,
+      baichanInterval1: data.baichanInterval1.present
+          ? data.baichanInterval1.value
+          : this.baichanInterval1,
+      baichanInterval2: data.baichanInterval2.present
+          ? data.baichanInterval2.value
+          : this.baichanInterval2,
+      flagOrderNumber: data.flagOrderNumber.present
+          ? data.flagOrderNumber.value
+          : this.flagOrderNumber,
+      flagQiShen: data.flagQiShen.present
+          ? data.flagQiShen.value
+          : this.flagQiShen,
+      detail: data.detail.present ? data.detail.value : this.detail,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BaiChanData(')
+          ..write('id: $id, ')
+          ..write('createDateTime: $createDateTime, ')
+          ..write('favoriteDateTime: $favoriteDateTime, ')
+          ..write('remarks: $remarks, ')
+          ..write('bk1: $bk1, ')
+          ..write('bk2: $bk2, ')
+          ..write('name: $name, ')
+          ..write('image: $image, ')
+          ..write('chanhuiWenStart: $chanhuiWenStart, ')
+          ..write('chanhuiWenEnd: $chanhuiWenEnd, ')
+          ..write('baichanTimes: $baichanTimes, ')
+          ..write('baichanInterval1: $baichanInterval1, ')
+          ..write('baichanInterval2: $baichanInterval2, ')
+          ..write('flagOrderNumber: $flagOrderNumber, ')
+          ..write('flagQiShen: $flagQiShen, ')
+          ..write('detail: $detail')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createDateTime,
+    favoriteDateTime,
+    remarks,
+    bk1,
+    bk2,
+    name,
+    image,
+    chanhuiWenStart,
+    chanhuiWenEnd,
+    baichanTimes,
+    baichanInterval1,
+    baichanInterval2,
+    flagOrderNumber,
+    flagQiShen,
+    detail,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BaiChanData &&
+          other.id == this.id &&
+          other.createDateTime == this.createDateTime &&
+          other.favoriteDateTime == this.favoriteDateTime &&
+          other.remarks == this.remarks &&
+          other.bk1 == this.bk1 &&
+          other.bk2 == this.bk2 &&
+          other.name == this.name &&
+          other.image == this.image &&
+          other.chanhuiWenStart == this.chanhuiWenStart &&
+          other.chanhuiWenEnd == this.chanhuiWenEnd &&
+          other.baichanTimes == this.baichanTimes &&
+          other.baichanInterval1 == this.baichanInterval1 &&
+          other.baichanInterval2 == this.baichanInterval2 &&
+          other.flagOrderNumber == this.flagOrderNumber &&
+          other.flagQiShen == this.flagQiShen &&
+          other.detail == this.detail);
+}
+
+class BaiChanCompanion extends UpdateCompanion<BaiChanData> {
+  final Value<int> id;
+  final Value<DateTime> createDateTime;
+  final Value<DateTime?> favoriteDateTime;
+  final Value<String?> remarks;
+  final Value<String?> bk1;
+  final Value<String?> bk2;
+  final Value<String> name;
+  final Value<String> image;
+  final Value<String> chanhuiWenStart;
+  final Value<String> chanhuiWenEnd;
+  final Value<int> baichanTimes;
+  final Value<int> baichanInterval1;
+  final Value<int> baichanInterval2;
+  final Value<bool> flagOrderNumber;
+  final Value<bool> flagQiShen;
+  final Value<String> detail;
+  const BaiChanCompanion({
+    this.id = const Value.absent(),
+    this.createDateTime = const Value.absent(),
+    this.favoriteDateTime = const Value.absent(),
+    this.remarks = const Value.absent(),
+    this.bk1 = const Value.absent(),
+    this.bk2 = const Value.absent(),
+    this.name = const Value.absent(),
+    this.image = const Value.absent(),
+    this.chanhuiWenStart = const Value.absent(),
+    this.chanhuiWenEnd = const Value.absent(),
+    this.baichanTimes = const Value.absent(),
+    this.baichanInterval1 = const Value.absent(),
+    this.baichanInterval2 = const Value.absent(),
+    this.flagOrderNumber = const Value.absent(),
+    this.flagQiShen = const Value.absent(),
+    this.detail = const Value.absent(),
+  });
+  BaiChanCompanion.insert({
+    this.id = const Value.absent(),
+    this.createDateTime = const Value.absent(),
+    this.favoriteDateTime = const Value.absent(),
+    this.remarks = const Value.absent(),
+    this.bk1 = const Value.absent(),
+    this.bk2 = const Value.absent(),
+    required String name,
+    required String image,
+    required String chanhuiWenStart,
+    required String chanhuiWenEnd,
+    this.baichanTimes = const Value.absent(),
+    this.baichanInterval1 = const Value.absent(),
+    this.baichanInterval2 = const Value.absent(),
+    this.flagOrderNumber = const Value.absent(),
+    this.flagQiShen = const Value.absent(),
+    required String detail,
+  }) : name = Value(name),
+       image = Value(image),
+       chanhuiWenStart = Value(chanhuiWenStart),
+       chanhuiWenEnd = Value(chanhuiWenEnd),
+       detail = Value(detail);
+  static Insertable<BaiChanData> custom({
+    Expression<int>? id,
+    Expression<DateTime>? createDateTime,
+    Expression<DateTime>? favoriteDateTime,
+    Expression<String>? remarks,
+    Expression<String>? bk1,
+    Expression<String>? bk2,
+    Expression<String>? name,
+    Expression<String>? image,
+    Expression<String>? chanhuiWenStart,
+    Expression<String>? chanhuiWenEnd,
+    Expression<int>? baichanTimes,
+    Expression<int>? baichanInterval1,
+    Expression<int>? baichanInterval2,
+    Expression<bool>? flagOrderNumber,
+    Expression<bool>? flagQiShen,
+    Expression<String>? detail,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createDateTime != null) 'create_date_time': createDateTime,
+      if (favoriteDateTime != null) 'favorite_date_time': favoriteDateTime,
+      if (remarks != null) 'remarks': remarks,
+      if (bk1 != null) 'bk1': bk1,
+      if (bk2 != null) 'bk2': bk2,
+      if (name != null) 'name': name,
+      if (image != null) 'image': image,
+      if (chanhuiWenStart != null) 'chanhui_wen_start': chanhuiWenStart,
+      if (chanhuiWenEnd != null) 'chanhui_wen_end': chanhuiWenEnd,
+      if (baichanTimes != null) 'baichan_times': baichanTimes,
+      if (baichanInterval1 != null) 'baichan_interval1': baichanInterval1,
+      if (baichanInterval2 != null) 'baichan_interval2': baichanInterval2,
+      if (flagOrderNumber != null) 'flag_order_number': flagOrderNumber,
+      if (flagQiShen != null) 'flag_qi_shen': flagQiShen,
+      if (detail != null) 'detail': detail,
+    });
+  }
+
+  BaiChanCompanion copyWith({
+    Value<int>? id,
+    Value<DateTime>? createDateTime,
+    Value<DateTime?>? favoriteDateTime,
+    Value<String?>? remarks,
+    Value<String?>? bk1,
+    Value<String?>? bk2,
+    Value<String>? name,
+    Value<String>? image,
+    Value<String>? chanhuiWenStart,
+    Value<String>? chanhuiWenEnd,
+    Value<int>? baichanTimes,
+    Value<int>? baichanInterval1,
+    Value<int>? baichanInterval2,
+    Value<bool>? flagOrderNumber,
+    Value<bool>? flagQiShen,
+    Value<String>? detail,
+  }) {
+    return BaiChanCompanion(
+      id: id ?? this.id,
+      createDateTime: createDateTime ?? this.createDateTime,
+      favoriteDateTime: favoriteDateTime ?? this.favoriteDateTime,
+      remarks: remarks ?? this.remarks,
+      bk1: bk1 ?? this.bk1,
+      bk2: bk2 ?? this.bk2,
+      name: name ?? this.name,
+      image: image ?? this.image,
+      chanhuiWenStart: chanhuiWenStart ?? this.chanhuiWenStart,
+      chanhuiWenEnd: chanhuiWenEnd ?? this.chanhuiWenEnd,
+      baichanTimes: baichanTimes ?? this.baichanTimes,
+      baichanInterval1: baichanInterval1 ?? this.baichanInterval1,
+      baichanInterval2: baichanInterval2 ?? this.baichanInterval2,
+      flagOrderNumber: flagOrderNumber ?? this.flagOrderNumber,
+      flagQiShen: flagQiShen ?? this.flagQiShen,
+      detail: detail ?? this.detail,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (createDateTime.present) {
+      map['create_date_time'] = Variable<DateTime>(createDateTime.value);
+    }
+    if (favoriteDateTime.present) {
+      map['favorite_date_time'] = Variable<DateTime>(favoriteDateTime.value);
+    }
+    if (remarks.present) {
+      map['remarks'] = Variable<String>(remarks.value);
+    }
+    if (bk1.present) {
+      map['bk1'] = Variable<String>(bk1.value);
+    }
+    if (bk2.present) {
+      map['bk2'] = Variable<String>(bk2.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (image.present) {
+      map['image'] = Variable<String>(image.value);
+    }
+    if (chanhuiWenStart.present) {
+      map['chanhui_wen_start'] = Variable<String>(chanhuiWenStart.value);
+    }
+    if (chanhuiWenEnd.present) {
+      map['chanhui_wen_end'] = Variable<String>(chanhuiWenEnd.value);
+    }
+    if (baichanTimes.present) {
+      map['baichan_times'] = Variable<int>(baichanTimes.value);
+    }
+    if (baichanInterval1.present) {
+      map['baichan_interval1'] = Variable<int>(baichanInterval1.value);
+    }
+    if (baichanInterval2.present) {
+      map['baichan_interval2'] = Variable<int>(baichanInterval2.value);
+    }
+    if (flagOrderNumber.present) {
+      map['flag_order_number'] = Variable<bool>(flagOrderNumber.value);
+    }
+    if (flagQiShen.present) {
+      map['flag_qi_shen'] = Variable<bool>(flagQiShen.value);
+    }
+    if (detail.present) {
+      map['detail'] = Variable<String>(detail.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BaiChanCompanion(')
+          ..write('id: $id, ')
+          ..write('createDateTime: $createDateTime, ')
+          ..write('favoriteDateTime: $favoriteDateTime, ')
+          ..write('remarks: $remarks, ')
+          ..write('bk1: $bk1, ')
+          ..write('bk2: $bk2, ')
+          ..write('name: $name, ')
+          ..write('image: $image, ')
+          ..write('chanhuiWenStart: $chanhuiWenStart, ')
+          ..write('chanhuiWenEnd: $chanhuiWenEnd, ')
+          ..write('baichanTimes: $baichanTimes, ')
+          ..write('baichanInterval1: $baichanInterval1, ')
+          ..write('baichanInterval2: $baichanInterval2, ')
+          ..write('flagOrderNumber: $flagOrderNumber, ')
+          ..write('flagQiShen: $flagQiShen, ')
+          ..write('detail: $detail')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4032,6 +4952,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $JingShuTable jingShu = $JingShuTable(this);
   late final $TipBookTable tipBook = $TipBookTable(this);
   late final $TipRecordTable tipRecord = $TipRecordTable(this);
+  late final $BaiChanTable baiChan = $BaiChanTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4043,6 +4964,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     jingShu,
     tipBook,
     tipRecord,
+    baiChan,
   ];
 }
 
@@ -5986,6 +6908,424 @@ typedef $$TipRecordTableProcessedTableManager =
       TipRecordData,
       PrefetchHooks Function()
     >;
+typedef $$BaiChanTableCreateCompanionBuilder =
+    BaiChanCompanion Function({
+      Value<int> id,
+      Value<DateTime> createDateTime,
+      Value<DateTime?> favoriteDateTime,
+      Value<String?> remarks,
+      Value<String?> bk1,
+      Value<String?> bk2,
+      required String name,
+      required String image,
+      required String chanhuiWenStart,
+      required String chanhuiWenEnd,
+      Value<int> baichanTimes,
+      Value<int> baichanInterval1,
+      Value<int> baichanInterval2,
+      Value<bool> flagOrderNumber,
+      Value<bool> flagQiShen,
+      required String detail,
+    });
+typedef $$BaiChanTableUpdateCompanionBuilder =
+    BaiChanCompanion Function({
+      Value<int> id,
+      Value<DateTime> createDateTime,
+      Value<DateTime?> favoriteDateTime,
+      Value<String?> remarks,
+      Value<String?> bk1,
+      Value<String?> bk2,
+      Value<String> name,
+      Value<String> image,
+      Value<String> chanhuiWenStart,
+      Value<String> chanhuiWenEnd,
+      Value<int> baichanTimes,
+      Value<int> baichanInterval1,
+      Value<int> baichanInterval2,
+      Value<bool> flagOrderNumber,
+      Value<bool> flagQiShen,
+      Value<String> detail,
+    });
+
+class $$BaiChanTableFilterComposer
+    extends Composer<_$AppDatabase, $BaiChanTable> {
+  $$BaiChanTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createDateTime => $composableBuilder(
+    column: $table.createDateTime,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get favoriteDateTime => $composableBuilder(
+    column: $table.favoriteDateTime,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remarks => $composableBuilder(
+    column: $table.remarks,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bk1 => $composableBuilder(
+    column: $table.bk1,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bk2 => $composableBuilder(
+    column: $table.bk2,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get image => $composableBuilder(
+    column: $table.image,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get chanhuiWenStart => $composableBuilder(
+    column: $table.chanhuiWenStart,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get chanhuiWenEnd => $composableBuilder(
+    column: $table.chanhuiWenEnd,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get baichanTimes => $composableBuilder(
+    column: $table.baichanTimes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get baichanInterval1 => $composableBuilder(
+    column: $table.baichanInterval1,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get baichanInterval2 => $composableBuilder(
+    column: $table.baichanInterval2,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get flagOrderNumber => $composableBuilder(
+    column: $table.flagOrderNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get flagQiShen => $composableBuilder(
+    column: $table.flagQiShen,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get detail => $composableBuilder(
+    column: $table.detail,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$BaiChanTableOrderingComposer
+    extends Composer<_$AppDatabase, $BaiChanTable> {
+  $$BaiChanTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createDateTime => $composableBuilder(
+    column: $table.createDateTime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get favoriteDateTime => $composableBuilder(
+    column: $table.favoriteDateTime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get remarks => $composableBuilder(
+    column: $table.remarks,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bk1 => $composableBuilder(
+    column: $table.bk1,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bk2 => $composableBuilder(
+    column: $table.bk2,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get image => $composableBuilder(
+    column: $table.image,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get chanhuiWenStart => $composableBuilder(
+    column: $table.chanhuiWenStart,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get chanhuiWenEnd => $composableBuilder(
+    column: $table.chanhuiWenEnd,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get baichanTimes => $composableBuilder(
+    column: $table.baichanTimes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get baichanInterval1 => $composableBuilder(
+    column: $table.baichanInterval1,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get baichanInterval2 => $composableBuilder(
+    column: $table.baichanInterval2,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get flagOrderNumber => $composableBuilder(
+    column: $table.flagOrderNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get flagQiShen => $composableBuilder(
+    column: $table.flagQiShen,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get detail => $composableBuilder(
+    column: $table.detail,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$BaiChanTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BaiChanTable> {
+  $$BaiChanTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createDateTime => $composableBuilder(
+    column: $table.createDateTime,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get favoriteDateTime => $composableBuilder(
+    column: $table.favoriteDateTime,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get remarks =>
+      $composableBuilder(column: $table.remarks, builder: (column) => column);
+
+  GeneratedColumn<String> get bk1 =>
+      $composableBuilder(column: $table.bk1, builder: (column) => column);
+
+  GeneratedColumn<String> get bk2 =>
+      $composableBuilder(column: $table.bk2, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get image =>
+      $composableBuilder(column: $table.image, builder: (column) => column);
+
+  GeneratedColumn<String> get chanhuiWenStart => $composableBuilder(
+    column: $table.chanhuiWenStart,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get chanhuiWenEnd => $composableBuilder(
+    column: $table.chanhuiWenEnd,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get baichanTimes => $composableBuilder(
+    column: $table.baichanTimes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get baichanInterval1 => $composableBuilder(
+    column: $table.baichanInterval1,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get baichanInterval2 => $composableBuilder(
+    column: $table.baichanInterval2,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get flagOrderNumber => $composableBuilder(
+    column: $table.flagOrderNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get flagQiShen => $composableBuilder(
+    column: $table.flagQiShen,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get detail =>
+      $composableBuilder(column: $table.detail, builder: (column) => column);
+}
+
+class $$BaiChanTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BaiChanTable,
+          BaiChanData,
+          $$BaiChanTableFilterComposer,
+          $$BaiChanTableOrderingComposer,
+          $$BaiChanTableAnnotationComposer,
+          $$BaiChanTableCreateCompanionBuilder,
+          $$BaiChanTableUpdateCompanionBuilder,
+          (
+            BaiChanData,
+            BaseReferences<_$AppDatabase, $BaiChanTable, BaiChanData>,
+          ),
+          BaiChanData,
+          PrefetchHooks Function()
+        > {
+  $$BaiChanTableTableManager(_$AppDatabase db, $BaiChanTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BaiChanTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BaiChanTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$BaiChanTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<DateTime> createDateTime = const Value.absent(),
+                Value<DateTime?> favoriteDateTime = const Value.absent(),
+                Value<String?> remarks = const Value.absent(),
+                Value<String?> bk1 = const Value.absent(),
+                Value<String?> bk2 = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> image = const Value.absent(),
+                Value<String> chanhuiWenStart = const Value.absent(),
+                Value<String> chanhuiWenEnd = const Value.absent(),
+                Value<int> baichanTimes = const Value.absent(),
+                Value<int> baichanInterval1 = const Value.absent(),
+                Value<int> baichanInterval2 = const Value.absent(),
+                Value<bool> flagOrderNumber = const Value.absent(),
+                Value<bool> flagQiShen = const Value.absent(),
+                Value<String> detail = const Value.absent(),
+              }) => BaiChanCompanion(
+                id: id,
+                createDateTime: createDateTime,
+                favoriteDateTime: favoriteDateTime,
+                remarks: remarks,
+                bk1: bk1,
+                bk2: bk2,
+                name: name,
+                image: image,
+                chanhuiWenStart: chanhuiWenStart,
+                chanhuiWenEnd: chanhuiWenEnd,
+                baichanTimes: baichanTimes,
+                baichanInterval1: baichanInterval1,
+                baichanInterval2: baichanInterval2,
+                flagOrderNumber: flagOrderNumber,
+                flagQiShen: flagQiShen,
+                detail: detail,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<DateTime> createDateTime = const Value.absent(),
+                Value<DateTime?> favoriteDateTime = const Value.absent(),
+                Value<String?> remarks = const Value.absent(),
+                Value<String?> bk1 = const Value.absent(),
+                Value<String?> bk2 = const Value.absent(),
+                required String name,
+                required String image,
+                required String chanhuiWenStart,
+                required String chanhuiWenEnd,
+                Value<int> baichanTimes = const Value.absent(),
+                Value<int> baichanInterval1 = const Value.absent(),
+                Value<int> baichanInterval2 = const Value.absent(),
+                Value<bool> flagOrderNumber = const Value.absent(),
+                Value<bool> flagQiShen = const Value.absent(),
+                required String detail,
+              }) => BaiChanCompanion.insert(
+                id: id,
+                createDateTime: createDateTime,
+                favoriteDateTime: favoriteDateTime,
+                remarks: remarks,
+                bk1: bk1,
+                bk2: bk2,
+                name: name,
+                image: image,
+                chanhuiWenStart: chanhuiWenStart,
+                chanhuiWenEnd: chanhuiWenEnd,
+                baichanTimes: baichanTimes,
+                baichanInterval1: baichanInterval1,
+                baichanInterval2: baichanInterval2,
+                flagOrderNumber: flagOrderNumber,
+                flagQiShen: flagQiShen,
+                detail: detail,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$BaiChanTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BaiChanTable,
+      BaiChanData,
+      $$BaiChanTableFilterComposer,
+      $$BaiChanTableOrderingComposer,
+      $$BaiChanTableAnnotationComposer,
+      $$BaiChanTableCreateCompanionBuilder,
+      $$BaiChanTableUpdateCompanionBuilder,
+      (BaiChanData, BaseReferences<_$AppDatabase, $BaiChanTable, BaiChanData>),
+      BaiChanData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -6002,4 +7342,6 @@ class $AppDatabaseManager {
       $$TipBookTableTableManager(_db, _db.tipBook);
   $$TipRecordTableTableManager get tipRecord =>
       $$TipRecordTableTableManager(_db, _db.tipRecord);
+  $$BaiChanTableTableManager get baiChan =>
+      $$BaiChanTableTableManager(_db, _db.baiChan);
 }

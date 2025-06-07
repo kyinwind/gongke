@@ -29,7 +29,8 @@ class BaiChan extends Table
       boolean().withDefault(const Constant(true))(); //每一拜，是否含序号，即第几拜
   BoolColumn get flagQiShen =>
       boolean().withDefault(const Constant(true))(); //每一拜，是否喊起身
-  TextColumn get detail => text()(); //为后续增加自定义功能预备，可以定义每一拜的佛名号，以及之前说什么，之后说什么
+  TextColumn get detail =>
+      text().nullable()(); //为后续增加自定义功能预备，可以定义每一拜的佛名号，以及之前说什么，之后说什么
 }
 
 class FaYuan extends Table

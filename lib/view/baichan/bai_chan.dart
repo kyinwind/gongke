@@ -8,13 +8,15 @@ import '../../main.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'bai_chan_play.dart';
 import 'package:styled_widget/styled_widget.dart';
+import '../../comm/pub_tools.dart';
 
-class BaiChanListPage extends StatefulWidget {
+class BaiChanPage extends StatefulWidget {
+  const BaiChanPage({super.key});
   @override
   _BaiChanListPageState createState() => _BaiChanListPageState();
 }
 
-class _BaiChanListPageState extends State<BaiChanListPage> {
+class _BaiChanListPageState extends State<BaiChanPage> {
   Stream<List<BaiChanData>> baiChanList = Stream.value([]);
 
   bool isRefresh = false;
@@ -42,7 +44,9 @@ class _BaiChanListPageState extends State<BaiChanListPage> {
   }
 
   Future<void> loadAllData() async {
-    baiChanList = globalDB.managers.baiChan.watch();
+    baiChanList = globalDB.managers.baiChan
+        .orderBy((o) => o.favoriteDateTime.desc() & o.createDateTime.desc())
+        .watch();
   }
 
   void deleteBaiChan(int id) {
@@ -61,11 +65,10 @@ class _BaiChanListPageState extends State<BaiChanListPage> {
 
   // 跳转到PDF页面
   void _navigateToPlay(BaiChanData baichan) {
-    Navigator.push(
+    Navigator.pushNamed(
       context,
-      MaterialPageRoute(
-        builder: (context) => BaiChanPlayPage(baichan: baichan),
-      ),
+      '/BaiChan/BaiChanPlay',
+      arguments: {'baichanId': baichan.id, 'baichan': baichan},
     );
   }
 
@@ -78,14 +81,10 @@ class _BaiChanListPageState extends State<BaiChanListPage> {
           IconButton(
             icon: Icon(Icons.add_circle),
             onPressed: () async {
-              final result = await Navigator.push(
+              final result = await Navigator.pushNamed(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => NewBaiChanPage(
-                    baichan: BaiChanCompanion(),
-                    actType: 'new',
-                  ),
-                ),
+                '/BaiChan/NewBaiChan',
+                arguments: {'acttype': 'new'},
               );
             },
           ),
@@ -153,7 +152,7 @@ class _BaiChanListPageState extends State<BaiChanListPage> {
                     ],
                   ),
                   child: ListTile(
-                    leading: Image.asset(list[index].image),
+                    leading: Image.asset(getFoPuSaImagePath(list[index].image)),
                     title: Row(
                       children: [Expanded(child: Text(list[index].name))],
                     ),
@@ -167,7 +166,14 @@ class _BaiChanListPageState extends State<BaiChanListPage> {
                       ],
                     ),
                     onTap: () {
-                      _navigateToPlay(list[index]);
+                      try {
+                        _navigateToPlay(list[index]);
+                      } catch (e) {
+                        print('---------${e.toString()}');
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text('打开新窗口失败: $e')));
+                      }
                     },
                   ).padding(all: 10),
                 );

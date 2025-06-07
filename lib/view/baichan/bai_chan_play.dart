@@ -1,18 +1,22 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:gongke/main.dart';
 import '../../database.dart';
+import '../../comm/pub_tools.dart';
+import '../../comm/audio_tools.dart';
 
 class BaiChanPlayPage extends StatefulWidget {
-  final BaiChanData baichan;
-
-  BaiChanPlayPage({required this.baichan});
+  const BaiChanPlayPage({super.key});
 
   @override
   _BaiChanPlayPageState createState() => _BaiChanPlayPageState();
 }
 
 class _BaiChanPlayPageState extends State<BaiChanPlayPage> {
+  bool _isInitialized = false; // 添加初始化标记
+  late int baichanId;
+  late BaiChanData baichan;
   int count = 0;
   bool isPlaying = false;
   bool flag = true;
@@ -24,7 +28,33 @@ class _BaiChanPlayPageState extends State<BaiChanPlayPage> {
   @override
   void initState() {
     super.initState();
-    _speak(widget.baichan.chanhuiWenStart.toString(), () => _startLoop());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_isInitialized) {
+      return;
+    }
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+    baichanId = args['baichanId'] as int;
+    BaiChanData? temp;
+    temp = args['baichan'] as BaiChanData?;
+    if (temp != null) {
+      baichan = temp;
+    }
+
+    _isInitialized = true;
+    if (baichanId > 0 && baichan != null) {
+      _speak(baichan.chanhuiWenStart.toString(), () => _startLoop());
+    }
+  }
+
+  Future<BaiChanData> _loadBaiChanData(id) async {
+    return await globalDB.managers.baiChan
+        .filter((f) => f.id.equals(id))
+        .getSingle();
   }
 
   void _startLoop() {
@@ -33,26 +63,30 @@ class _BaiChanPlayPageState extends State<BaiChanPlayPage> {
       if (!isPlaying) return;
 
       if (flag) {
-        final int baichanInterval2 = widget.baichan.baichanInterval2.toInt();
+        final int baichanInterval2 = baichan.baichanInterval2.toInt();
         if (num % baichanInterval2 == 0) {
-          count++;
-          if (count <= widget.baichan.baichanTimes &&
-              widget.baichan.flagOrderNumber) {
+          setState(() {
+            count++;
+          });
+
+          if (count <= baichan.baichanTimes && baichan.flagOrderNumber) {
             _speak("第$count 拜", () {});
           }
           num = 0;
           flag = false;
         }
-        if (count == widget.baichan.baichanTimes.toInt() + 1) {
-          _speak(widget.baichan.chanhuiWenEnd, () {
-            _stop();
-            Navigator.pop(context);
+        if (count == baichan.baichanTimes.toInt() + 1) {
+          AudioTools.playLocalAsset('mp3/yinqing.wav').then((_) {
+            _speak(baichan.chanhuiWenEnd, () {
+              _stop();
+              Navigator.pop(context);
+            });
           });
         }
         num++;
       } else {
-        if (num % widget.baichan.baichanInterval1.toInt() == 0) {
-          if (widget.baichan.flagQiShen) {
+        if (num % baichan.baichanInterval1.toInt() == 0) {
+          if (baichan.flagQiShen) {
             _speak("起身", () {});
           }
           num = 0;
@@ -86,7 +120,13 @@ class _BaiChanPlayPageState extends State<BaiChanPlayPage> {
 
   @override
   Widget build(BuildContext context) {
-    final bai = widget.baichan;
+    if (baichan == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text('拜忏进行中')),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    final bai = baichan;
     return Scaffold(
       appBar: AppBar(
         title: Text('拜忏进行中'),
@@ -104,7 +144,12 @@ class _BaiChanPlayPageState extends State<BaiChanPlayPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(bai.image, height: 300),
+              Expanded(
+                child: Image.asset(
+                  getFoPuSaImagePath(bai.image),
+                  fit: BoxFit.contain,
+                ),
+              ),
               SizedBox(height: 20),
               Text('$count / ${bai.baichanTimes.toInt()} $msg'),
             ],

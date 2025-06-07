@@ -63,6 +63,9 @@ class _NianShengHaoPageState extends State<NianShengHaoPage> {
             currentCount++;
           });
         }
+        if (currentCount >= gongkeitem!.cnt) {
+          AudioTools.playLocalAsset('mp3/yinqing.wav');
+        }
       }
     });
   }

@@ -4205,9 +4205,9 @@ class $BaiChanTable extends BaiChan with TableInfo<$BaiChanTable, BaiChanData> {
   late final GeneratedColumn<String> detail = GeneratedColumn<String>(
     'detail',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   @override
   List<GeneratedColumn> get $columns => [
@@ -4367,8 +4367,6 @@ class $BaiChanTable extends BaiChan with TableInfo<$BaiChanTable, BaiChanData> {
         _detailMeta,
         detail.isAcceptableOrUnknown(data['detail']!, _detailMeta),
       );
-    } else if (isInserting) {
-      context.missing(_detailMeta);
     }
     return context;
   }
@@ -4442,7 +4440,7 @@ class $BaiChanTable extends BaiChan with TableInfo<$BaiChanTable, BaiChanData> {
       detail: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}detail'],
-      )!,
+      ),
     );
   }
 
@@ -4468,7 +4466,7 @@ class BaiChanData extends DataClass implements Insertable<BaiChanData> {
   final int baichanInterval2;
   final bool flagOrderNumber;
   final bool flagQiShen;
-  final String detail;
+  final String? detail;
   const BaiChanData({
     required this.id,
     required this.createDateTime,
@@ -4485,7 +4483,7 @@ class BaiChanData extends DataClass implements Insertable<BaiChanData> {
     required this.baichanInterval2,
     required this.flagOrderNumber,
     required this.flagQiShen,
-    required this.detail,
+    this.detail,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -4513,7 +4511,9 @@ class BaiChanData extends DataClass implements Insertable<BaiChanData> {
     map['baichan_interval2'] = Variable<int>(baichanInterval2);
     map['flag_order_number'] = Variable<bool>(flagOrderNumber);
     map['flag_qi_shen'] = Variable<bool>(flagQiShen);
-    map['detail'] = Variable<String>(detail);
+    if (!nullToAbsent || detail != null) {
+      map['detail'] = Variable<String>(detail);
+    }
     return map;
   }
 
@@ -4538,7 +4538,9 @@ class BaiChanData extends DataClass implements Insertable<BaiChanData> {
       baichanInterval2: Value(baichanInterval2),
       flagOrderNumber: Value(flagOrderNumber),
       flagQiShen: Value(flagQiShen),
-      detail: Value(detail),
+      detail: detail == null && nullToAbsent
+          ? const Value.absent()
+          : Value(detail),
     );
   }
 
@@ -4565,7 +4567,7 @@ class BaiChanData extends DataClass implements Insertable<BaiChanData> {
       baichanInterval2: serializer.fromJson<int>(json['baichanInterval2']),
       flagOrderNumber: serializer.fromJson<bool>(json['flagOrderNumber']),
       flagQiShen: serializer.fromJson<bool>(json['flagQiShen']),
-      detail: serializer.fromJson<String>(json['detail']),
+      detail: serializer.fromJson<String?>(json['detail']),
     );
   }
   @override
@@ -4587,7 +4589,7 @@ class BaiChanData extends DataClass implements Insertable<BaiChanData> {
       'baichanInterval2': serializer.toJson<int>(baichanInterval2),
       'flagOrderNumber': serializer.toJson<bool>(flagOrderNumber),
       'flagQiShen': serializer.toJson<bool>(flagQiShen),
-      'detail': serializer.toJson<String>(detail),
+      'detail': serializer.toJson<String?>(detail),
     };
   }
 
@@ -4607,7 +4609,7 @@ class BaiChanData extends DataClass implements Insertable<BaiChanData> {
     int? baichanInterval2,
     bool? flagOrderNumber,
     bool? flagQiShen,
-    String? detail,
+    Value<String?> detail = const Value.absent(),
   }) => BaiChanData(
     id: id ?? this.id,
     createDateTime: createDateTime ?? this.createDateTime,
@@ -4626,7 +4628,7 @@ class BaiChanData extends DataClass implements Insertable<BaiChanData> {
     baichanInterval2: baichanInterval2 ?? this.baichanInterval2,
     flagOrderNumber: flagOrderNumber ?? this.flagOrderNumber,
     flagQiShen: flagQiShen ?? this.flagQiShen,
-    detail: detail ?? this.detail,
+    detail: detail.present ? detail.value : this.detail,
   );
   BaiChanData copyWithCompanion(BaiChanCompanion data) {
     return BaiChanData(
@@ -4747,7 +4749,7 @@ class BaiChanCompanion extends UpdateCompanion<BaiChanData> {
   final Value<int> baichanInterval2;
   final Value<bool> flagOrderNumber;
   final Value<bool> flagQiShen;
-  final Value<String> detail;
+  final Value<String?> detail;
   const BaiChanCompanion({
     this.id = const Value.absent(),
     this.createDateTime = const Value.absent(),
@@ -4782,12 +4784,11 @@ class BaiChanCompanion extends UpdateCompanion<BaiChanData> {
     this.baichanInterval2 = const Value.absent(),
     this.flagOrderNumber = const Value.absent(),
     this.flagQiShen = const Value.absent(),
-    required String detail,
+    this.detail = const Value.absent(),
   }) : name = Value(name),
        image = Value(image),
        chanhuiWenStart = Value(chanhuiWenStart),
-       chanhuiWenEnd = Value(chanhuiWenEnd),
-       detail = Value(detail);
+       chanhuiWenEnd = Value(chanhuiWenEnd);
   static Insertable<BaiChanData> custom({
     Expression<int>? id,
     Expression<DateTime>? createDateTime,
@@ -4842,7 +4843,7 @@ class BaiChanCompanion extends UpdateCompanion<BaiChanData> {
     Value<int>? baichanInterval2,
     Value<bool>? flagOrderNumber,
     Value<bool>? flagQiShen,
-    Value<String>? detail,
+    Value<String?>? detail,
   }) {
     return BaiChanCompanion(
       id: id ?? this.id,
@@ -6925,7 +6926,7 @@ typedef $$BaiChanTableCreateCompanionBuilder =
       Value<int> baichanInterval2,
       Value<bool> flagOrderNumber,
       Value<bool> flagQiShen,
-      required String detail,
+      Value<String?> detail,
     });
 typedef $$BaiChanTableUpdateCompanionBuilder =
     BaiChanCompanion Function({
@@ -6944,7 +6945,7 @@ typedef $$BaiChanTableUpdateCompanionBuilder =
       Value<int> baichanInterval2,
       Value<bool> flagOrderNumber,
       Value<bool> flagQiShen,
-      Value<String> detail,
+      Value<String?> detail,
     });
 
 class $$BaiChanTableFilterComposer
@@ -7249,7 +7250,7 @@ class $$BaiChanTableTableManager
                 Value<int> baichanInterval2 = const Value.absent(),
                 Value<bool> flagOrderNumber = const Value.absent(),
                 Value<bool> flagQiShen = const Value.absent(),
-                Value<String> detail = const Value.absent(),
+                Value<String?> detail = const Value.absent(),
               }) => BaiChanCompanion(
                 id: id,
                 createDateTime: createDateTime,
@@ -7285,7 +7286,7 @@ class $$BaiChanTableTableManager
                 Value<int> baichanInterval2 = const Value.absent(),
                 Value<bool> flagOrderNumber = const Value.absent(),
                 Value<bool> flagQiShen = const Value.absent(),
-                required String detail,
+                Value<String?> detail = const Value.absent(),
               }) => BaiChanCompanion.insert(
                 id: id,
                 createDateTime: createDateTime,

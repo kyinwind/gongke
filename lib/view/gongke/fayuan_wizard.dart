@@ -504,66 +504,6 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
     );
   }
 
-  // Future<void> _showAddGongKeDialog() async {
-  //   GongKeType? selectedType;
-  //   String? name;
-  //   int? count;
-
-  //   await showDialog(
-  //     context: context,
-  //     builder: (context) => AlertDialog(
-  //       title: const Text('新增功课'),
-  //       content: Column(
-  //         mainAxisSize: MainAxisSize.min,
-  //         children: [
-  //           DropdownButtonFormField<GongKeType>(
-  //             decoration: const InputDecoration(labelText: '功课类型'),
-  //             items: GongKeType.values.map((type) {
-  //               return DropdownMenuItem(value: type, child: Text(type.label));
-  //             }).toList(),
-  //             onChanged: (value) => selectedType = value,
-  //           ),
-  //           TextFormField(
-  //             decoration: const InputDecoration(labelText: '功课名称'),
-  //             onChanged: (value) => name = value,
-  //           ),
-  //           TextFormField(
-  //             decoration: const InputDecoration(labelText: '数量'),
-  //             keyboardType: TextInputType.number,
-  //             onChanged: (value) => count = int.tryParse(value) ?? 0,
-  //           ),
-  //         ],
-  //       ),
-  //       actions: [
-  //         TextButton(
-  //           onPressed: () => Navigator.pop(context),
-  //           child: const Text('取消'),
-  //         ),
-  //         TextButton(
-  //           onPressed: () {
-  //             if (selectedType != null &&
-  //                 name?.isNotEmpty == true &&
-  //                 count != null &&
-  //                 count! > 0) {
-  //               setState(() {
-  //                 _data.gkiODList.add(
-  //                   VMGongKeItemOneDayData(
-  //                     gongketype: selectedType!,
-  //                     name: name!,
-  //                     cnt: count!,
-  //                     idx: _data.gkiODList.length + 1, // 序号从1开始
-  //                   ),
-  //                 );
-  //               });
-  //               Navigator.pop(context);
-  //             }
-  //           },
-  //           child: const Text('确定'),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
   Future<void> _showAddGongKeDialog() async {
     GongKeType? selectedType;
     String? selectedJingShu;
@@ -800,8 +740,12 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
             gongkedaystr,
             'yyyy-MM-dd',
           ).isBefore(DateTime.now())) {
-            // 如果日期早于今天，则设置为已完成
-            iscomplete = true;
+            if (gongkedaystr == DateTools.getDateStringByDate(DateTime.now())) {
+              iscomplete = false;
+            } else {
+              // 如果日期早于今天，则设置为已完成
+              iscomplete = true;
+            }
           } else {
             iscomplete = false;
           }

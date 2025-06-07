@@ -222,21 +222,18 @@ class _GongKeSettingPageState extends State<GongKeSettingPage> {
                                       },
                                     },
                                   );
+                                  break;
                                 case 'nianshenghao':
-                                  // Navigator.push(
-                                  //   context,
-                                  //   MaterialPageRoute(
-                                  //     builder: (context) => WoodenFishWidget(),
-                                  //   ),
-                                  // );
-
                                   Navigator.pushNamed(
                                     context,
                                     '/GongKe/GongKeSetting/nianshenghao',
                                     arguments: {'gongkeitem': item},
                                   );
+                                  break;
                                 case 'ketou':
+                                  break;
                                 case 'baichan':
+                                  break;
                                 case 'dazuo':
                                   Navigator.pushNamed(
                                     context,
@@ -254,7 +251,9 @@ class _GongKeSettingPageState extends State<GongKeSettingPage> {
                               style: TextStyle(
                                 color:
                                     item.gongketype == 'songjing' ||
-                                        item.gongketype == 'nianzhou'
+                                        item.gongketype == 'nianzhou' ||
+                                        item.gongketype == 'nianshenghao' ||
+                                        item.gongketype == 'dazuo'
                                     ? Colors.blue
                                     : Colors.black,
                               ),

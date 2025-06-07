@@ -61,7 +61,8 @@ dependencies:
   sensors_plus: ^6.1.1  # 用于传感器数据获取
   flutter_svg: ^2.0.9  # 用于SVG图标支持
   audioplayers: ^6.4.0
-  flutter_tts: ^4.2.3
+  flutter_tts: 4.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

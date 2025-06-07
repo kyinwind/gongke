@@ -81,6 +81,9 @@ class _NianzhouPageState extends State<NianzhouPage> {
     if (vibrateEnabled) {
       HapticFeedback.vibrate();
     }
+    if (count >= gongkeitem.cnt) {
+      AudioTools.playLocalAsset('mp3/yinqing.wav');
+    }
   }
 
   void _decrementCount() {

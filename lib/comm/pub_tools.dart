@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 enum FoPuShaImageType {
   amituofo('阿弥陀佛圣像'),
-  ziangpusashengxiang('地藏菩萨圣像'),
+  dizangpusashengxiang('地藏菩萨圣像'),
   dashizhipusashengxiang('大势至菩萨圣像'),
   guanyinpusashengxiang('观音菩萨圣像'),
   guanshiyinpusashengxiang('观世音菩萨圣像'),

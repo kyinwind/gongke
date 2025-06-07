@@ -57,7 +57,7 @@ class _BaiChanPlayPageState extends State<BaiChanPlayPage> {
         .getSingle();
   }
 
-  void _startLoop() {
+  void _startLoop() async {
     setState(() => isPlaying = true);
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (!isPlaying) return;
@@ -70,7 +70,9 @@ class _BaiChanPlayPageState extends State<BaiChanPlayPage> {
           });
 
           if (count <= baichan.baichanTimes && baichan.flagOrderNumber) {
-            _speak("第$count 拜", () {});
+            AudioTools.playLocalAsset('mp3/yinqing.wav').then((_) {
+              _speak("第$count 拜", () {});
+            });
           }
           num = 0;
           flag = false;
@@ -87,7 +89,9 @@ class _BaiChanPlayPageState extends State<BaiChanPlayPage> {
       } else {
         if (num % baichan.baichanInterval1.toInt() == 0) {
           if (baichan.flagQiShen) {
-            _speak("起身", () {});
+            AudioTools.playLocalAsset('mp3/yinqing.wav').then((_) {
+              _speak("起身", () {});
+            });
           }
           num = 0;
           flag = true;

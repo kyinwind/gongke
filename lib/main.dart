@@ -20,6 +20,7 @@ import 'view/tips/import_tips.dart';
 import 'view/baichan/bai_chan.dart';
 import 'view/baichan/new_bai_chan.dart';
 import 'view/baichan/bai_chan_play.dart';
+import 'view/setting/setting_page.dart';
 // 导入 path_provider 库以使用 getApplicationDocumentsDirectory 函数
 //import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -95,6 +96,7 @@ class _MyAppState extends State<MyApp> {
         '/BaiChan': (context) => const BaiChanPage(),
         '/BaiChan/NewBaiChan': (context) => const NewBaiChanPage(),
         '/BaiChan/BaiChanPlay': (context) => const BaiChanPlayPage(),
+        '/Setting': (context) => const SettingPage(),
       },
       initialRoute: '/',
       localizationsDelegates: const [
@@ -128,7 +130,7 @@ class _TabbedHomePageState extends State<TabbedHomePage> {
     SongJingPage(),
     TipPage(), // 传入数据库实例
     BaiChanPage(),
-    Text('设置页面'),
+    SettingPage(),
   ];
 
   @override

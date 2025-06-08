@@ -3,6 +3,8 @@ import 'package:pdfx/pdfx.dart';
 import 'package:flutter/services.dart';
 import 'dart:io'; // 引入 dart:io 来判断平台
 import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
+import 'platform_tools.dart';
 
 class PdfViewerPage extends StatefulWidget {
   final String pdfFileName; //带pdf后缀的文件名
@@ -20,7 +22,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
 
   int _pages = 0;
   int _currentIndex = 0;
-  bool _isDoublePage = true;
+  bool _isDoublePage = false;
 
   // 全局管理焦点节点
   final FocusNode focusNode = FocusNode();
@@ -39,22 +41,65 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     });
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.of(context).orientation == Orientation.landscape) {
+      _isDoublePage = true; //如果打开app时是横屏的，默认显示双页
+    }
+  }
+
   Future<void> _loadPdf() async {
-    final doc = await PdfDocument.openAsset('assets/pdfs/${widget.pdfFileName}')
-        .timeout(
-          const Duration(seconds: 10),
-          onTimeout: () {
-            throw Exception('PDF loading timed out');
-          },
-        );
-    if (!mounted) return;
-    setState(() {
-      _document = doc;
-      _pdfController = PdfController(
-        document: Future.value(doc),
-      ); // Wrap the PdfDocument into a Future
-      _pages = doc.pagesCount;
-    });
+    // 为了兼容 Android 14 更为严格的文件权限管理
+    late PdfDocument doc;
+    try {
+      if (Platform.isAndroid) {
+        print(PlatformUtils.isAndroid14Above);
+        if (await PlatformUtils.isAndroid14Above) {
+          print("执行 Android 14+ 的兼容逻辑");
+          doc = await PdfDocument.openAsset('assets/pdfs/${widget.pdfFileName}')
+              .timeout(
+                const Duration(seconds: 10),
+                onTimeout: () {
+                  throw Exception('PDF loading timed out');
+                },
+              );
+        } else {
+          print("执行旧版 Android 的逻辑");
+          // 先从 assets 读取
+          final byteData = await rootBundle.load(
+            'assets/pdfs/${widget.pdfFileName}',
+          );
+          // 写入临时文件
+          final tempDir = await getTemporaryDirectory();
+          final tempFilePath = '${tempDir.path}/${widget.pdfFileName}';
+          final file = File(tempFilePath);
+          if (!await file.exists()) {
+            final byteData = await rootBundle.load(
+              'assets/pdfs/${widget.pdfFileName}',
+            );
+            await file.writeAsBytes(byteData.buffer.asUint8List(), flush: true);
+          }
+          print('PDF file path: $tempDir');
+          print('File exists: ${await file.exists()}');
+          print('File size: ${await file.length()}');
+          // 打开 PDF
+          doc = await PdfDocument.openFile(tempFilePath);
+        }
+      } else {
+        // 非 Android 平台（如 iOS、Web、macOS）
+        doc = await PdfDocument.openAsset('assets/pdfs/${widget.pdfFileName}');
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _document = doc;
+        _pdfController = PdfController(document: Future.value(doc));
+        _pages = doc.pagesCount;
+      });
+    } catch (e) {
+      print('加载 PDF 出错: $e');
+    }
   }
 
   @override
@@ -81,27 +126,25 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
 
         return Row(
           children: [
-            Expanded(flex: 1, child: SizedBox()),
+            Expanded(flex: 4, child: SizedBox()),
             Expanded(
-              flex: 4,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: PdfPageView(
-                  pageNumber: leftPage,
-                  controller: _pdfController!,
-                ),
+              flex: 10,
+              child: PdfPageView(
+                pageNumber: leftPage,
+                controller: _pdfController!,
               ),
             ),
+            Expanded(flex: 1, child: SizedBox()),
             (rightPage <= _pages)
                 ? Expanded(
-                    flex: 4,
+                    flex: 10,
                     child: PdfPageView(
                       pageNumber: rightPage,
                       controller: _pdfController!,
                     ),
                   )
                 : Expanded(child: SizedBox()),
-            Expanded(flex: 1, child: SizedBox()),
+            Expanded(flex: 4, child: SizedBox()),
           ],
         );
       },
@@ -130,7 +173,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     }
   }
 
-  Widget _buildThumbnailList() {
+  Widget _buildThumbnailList(Axis direction) {
     // 在 Widget 构建完成后，自动定位到当前索引页面
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_thumbnailScrollController.hasClients) {
@@ -147,7 +190,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     return SizedBox(
       width: 50,
       child: ListView.builder(
-        scrollDirection: Axis.vertical,
+        scrollDirection: direction,
         itemCount: _pages,
         itemBuilder: (context, index) {
           final pageNumber = index + 1;
@@ -289,6 +332,38 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     FocusScope.of(context).requestFocus(focusNode);
   }
 
+  Widget _buildNavigatorButton() {
+    return Column(
+      children: [
+        Spacer(),
+        IconButton(
+          icon: const Icon(Icons.arrow_upward),
+          tooltip: '上一页',
+          onPressed: () {
+            _handlePreviousPage();
+            focusNode.requestFocus(); // 处理完事件后重新获取焦点
+          },
+        ),
+        Spacer(),
+        IconButton(
+          icon: Icon(_isDoublePage ? Icons.filter_1 : Icons.filter_2),
+          tooltip: _isDoublePage ? '切换为单页显示' : '切换为双页显示',
+          onPressed: _togglePageMode,
+        ),
+        Spacer(),
+        IconButton(
+          icon: const Icon(Icons.arrow_downward),
+          tooltip: '下一页',
+          onPressed: () {
+            _handleNextPage();
+            focusNode.requestFocus(); // 处理完事件后重新获取焦点
+          },
+        ),
+        Spacer(),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_pages == 0) {
@@ -330,45 +405,39 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
             focusNode.requestFocus(); // 处理完事件后重新获取焦点
           }
         },
-        child: Row(
-          children: [
-            Expanded(
-              child: _isDoublePage
-                  ? _buildDoublePageView()
-                  : _buildSinglePageView(),
-            ),
-            Column(
-              children: [
-                Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.arrow_upward),
-                  tooltip: '上一页',
-                  onPressed: () {
-                    _handlePreviousPage();
-                    focusNode.requestFocus(); // 处理完事件后重新获取焦点
-                  },
-                ),
-                Spacer(),
-                IconButton(
-                  icon: Icon(_isDoublePage ? Icons.filter_1 : Icons.filter_2),
-                  tooltip: _isDoublePage ? '切换为单页显示' : '切换为双页显示',
-                  onPressed: _togglePageMode,
-                ),
-                Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.arrow_downward),
-                  tooltip: '下一页',
-                  onPressed: () {
-                    _handleNextPage();
-                    focusNode.requestFocus(); // 处理完事件后重新获取焦点
-                  },
-                ),
-                Spacer(),
-              ],
-            ),
-            _buildThumbnailList(),
-          ],
-        ),
+        child: MediaQuery.of(context).orientation == Orientation.landscape
+            ? Row(
+                children: [
+                  Expanded(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        _isDoublePage
+                            ? _buildDoublePageView()
+                            : _buildSinglePageView(),
+                        Row(children: [Spacer(), _buildNavigatorButton()]),
+                      ],
+                    ),
+                  ),
+                  _buildThumbnailList(Axis.vertical),
+                ],
+              )
+            : Column(
+                children: [
+                  Expanded(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        _isDoublePage
+                            ? _buildDoublePageView()
+                            : _buildSinglePageView(),
+                        Row(children: [Spacer(), _buildNavigatorButton()]),
+                      ],
+                    ),
+                  ),
+                  //_buildThumbnailList(Axis.horizontal),
+                ],
+              ),
       ),
     );
   }

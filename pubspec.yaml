@@ -52,7 +52,7 @@ dependencies:
   path: ^1.9.0
 
   shared_preferences: ^2.2.2
-  pdfx: ^2.9.1
+  pdfx: 2.9.1
   flutter_slidable: ^4.0.0
   image_picker: ^1.1.2
   flutter_image_compress: ^2.1.0
@@ -64,6 +64,7 @@ dependencies:
   flutter_tts: 4.2.0    #text to speech
   carousel_slider: ^5.1.1  #图片轮播
   wakelock_plus: ^1.3.2 #防息屏
+  device_info_plus: ^9.1.2 #设备信息
 dev_dependencies:
   flutter_test:
     sdk: flutter

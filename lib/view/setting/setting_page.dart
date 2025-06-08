@@ -6,9 +6,101 @@ class SettingPage extends StatefulWidget {
   State<SettingPage> createState() => _SettingPageState();
 }
 
-class _SettingPageState extends State<SettingPage> {
-  List<String> helpimagelist = [];
+final List<Map<String, String>> help_slides = [
+  {
+    'image': 'assets/help/01.jpg',
+    'title': '首页',
+    'description': '发愿功课，功课完成日历一目了然',
+  },
+  {
+    'image': 'assets/help/02.jpg',
+    'title': '发愿向导',
+    'description': '跟随发愿向导，制定功课计划。',
+  },
+  {
+    'image': 'assets/help/03.jpg',
+    'title': '完成功课记录',
+    'description': '点击日历日期，完成当天功课。',
+  },
+  {
+    'image': 'assets/help/04.jpg',
+    'title': '完成功课小工具-功课计数',
+    'description': '对于念咒类功课，提供晃动手机计数功能，适合在外散步时做功课。',
+  },
+  {
+    'image': 'assets/help/05.jpg',
+    'title': '完成功课小工具-念佛计数',
+    'description': '对于念佛类功课，提供电子木鱼功能',
+  },
+  {
+    'image': 'assets/help/06.jpg',
+    'title': '功课统计',
+    'description': '可随时查看统计功课完成情况',
+  },
+  {
+    'image': 'assets/help/07.jpg',
+    'title': '藏经阁',
+    'description': '40多部常用经书供持诵学习',
+  },
+  {
+    'image': 'assets/help/08.jpg',
+    'title': '大德开示',
+    'description': '每天一句大德开示，勉励自己精进修行。',
+  },
+  {
+    'image': 'assets/help/09.jpg',
+    'title': '拜忏',
+    'description': '根据自己体力和发愿，自定义人声引导拜忏，自净其意。',
+  },
+];
+final List<Widget> imageSliders = help_slides
+    .map(
+      (item) => Container(
+        child: Container(
+          margin: EdgeInsets.all(5.0),
+          child: ClipRRect(
+            borderRadius: BorderRadius.all(Radius.circular(5.0)),
+            child: Stack(
+              children: <Widget>[
+                Image.asset(item['image']!, fit: BoxFit.fill, height: 700),
+                Positioned(
+                  bottom: 0.0,
+                  left: 0.0,
+                  right: 0.0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Color.fromARGB(200, 0, 0, 0),
+                          Color.fromARGB(0, 0, 0, 0),
+                        ],
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                      ),
+                    ),
+                    padding: EdgeInsets.symmetric(
+                      vertical: 10.0,
+                      horizontal: 20.0,
+                    ),
+                    child: Text(
+                      '${item['title']!}\n${item['description']!}',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    )
+    .toList();
 
+class _SettingPageState extends State<SettingPage> {
   @override
   void initState() {
     super.initState();
@@ -56,22 +148,12 @@ class _SettingPageState extends State<SettingPage> {
                 '使用帮助',
                 CarouselSlider(
                   options: CarouselOptions(
-                    height: 200,
-                    enableInfiniteScroll: false,
-                    viewportFraction: 0.8,
+                    aspectRatio: 2.0,
+                    enlargeCenterPage: true,
+                    enlargeStrategy: CenterPageEnlargeStrategy.zoom,
+                    enlargeFactor: 0.4,
                   ),
-                  items: List.generate(
-                    10,
-                    (index) => Card(
-                      child: Align(
-                        alignment: Alignment.centerLeft, // ✅ 左对齐
-                        child: Image.asset(
-                          'assets/help/${(index + 1).toString().padLeft(2, '0')}.jpg',
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ),
-                  ),
+                  items: imageSliders,
                 ),
               ),
 
@@ -102,8 +184,8 @@ class _SettingPageState extends State<SettingPage> {
   flutter_svg
   audioplayers
   flutter_tts
-  carousel_slider...                
-                ''',
+  carousel_slider
+  wakelock_plus...''',
                   textAlign: TextAlign.left, // ✅ 添加对齐
                 ),
               ),

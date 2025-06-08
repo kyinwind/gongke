@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:gongke/main.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import '../../database.dart';
 import '../../comm/pub_tools.dart';
 import '../../comm/audio_tools.dart';
@@ -61,7 +62,7 @@ class _BaiChanPlayPageState extends State<BaiChanPlayPage> {
     setState(() => isPlaying = true);
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (!isPlaying) return;
-
+      WakelockPlus.enable(); //避免息屏
       if (flag) {
         final int baichanInterval2 = baichan.baichanInterval2.toInt();
         if (num % baichanInterval2 == 0) {
@@ -81,6 +82,7 @@ class _BaiChanPlayPageState extends State<BaiChanPlayPage> {
           AudioTools.playLocalAsset('mp3/yinqing.wav').then((_) {
             _speak(baichan.chanhuiWenEnd, () {
               _stop();
+              WakelockPlus.disable();
               Navigator.pop(context);
             });
           });
@@ -110,15 +112,18 @@ class _BaiChanPlayPageState extends State<BaiChanPlayPage> {
     });
   }
 
-  void _stop() {
+  void _stop() async {
     _timer?.cancel();
-    flutterTts.stop();
+    await flutterTts.stop();
+    if (!mounted) return; // ✅ 避免 setState 后报错
     setState(() => isPlaying = false);
   }
 
   @override
   void dispose() {
-    _stop();
+    WakelockPlus.disable(); //放开避免息屏
+    _timer?.cancel();
+    flutterTts.stop();
     super.dispose();
   }
 

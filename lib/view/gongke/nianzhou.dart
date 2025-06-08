@@ -8,6 +8,7 @@ import 'package:drift/drift.dart' hide Column;
 import 'dart:io' show Platform;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import '../../comm/audio_tools.dart';
 
 class NianzhouPage extends StatefulWidget {
@@ -75,10 +76,12 @@ class _NianzhouPageState extends State<NianzhouPage> {
   }
 
   void _incrementCount() {
+    WakelockPlus.enable();
     setState(() {
       count += 1;
     });
     if (vibrateEnabled) {
+      AudioTools.playLocalAsset('mp3/muyu.wav');
       HapticFeedback.vibrate();
     }
     if (count >= gongkeitem.cnt) {
@@ -95,11 +98,10 @@ class _NianzhouPageState extends State<NianzhouPage> {
   @override
   void dispose() {
     _accelerometerSubscription?.cancel();
-
+    WakelockPlus.disable();
     // 先保存数据
     _updateCountBeforeExit().then((_) {
       // 数据保存完成后，使用 SchedulerBinding 在下一帧回调
-
       //print('-----------开始onUpdated?.call();');
       SchedulerBinding.instance.addPostFrameCallback((_) {
         onUpdated?.call();

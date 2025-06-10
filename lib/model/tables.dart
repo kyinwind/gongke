@@ -93,7 +93,7 @@ class JingShu extends Table
         FavoriteDateTimeColumn,
         RemarksColumn {
   TextColumn get name => text()();
-  TextColumn get type => text()();
+  TextColumn get type => text()(); //jingshu,shanshu
   TextColumn get image => text()();
   TextColumn get fileUrl => text()();
   TextColumn get fileType => text()();
@@ -106,6 +106,7 @@ class JingShu extends Table
   IntColumn get muyuCount => integer().nullable()();
   RealColumn get muyuInterval => real().nullable()();
   RealColumn get muyuDuration => real().nullable()();
+  IntColumn get curPageNum => integer().nullable()(); // 当前看到的页码
 }
 
 class TipBook extends Table

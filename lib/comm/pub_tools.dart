@@ -34,7 +34,7 @@ String getTypeByFoPuSaLabel(String fopusaLabel) {
       case '阿弥陀佛圣像':
         return 'amituofo';
       case '地藏菩萨圣像':
-        return 'ziangpusashengxiang';
+        return 'dizangpusashengxiang';
       case '大势至菩萨圣像':
         return 'dashizhipusashengxiang';
       case '观音菩萨圣像':

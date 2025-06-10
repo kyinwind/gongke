@@ -21,6 +21,7 @@ import 'view/baichan/bai_chan.dart';
 import 'view/baichan/new_bai_chan.dart';
 import 'view/baichan/bai_chan_play.dart';
 import 'view/setting/setting_page.dart';
+import 'view/shanshu/shanshu.dart';
 // 导入 path_provider 库以使用 getApplicationDocumentsDirectory 函数
 //import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -128,6 +129,7 @@ class _TabbedHomePageState extends State<TabbedHomePage> {
   static List<Widget> _widgetOptions() => <Widget>[
     GongKePage(),
     SongJingPage(),
+    ShanShuPage(),
     TipPage(), // 传入数据库实例
     BaiChanPage(),
     SettingPage(),
@@ -141,6 +143,7 @@ class _TabbedHomePageState extends State<TabbedHomePage> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.book), label: '功课'),
           BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: '诵经'),
+          BottomNavigationBarItem(icon: Icon(Icons.auto_graph), label: '善书'),
           BottomNavigationBarItem(icon: Icon(Icons.chat), label: '开示'),
           BottomNavigationBarItem(icon: Icon(Icons.announcement), label: '拜忏'),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: '设置'),

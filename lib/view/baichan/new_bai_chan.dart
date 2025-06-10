@@ -20,7 +20,7 @@ class _NewBaiChanPageState extends State<NewBaiChanPage> {
   final List<String> imageList = [
     '阿弥陀佛圣像',
     '观音菩萨圣像',
-    '地藏王菩萨圣像',
+    '地藏菩萨圣像',
     '大势至菩萨圣像',
     '观世音菩萨圣像',
     '释迦牟尼佛圣像',
@@ -46,7 +46,7 @@ class _NewBaiChanPageState extends State<NewBaiChanPage> {
       name: const Value('我的拜忏'),
     );
     currentImage = baichan.image.value;
-    print('----------------初始化baichan${baichan.toString()}');
+    //print('----------------初始化baichan${baichan.toString()}');
   }
 
   @override
@@ -61,7 +61,7 @@ class _NewBaiChanPageState extends State<NewBaiChanPage> {
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
       actType = args['acttype'];
       baichanId = args['baichanId'] ?? 0;
-      print('----------------开始接受参数${args.toString()}');
+      //print('----------------开始接受参数${args.toString()}');
       if (actType == 'mod' && baichanId > 0) {
         _loadBaiChanData(baichanId).then(
           (value) => {
@@ -80,7 +80,7 @@ class _NewBaiChanPageState extends State<NewBaiChanPage> {
           },
         );
       }
-      print('---------baichan.image.value:${baichan.image.value}');
+      //print('---------baichan.image.value:${baichan.image.value}');
       currentImage = baichan.image.value;
     } catch (e) {
       print('------------------didChangeDependencies error:${e}');
@@ -150,7 +150,7 @@ class _NewBaiChanPageState extends State<NewBaiChanPage> {
         name: Value(baichan.name.value),
       );
 
-      print('------------开始保存-----------baichan:${dataToSave.toString()}');
+      //print('------------开始保存-----------baichan:${dataToSave.toString()}');
       await globalDB.into(globalDB.baiChan).insertOnConflictUpdate(dataToSave);
     } catch (e) {
       if (mounted) {
@@ -184,7 +184,7 @@ class _NewBaiChanPageState extends State<NewBaiChanPage> {
                 value: currentImage,
                 onChanged: (String? newValue) {
                   try {
-                    print('-------------------newValue${newValue}');
+                    //print('-------------------newValue${newValue}');
                     if (newValue != null) {
                       // 直接存储枚举的 label，也就是汉字
                       setState(() {

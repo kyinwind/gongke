@@ -2194,6 +2194,17 @@ class $JingShuTable extends JingShu with TableInfo<$JingShuTable, JingShuData> {
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _curPageNumMeta = const VerificationMeta(
+    'curPageNum',
+  );
+  @override
+  late final GeneratedColumn<int> curPageNum = GeneratedColumn<int>(
+    'cur_page_num',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2216,6 +2227,7 @@ class $JingShuTable extends JingShu with TableInfo<$JingShuTable, JingShuData> {
     muyuCount,
     muyuInterval,
     muyuDuration,
+    curPageNum,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2371,6 +2383,15 @@ class $JingShuTable extends JingShu with TableInfo<$JingShuTable, JingShuData> {
         ),
       );
     }
+    if (data.containsKey('cur_page_num')) {
+      context.handle(
+        _curPageNumMeta,
+        curPageNum.isAcceptableOrUnknown(
+          data['cur_page_num']!,
+          _curPageNumMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2460,6 +2481,10 @@ class $JingShuTable extends JingShu with TableInfo<$JingShuTable, JingShuData> {
         DriftSqlType.double,
         data['${effectivePrefix}muyu_duration'],
       ),
+      curPageNum: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}cur_page_num'],
+      ),
     );
   }
 
@@ -2490,6 +2515,7 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
   final int? muyuCount;
   final double? muyuInterval;
   final double? muyuDuration;
+  final int? curPageNum;
   const JingShuData({
     required this.id,
     required this.createDateTime,
@@ -2511,6 +2537,7 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
     this.muyuCount,
     this.muyuInterval,
     this.muyuDuration,
+    this.curPageNum,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2557,6 +2584,9 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
     if (!nullToAbsent || muyuDuration != null) {
       map['muyu_duration'] = Variable<double>(muyuDuration);
     }
+    if (!nullToAbsent || curPageNum != null) {
+      map['cur_page_num'] = Variable<int>(curPageNum);
+    }
     return map;
   }
 
@@ -2600,6 +2630,9 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
       muyuDuration: muyuDuration == null && nullToAbsent
           ? const Value.absent()
           : Value(muyuDuration),
+      curPageNum: curPageNum == null && nullToAbsent
+          ? const Value.absent()
+          : Value(curPageNum),
     );
   }
 
@@ -2631,6 +2664,7 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
       muyuCount: serializer.fromJson<int?>(json['muyuCount']),
       muyuInterval: serializer.fromJson<double?>(json['muyuInterval']),
       muyuDuration: serializer.fromJson<double?>(json['muyuDuration']),
+      curPageNum: serializer.fromJson<int?>(json['curPageNum']),
     );
   }
   @override
@@ -2657,6 +2691,7 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
       'muyuCount': serializer.toJson<int?>(muyuCount),
       'muyuInterval': serializer.toJson<double?>(muyuInterval),
       'muyuDuration': serializer.toJson<double?>(muyuDuration),
+      'curPageNum': serializer.toJson<int?>(curPageNum),
     };
   }
 
@@ -2681,6 +2716,7 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
     Value<int?> muyuCount = const Value.absent(),
     Value<double?> muyuInterval = const Value.absent(),
     Value<double?> muyuDuration = const Value.absent(),
+    Value<int?> curPageNum = const Value.absent(),
   }) => JingShuData(
     id: id ?? this.id,
     createDateTime: createDateTime ?? this.createDateTime,
@@ -2704,6 +2740,7 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
     muyuCount: muyuCount.present ? muyuCount.value : this.muyuCount,
     muyuInterval: muyuInterval.present ? muyuInterval.value : this.muyuInterval,
     muyuDuration: muyuDuration.present ? muyuDuration.value : this.muyuDuration,
+    curPageNum: curPageNum.present ? curPageNum.value : this.curPageNum,
   );
   JingShuData copyWithCompanion(JingShuCompanion data) {
     return JingShuData(
@@ -2737,6 +2774,9 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
       muyuDuration: data.muyuDuration.present
           ? data.muyuDuration.value
           : this.muyuDuration,
+      curPageNum: data.curPageNum.present
+          ? data.curPageNum.value
+          : this.curPageNum,
     );
   }
 
@@ -2762,13 +2802,14 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
           ..write('muyuType: $muyuType, ')
           ..write('muyuCount: $muyuCount, ')
           ..write('muyuInterval: $muyuInterval, ')
-          ..write('muyuDuration: $muyuDuration')
+          ..write('muyuDuration: $muyuDuration, ')
+          ..write('curPageNum: $curPageNum')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     createDateTime,
     favoriteDateTime,
@@ -2789,7 +2830,8 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
     muyuCount,
     muyuInterval,
     muyuDuration,
-  );
+    curPageNum,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2813,7 +2855,8 @@ class JingShuData extends DataClass implements Insertable<JingShuData> {
           other.muyuType == this.muyuType &&
           other.muyuCount == this.muyuCount &&
           other.muyuInterval == this.muyuInterval &&
-          other.muyuDuration == this.muyuDuration);
+          other.muyuDuration == this.muyuDuration &&
+          other.curPageNum == this.curPageNum);
 }
 
 class JingShuCompanion extends UpdateCompanion<JingShuData> {
@@ -2837,6 +2880,7 @@ class JingShuCompanion extends UpdateCompanion<JingShuData> {
   final Value<int?> muyuCount;
   final Value<double?> muyuInterval;
   final Value<double?> muyuDuration;
+  final Value<int?> curPageNum;
   const JingShuCompanion({
     this.id = const Value.absent(),
     this.createDateTime = const Value.absent(),
@@ -2858,6 +2902,7 @@ class JingShuCompanion extends UpdateCompanion<JingShuData> {
     this.muyuCount = const Value.absent(),
     this.muyuInterval = const Value.absent(),
     this.muyuDuration = const Value.absent(),
+    this.curPageNum = const Value.absent(),
   });
   JingShuCompanion.insert({
     this.id = const Value.absent(),
@@ -2880,6 +2925,7 @@ class JingShuCompanion extends UpdateCompanion<JingShuData> {
     this.muyuCount = const Value.absent(),
     this.muyuInterval = const Value.absent(),
     this.muyuDuration = const Value.absent(),
+    this.curPageNum = const Value.absent(),
   }) : name = Value(name),
        type = Value(type),
        image = Value(image),
@@ -2906,6 +2952,7 @@ class JingShuCompanion extends UpdateCompanion<JingShuData> {
     Expression<int>? muyuCount,
     Expression<double>? muyuInterval,
     Expression<double>? muyuDuration,
+    Expression<int>? curPageNum,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2928,6 +2975,7 @@ class JingShuCompanion extends UpdateCompanion<JingShuData> {
       if (muyuCount != null) 'muyu_count': muyuCount,
       if (muyuInterval != null) 'muyu_interval': muyuInterval,
       if (muyuDuration != null) 'muyu_duration': muyuDuration,
+      if (curPageNum != null) 'cur_page_num': curPageNum,
     });
   }
 
@@ -2952,6 +3000,7 @@ class JingShuCompanion extends UpdateCompanion<JingShuData> {
     Value<int?>? muyuCount,
     Value<double?>? muyuInterval,
     Value<double?>? muyuDuration,
+    Value<int?>? curPageNum,
   }) {
     return JingShuCompanion(
       id: id ?? this.id,
@@ -2974,6 +3023,7 @@ class JingShuCompanion extends UpdateCompanion<JingShuData> {
       muyuCount: muyuCount ?? this.muyuCount,
       muyuInterval: muyuInterval ?? this.muyuInterval,
       muyuDuration: muyuDuration ?? this.muyuDuration,
+      curPageNum: curPageNum ?? this.curPageNum,
     );
   }
 
@@ -3040,6 +3090,9 @@ class JingShuCompanion extends UpdateCompanion<JingShuData> {
     if (muyuDuration.present) {
       map['muyu_duration'] = Variable<double>(muyuDuration.value);
     }
+    if (curPageNum.present) {
+      map['cur_page_num'] = Variable<int>(curPageNum.value);
+    }
     return map;
   }
 
@@ -3065,7 +3118,8 @@ class JingShuCompanion extends UpdateCompanion<JingShuData> {
           ..write('muyuType: $muyuType, ')
           ..write('muyuCount: $muyuCount, ')
           ..write('muyuInterval: $muyuInterval, ')
-          ..write('muyuDuration: $muyuDuration')
+          ..write('muyuDuration: $muyuDuration, ')
+          ..write('curPageNum: $curPageNum')
           ..write(')'))
         .toString();
   }
@@ -5959,6 +6013,7 @@ typedef $$JingShuTableCreateCompanionBuilder =
       Value<int?> muyuCount,
       Value<double?> muyuInterval,
       Value<double?> muyuDuration,
+      Value<int?> curPageNum,
     });
 typedef $$JingShuTableUpdateCompanionBuilder =
     JingShuCompanion Function({
@@ -5982,6 +6037,7 @@ typedef $$JingShuTableUpdateCompanionBuilder =
       Value<int?> muyuCount,
       Value<double?> muyuInterval,
       Value<double?> muyuDuration,
+      Value<int?> curPageNum,
     });
 
 class $$JingShuTableFilterComposer
@@ -6090,6 +6146,11 @@ class $$JingShuTableFilterComposer
 
   ColumnFilters<double> get muyuDuration => $composableBuilder(
     column: $table.muyuDuration,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get curPageNum => $composableBuilder(
+    column: $table.curPageNum,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -6202,6 +6263,11 @@ class $$JingShuTableOrderingComposer
     column: $table.muyuDuration,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get curPageNum => $composableBuilder(
+    column: $table.curPageNum,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$JingShuTableAnnotationComposer
@@ -6282,6 +6348,11 @@ class $$JingShuTableAnnotationComposer
     column: $table.muyuDuration,
     builder: (column) => column,
   );
+
+  GeneratedColumn<int> get curPageNum => $composableBuilder(
+    column: $table.curPageNum,
+    builder: (column) => column,
+  );
 }
 
 class $$JingShuTableTableManager
@@ -6335,6 +6406,7 @@ class $$JingShuTableTableManager
                 Value<int?> muyuCount = const Value.absent(),
                 Value<double?> muyuInterval = const Value.absent(),
                 Value<double?> muyuDuration = const Value.absent(),
+                Value<int?> curPageNum = const Value.absent(),
               }) => JingShuCompanion(
                 id: id,
                 createDateTime: createDateTime,
@@ -6356,6 +6428,7 @@ class $$JingShuTableTableManager
                 muyuCount: muyuCount,
                 muyuInterval: muyuInterval,
                 muyuDuration: muyuDuration,
+                curPageNum: curPageNum,
               ),
           createCompanionCallback:
               ({
@@ -6379,6 +6452,7 @@ class $$JingShuTableTableManager
                 Value<int?> muyuCount = const Value.absent(),
                 Value<double?> muyuInterval = const Value.absent(),
                 Value<double?> muyuDuration = const Value.absent(),
+                Value<int?> curPageNum = const Value.absent(),
               }) => JingShuCompanion.insert(
                 id: id,
                 createDateTime: createDateTime,
@@ -6400,6 +6474,7 @@ class $$JingShuTableTableManager
                 muyuCount: muyuCount,
                 muyuInterval: muyuInterval,
                 muyuDuration: muyuDuration,
+                curPageNum: curPageNum,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

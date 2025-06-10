@@ -462,9 +462,9 @@ class _SongJingPageState extends State<SongJingPage> {
   // 查询所有记录
   Future<void> fetchAll() async {
     try {
-      final query = globalDB.managers.jingShu.orderBy(
-        (t) => t.favoriteDateTime.desc() & t.createDateTime.desc(),
-      );
+      final query = globalDB.managers.jingShu
+          .filter((f) => f.type.equals('jingshu'))
+          .orderBy((t) => t.favoriteDateTime.desc() & t.createDateTime.desc());
       final list = query.watch(); // 获取所有记录
       setState(() {
         jingshudatalist = list;
@@ -483,7 +483,9 @@ class _SongJingPageState extends State<SongJingPage> {
     try {
       final query = globalDB.managers.jingShu
           .orderBy((t) => t.favoriteDateTime.desc() & t.createDateTime.desc())
-          .filter((f) => f.name.contains(str.trim()));
+          .filter(
+            (f) => f.name.contains(str.trim()) & f.type.equals('jingshu'),
+          );
       final list = query.watch(); // 获取所有记录
       setState(() {
         jingshudatalist = list;

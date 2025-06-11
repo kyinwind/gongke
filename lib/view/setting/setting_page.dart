@@ -62,7 +62,7 @@ final List<Widget> imageSliders = help_slides
             borderRadius: BorderRadius.all(Radius.circular(5.0)),
             child: Stack(
               children: <Widget>[
-                Image.asset(item['image']!, fit: BoxFit.fill, height: 700),
+                Image.asset(item['image']!, fit: BoxFit.fill, height: 1400),
                 Positioned(
                   bottom: 0.0,
                   left: 0.0,
@@ -148,7 +148,7 @@ class _SettingPageState extends State<SettingPage> {
                 '使用帮助',
                 CarouselSlider(
                   options: CarouselOptions(
-                    aspectRatio: 2.0,
+                    aspectRatio: 1.0,
                     enlargeCenterPage: true,
                     enlargeStrategy: CenterPageEnlargeStrategy.zoom,
                     enlargeFactor: 0.4,
@@ -199,7 +199,9 @@ class _SettingPageState extends State<SettingPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
                     SizedBox(height: 8),
-                    Text('v0.9.0 (2025-06-8)', textAlign: TextAlign.left), // ✅
+                    Text('v0.9.1 (2025-06-11)', textAlign: TextAlign.left), // ✅
+                    Text('• 完善pdf显示，增加善书页面', textAlign: TextAlign.left), // ✅
+                    Text('v0.9.0 (2025-06-08)', textAlign: TextAlign.left), // ✅
                     Text('• 首次发布', textAlign: TextAlign.left), // ✅
                     SizedBox(height: 8),
                   ],

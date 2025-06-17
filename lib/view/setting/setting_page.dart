@@ -199,6 +199,11 @@ class _SettingPageState extends State<SettingPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
                     SizedBox(height: 8),
+                    Text('v0.9.2 (2025-06-17)', textAlign: TextAlign.left), // ✅
+                    Text(
+                      '• 完善首页显示。\n• 完善开示录显示。\n• 完善拜忏显示。',
+                      textAlign: TextAlign.left,
+                    ), // ✅
                     Text('v0.9.1 (2025-06-11)', textAlign: TextAlign.left), // ✅
                     Text('• 完善pdf显示，增加善书页面', textAlign: TextAlign.left), // ✅
                     Text('v0.9.0 (2025-06-08)', textAlign: TextAlign.left), // ✅

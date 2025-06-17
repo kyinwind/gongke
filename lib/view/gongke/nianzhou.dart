@@ -65,9 +65,9 @@ class _NianzhouPageState extends State<NianzhouPage> {
       if (!shakeEnabled) return;
 
       double delta = event.x.abs() + event.y.abs() + event.z.abs();
-      if (delta > 18) {
+      if (delta > 38) {
         final now = DateTime.now();
-        if (now.difference(lastShakeTime).inMilliseconds > 1000) {
+        if (now.difference(lastShakeTime).inMilliseconds > 2000) {
           lastShakeTime = now;
           _incrementCount();
         }

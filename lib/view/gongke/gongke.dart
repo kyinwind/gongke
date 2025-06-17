@@ -12,6 +12,7 @@ import 'package:intl/intl.dart';
 import '../../main.dart';
 import '../../comm/date_tools.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import '../../comm/platform_tools.dart';
 
 // 添加数据模型类
 class _ChartData {
@@ -261,7 +262,7 @@ class _GongKePageState extends State<GongKePage> {
           horizontal: 1,
           vertical: 2,
         ), // 减小水平边距，保持垂直边距
-        padding: const EdgeInsets.all(2), // 添加内边距
+        padding: const EdgeInsets.all(1), // 添加内边距
         width: 45, // 让容器尽可能宽
 
         decoration: BoxDecoration(
@@ -361,118 +362,217 @@ class _GongKePageState extends State<GongKePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 发愿一览标题
-            ListTile(
-              title: const Text(
-                '发愿一览',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min, // 让 Row 宽度适应内容
-                children: [
-                  // 添加文字和开关的组合
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Tooltip(
-                        message: '切换显示全部发愿记录或仅显示有效发愿', // 提示文字
-                        waitDuration: const Duration(
-                          milliseconds: 500,
-                        ), // 悬停多久后显示提示
-                        showDuration: const Duration(seconds: 2), // 提示显示多久
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text(
-                              '显示全部发愿',
-                              style: TextStyle(fontSize: 14),
-                            ),
-                            Transform.scale(
-                              scale: 0.5,
-                              child: Switch(
-                                value: flagFaYuanFilter == 1,
-                                onChanged: (value) {
-                                  setState(() {
-                                    flagFaYuanFilter = value ? 1 : 0;
-                                    _refreshAllData();
-                                  });
-                                },
-                                activeColor: Theme.of(context).primaryColor,
-                                materialTapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 发愿一览标题
+              ListTile(
+                title: const Text(
+                  '发愿一览',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min, // 让 Row 宽度适应内容
+                  children: [
+                    // 添加文字和开关的组合
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Tooltip(
+                          message: '切换显示全部发愿记录或仅显示有效发愿', // 提示文字
+                          waitDuration: const Duration(
+                            milliseconds: 500,
+                          ), // 悬停多久后显示提示
+                          showDuration: const Duration(seconds: 2), // 提示显示多久
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                '显示全部发愿',
+                                style: TextStyle(fontSize: 14),
                               ),
-                            ),
-                          ],
+                              Transform.scale(
+                                scale: 0.5,
+                                child: Switch(
+                                  value: flagFaYuanFilter == 1,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      flagFaYuanFilter = value ? 1 : 0;
+                                      _refreshAllData();
+                                    });
+                                  },
+                                  activeColor: Theme.of(context).primaryColor,
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      Tooltip(
-                        message: '添加新的发愿', // 为添加按钮也添加提示
-                        child: IconButton(
-                          icon: const Icon(Icons.add),
-                          onPressed: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/GongKe/FaYuanWizard',
-                              arguments: {'acttype': 'A'},
-                            ).then((_) => _refreshAllData());
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // 发愿列表
-            StreamBuilder<List<FaYuanData>>(
-              stream: fayuandatalist,
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                if (snapshot.data!.isEmpty) {
-                  return const Center(child: Text('暂无发愿记录'));
-                }
-
-                return ListView.builder(
-                  shrinkWrap: true, // 让ListView适应内容高度
-                  physics:
-                      const NeverScrollableScrollPhysics(), // 禁用ListView的滚动
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (context, index) {
-                    final fayuan = snapshot.data![index];
-                    return Slidable(
-                      startActionPane: ActionPane(
-                        motion: const ScrollMotion(),
-                        children: [
-                          SlidableAction(
-                            backgroundColor: Colors.blue,
-                            foregroundColor: Colors.white,
-                            icon: Icons.edit,
-                            label: '编辑',
-                            onPressed: (context) {
+                        Tooltip(
+                          message: '添加新的发愿', // 为添加按钮也添加提示
+                          child: IconButton(
+                            icon: const Icon(Icons.add),
+                            onPressed: () {
                               Navigator.pushNamed(
                                 context,
                                 '/GongKe/FaYuanWizard',
-                                arguments: {
-                                  'acttype': 'M',
-                                  'fayuanId': fayuan.id,
-                                },
+                                arguments: {'acttype': 'A'},
                               ).then((_) => _refreshAllData());
                             },
                           ),
-                          SlidableAction(
-                            backgroundColor: Colors.green,
-                            foregroundColor: Colors.white,
-                            icon: Icons.check_circle,
-                            label: '发愿文',
-                            onPressed: (context) {
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              // 发愿列表
+              StreamBuilder<List<FaYuanData>>(
+                stream: fayuandatalist,
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (snapshot.data!.isEmpty) {
+                    return const Center(child: Text('暂无发愿记录'));
+                  }
+
+                  return ListView.builder(
+                    shrinkWrap: true, // 让ListView适应内容高度
+                    padding: EdgeInsets.zero, // ← 去掉内边距
+                    physics:
+                        const NeverScrollableScrollPhysics(), // 禁用ListView的滚动
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      final fayuan = snapshot.data![index];
+                      return Slidable(
+                        startActionPane: ActionPane(
+                          motion: const ScrollMotion(),
+                          children: [
+                            SlidableAction(
+                              backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
+                              icon: Icons.edit,
+                              label: '编辑',
+                              onPressed: (context) {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/GongKe/FaYuanWizard',
+                                  arguments: {
+                                    'acttype': 'M',
+                                    'fayuanId': fayuan.id,
+                                  },
+                                ).then((_) => _refreshAllData());
+                              },
+                            ),
+                            SlidableAction(
+                              backgroundColor: Colors.green,
+                              foregroundColor: Colors.white,
+                              icon: Icons.check_circle,
+                              label: '发愿文',
+                              onPressed: (context) {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/GongKe/ModifyFaYuanWen',
+                                  arguments: {'fayuanId': fayuan.id},
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                        endActionPane: ActionPane(
+                          motion: const ScrollMotion(),
+                          children: [
+                            SlidableAction(
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                              icon: Icons.delete,
+                              label: '删除',
+                              onPressed: (context) async {
+                                bool confirm =
+                                    await showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: const Text('确认删除'),
+                                        content: const Text(
+                                          '确定要删除这条发愿记录吗？相关的功课记录也会被删除。',
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            child: const Text('取消'),
+                                            onPressed: () =>
+                                                Navigator.pop(context, false),
+                                          ),
+                                          TextButton(
+                                            child: const Text('确定'),
+                                            onPressed: () =>
+                                                Navigator.pop(context, true),
+                                          ),
+                                        ],
+                                      ),
+                                    ) ??
+                                    false;
+
+                                if (confirm) {
+                                  await globalDB.transaction(() async {
+                                    // 删除关联的功课项目记录
+                                    await (globalDB.delete(globalDB.gongKeItem)
+                                          ..where(
+                                            (t) => t.fayuanId.equals(fayuan.id),
+                                          ))
+                                        .go();
+                                    // 删除关联的每日功课记录
+                                    await (globalDB.delete(
+                                          globalDB.gongKeItemsOneDay,
+                                        )..where(
+                                          (t) => t.fayuanId.equals(fayuan.id),
+                                        ))
+                                        .go();
+                                    // 删除发愿记录
+                                    await (globalDB.delete(
+                                          globalDB.faYuan,
+                                        )..where((t) => t.id.equals(fayuan.id)))
+                                        .go();
+                                  });
+                                  setState(() {
+                                    // 刷新数据
+                                    _refreshAllData();
+                                  });
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                        child: Card(
+                          child: ListTile(
+                            title: Row(
+                              children: [
+                                _PercentChart(
+                                  context,
+                                  _fayuanCompletionRates[fayuan.id] ?? 0.0,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  '建:${DateTools.getDateStringByDate(fayuan.createDateTime)}\n'
+                                  '起:${DateTools.getDateStringByDate(fayuan.startDate)}\n'
+                                  '止:${DateTools.getDateStringByDate(fayuan.endDate)}',
+                                  style: TextStyle(fontSize: 10),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  fayuan.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            onTap: () {
                               Navigator.pushNamed(
                                 context,
                                 '/GongKe/ModifyFaYuanWen',
@@ -480,196 +580,101 @@ class _GongKePageState extends State<GongKePage> {
                               );
                             },
                           ),
-                        ],
-                      ),
-                      endActionPane: ActionPane(
-                        motion: const ScrollMotion(),
-                        children: [
-                          SlidableAction(
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                            icon: Icons.delete,
-                            label: '删除',
-                            onPressed: (context) async {
-                              bool confirm =
-                                  await showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      title: const Text('确认删除'),
-                                      content: const Text(
-                                        '确定要删除这条发愿记录吗？相关的功课记录也会被删除。',
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          child: const Text('取消'),
-                                          onPressed: () =>
-                                              Navigator.pop(context, false),
-                                        ),
-                                        TextButton(
-                                          child: const Text('确定'),
-                                          onPressed: () =>
-                                              Navigator.pop(context, true),
-                                        ),
-                                      ],
-                                    ),
-                                  ) ??
-                                  false;
-
-                              if (confirm) {
-                                await globalDB.transaction(() async {
-                                  // 删除关联的功课项目记录
-                                  await (globalDB.delete(globalDB.gongKeItem)
-                                        ..where(
-                                          (t) => t.fayuanId.equals(fayuan.id),
-                                        ))
-                                      .go();
-                                  // 删除关联的每日功课记录
-                                  await (globalDB.delete(
-                                        globalDB.gongKeItemsOneDay,
-                                      )..where(
-                                        (t) => t.fayuanId.equals(fayuan.id),
-                                      ))
-                                      .go();
-                                  // 删除发愿记录
-                                  await (globalDB.delete(
-                                    globalDB.faYuan,
-                                  )..where((t) => t.id.equals(fayuan.id))).go();
-                                });
-                                setState(() {
-                                  // 刷新数据
-                                  _refreshAllData();
-                                });
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                      child: Card(
-                        child: ListTile(
-                          title: Row(
-                            children: [
-                              _PercentChart(
-                                context,
-                                _fayuanCompletionRates[fayuan.id] ?? 0.0,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                '建:${DateTools.getDateStringByDate(fayuan.createDateTime)}\n'
-                                '起:${DateTools.getDateStringByDate(fayuan.startDate)}\n'
-                                '止:${DateTools.getDateStringByDate(fayuan.endDate)}',
-                                style: TextStyle(fontSize: 10),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                fayuan.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/GongKe/ModifyFaYuanWen',
-                              arguments: {'fayuanId': fayuan.id},
-                            );
-                          },
                         ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-
-            // 功课一览标题
-            Container(
-              padding: const EdgeInsets.only(top: 8),
-              child: ListTile(
-                title: const Text(
-                  '功课一览',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                trailing: Tooltip(
-                  message: '功课统计',
-                  child: IconButton(
-                    icon: const Icon(Icons.bar_chart),
-                    onPressed: () {
-                      Navigator.pushNamed(
-                        context,
-                        '/GongKeStat',
-                        arguments: {},
                       );
                     },
-                  ),
-                ),
+                  );
+                },
               ),
-            ),
 
-            // 这里添加日历组件
-            Container(
-              margin: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withAlpha(26), // 0.1 * 255 ≈ 26
-                    spreadRadius: 1,
-                    blurRadius: 1,
+              // 功课一览标题
+              Container(
+                padding: const EdgeInsets.only(top: 8),
+                child: ListTile(
+                  title: const Text(
+                    '功课一览',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                ],
-              ),
-              child: TableCalendar(
-                firstDay: DateTime.utc(2020, 1, 1),
-                lastDay: DateTime.utc(2030, 12, 31),
-                focusedDay: _focusedDay,
-                selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                calendarFormat: CalendarFormat.month,
-                availableCalendarFormats: const {CalendarFormat.month: '月'},
-                onDaySelected: (selectedDay, focusedDay) {
-                  setState(() {
-                    _selectedDay = selectedDay;
-                    _focusedDay = focusedDay;
-                  });
-                },
-                onPageChanged: (focusedDay) {
-                  _focusedDay = focusedDay;
-                  _loadCompletionRates(focusedDay);
-                },
-                calendarBuilders: CalendarBuilders(
-                  defaultBuilder: _buildCalendarCell,
-                  selectedBuilder: _buildCalendarCell,
-                  todayBuilder: _buildCalendarCell,
-                ),
-                locale: 'zh_CN', // 设置中文区域
-                headerStyle: const HeaderStyle(
-                  formatButtonVisible: false,
-                  titleCentered: true,
-                ),
-                calendarStyle: const CalendarStyle(
-                  outsideDaysVisible: false, // 隐藏非当前月份的日期
-                ),
-                daysOfWeekHeight: 32, // 增加星期标题行高度
-                daysOfWeekStyle: const DaysOfWeekStyle(
-                  weekdayStyle: TextStyle(color: Colors.black87),
-                  weekendStyle: TextStyle(color: Colors.red),
-                  // 添加下边距
-                  dowTextFormatter: null,
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: Colors.transparent,
-                        width: 8, // 增加底部间距
-                      ),
+                  trailing: Tooltip(
+                    message: '功课统计',
+                    child: IconButton(
+                      icon: const Icon(Icons.bar_chart),
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/GongKeStat',
+                          arguments: {},
+                        );
+                      },
                     ),
                   ),
                 ),
-                rowHeight: 65, // 增加行高，可以根据需要调整这个值
               ),
-            ),
-          ],
+
+              // 这里添加日历组件
+              Container(
+                margin: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withAlpha(26), // 0.1 * 255 ≈ 26
+                      spreadRadius: 1,
+                      blurRadius: 1,
+                    ),
+                  ],
+                ),
+                child: TableCalendar(
+                  firstDay: DateTime.utc(2020, 1, 1),
+                  lastDay: DateTime.utc(2030, 12, 31),
+                  focusedDay: _focusedDay,
+                  selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                  calendarFormat: CalendarFormat.month,
+                  availableCalendarFormats: const {CalendarFormat.month: '月'},
+                  onDaySelected: (selectedDay, focusedDay) {
+                    setState(() {
+                      _selectedDay = selectedDay;
+                      _focusedDay = focusedDay;
+                    });
+                  },
+                  onPageChanged: (focusedDay) {
+                    _focusedDay = focusedDay;
+                    _loadCompletionRates(focusedDay);
+                  },
+                  calendarBuilders: CalendarBuilders(
+                    defaultBuilder: _buildCalendarCell,
+                    selectedBuilder: _buildCalendarCell,
+                    todayBuilder: _buildCalendarCell,
+                  ),
+                  locale: 'zh_CN', // 设置中文区域
+                  headerStyle: const HeaderStyle(
+                    formatButtonVisible: false,
+                    titleCentered: true,
+                  ),
+                  calendarStyle: const CalendarStyle(
+                    outsideDaysVisible: false, // 隐藏非当前月份的日期
+                  ),
+                  daysOfWeekHeight: 32, // 增加星期标题行高度
+                  daysOfWeekStyle: const DaysOfWeekStyle(
+                    weekdayStyle: TextStyle(color: Colors.black87),
+                    weekendStyle: TextStyle(color: Colors.red),
+                    // 添加下边距
+                    dowTextFormatter: null,
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Colors.transparent,
+                          width: 8, // 增加底部间距
+                        ),
+                      ),
+                    ),
+                  ),
+                  rowHeight: 65, // 增加行高，可以根据需要调整这个值
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

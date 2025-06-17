@@ -228,16 +228,6 @@ class _SongJingPageState extends State<SongJingPage> {
               createDateTime: Value(DateTime.now()),
             ),
             o(
-              name: '《大佛顶首楞严经浅释》宣化上人',
-              image: imagePath!,
-              fileUrl: '21.pdf',
-              fileType: 'pdf',
-              type: 'jingshu',
-              remarks: Value('《大佛顶首楞严经浅释》宣化上人'),
-              favoriteDateTime: Value(null),
-              createDateTime: Value(DateTime.now()),
-            ),
-            o(
               name: '《大悲咒》（84句）',
               image: imagePath!,
               fileUrl: '22.pdf',

@@ -76,7 +76,10 @@ class _BaiChanListPageState extends State<BaiChanPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('拜忏'),
+        title: Text(
+          '拜忏',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
         actions: [
           IconButton(
             icon: Icon(Icons.add_circle),
@@ -102,6 +105,9 @@ class _BaiChanListPageState extends State<BaiChanPage> {
               return Center(child: Text('数据加载出错: ${snapshot.error}'));
             }
             final list = snapshot.data ?? [];
+            if (list.length == 0) {
+              return Center(child: Text('暂无拜忏记录，请先添加'));
+            }
             return ListView.builder(
               itemCount: list.length,
               itemBuilder: (context, index) {
@@ -152,9 +158,27 @@ class _BaiChanListPageState extends State<BaiChanPage> {
                     ],
                   ),
                   child: ListTile(
-                    leading: Image.asset(getFoPuSaImagePath(list[index].image)),
+                    // leading: SizedBox(
+                    //   //width: 200,
+                    //   height: 360,
+                    //   child: Image.asset(
+                    //     getFoPuSaImagePath(list[index].image),
+                    //     fit: BoxFit.fitHeight,
+                    //   ),
+                    // ),
                     title: Row(
-                      children: [Expanded(child: Text(list[index].name))],
+                      children: [
+                        Container(
+                          width: 100,
+                          height: 100,
+                          child: Image.asset(
+                            getFoPuSaImagePath(list[index].image),
+                            fit: BoxFit.scaleDown,
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(child: Text(list[index].name)),
+                      ],
                     ),
                     subtitle: Row(
                       children: [

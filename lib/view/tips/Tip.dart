@@ -183,21 +183,23 @@ class _TipPageState extends State<TipPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           '开示录',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
-        toolbarHeight: 40,
+
+        //backgroundColor: Colors.blue,
+        //toolbarHeight: 40,
         actions: [
-          Spacer(),
-          IconButton(
-            icon: const Icon(Icons.import_export),
-            onPressed: () {
-              // 跳转到导入页面
-              Navigator.pushNamed(context, '/ImportTip');
-            },
-          ),
-          Text('  '),
+          //Spacer(),
+          // IconButton(
+          //   icon: const Icon(Icons.import_export),
+          //   onPressed: () {
+          //     // 跳转到导入页面
+          //     Navigator.pushNamed(context, '/ImportTip');
+          //   },
+          // ),
+          // Text('  '),
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {

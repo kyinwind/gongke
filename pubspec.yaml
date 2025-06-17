@@ -52,7 +52,7 @@ dependencies:
   path: ^1.9.0
 
   shared_preferences: ^2.2.2
-  pdfx: 2.9.1
+  pdfx: 2.9.2
   flutter_slidable: ^4.0.0
   image_picker: ^1.1.2
   flutter_image_compress: ^2.1.0
@@ -138,8 +138,8 @@ flutter_launcher_icons:
     theme_color: "#hexcode"
   windows:
     generate: true
-    image_path: "assets/icons/icon.png"
-    icon_size: 48 # min:48, max:256, default: 48
+    image_path: "assets/icons/icon.ico"
+    icon_size: 256 # min:48, max:256, default: 48
   macos:
     generate: true
     image_path: "assets/icons/icon.png"

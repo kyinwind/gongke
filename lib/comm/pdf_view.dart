@@ -6,6 +6,7 @@ import 'dart:io'; // 引入 dart:io 来判断平台
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'platform_tools.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class PdfViewerPage extends StatefulWidget {
   final String pdfFileName; //带pdf后缀的文件名,jingshu的fileUrl字段
@@ -32,6 +33,8 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
 
   //当前页码，即当前阅读到的页码
   late int curPage = 1; //初始值为1
+
+  final FlutterTts flutterTts = FlutterTts();
 
   @override
   void initState() {
@@ -189,11 +192,21 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     curPage = shanshu.curPageNum ?? 1;
   }
 
+  Future<void> _speak(String text, VoidCallback onDone) async {
+    await flutterTts.setLanguage("zh-CN");
+    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.speak(text);
+    flutterTts.setCompletionHandler(() {
+      onDone();
+    });
+  }
+
   @override
   void dispose() {
     _pdfController?.dispose();
     _pageController?.dispose();
     focusNode.dispose();
+    flutterTts.stop();
     super.dispose();
   }
 

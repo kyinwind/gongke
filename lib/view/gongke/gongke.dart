@@ -3,7 +3,7 @@ import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:gongke/database.dart';
 import 'package:gongke/model/tables.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:lunar/lunar.dart';
 import 'package:intl/intl.dart';
@@ -316,43 +316,59 @@ class _GongKePageState extends State<GongKePage> {
   }
 
   Widget _PercentChart(BuildContext context, double percent) {
+    final double piesize = 15;
     return SizedBox(
       height: 60,
       width: 60,
-      child: SfCircularChart(
-        margin: EdgeInsets.zero,
-        annotations: [
-          CircularChartAnnotation(
-            widget: Text(
-              '${(percent * 100).toStringAsFixed(0)}%',
-              style: const TextStyle(fontSize: 12),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // 背景黄色圆环（满圆）
+          PieChart(
+            PieChartData(
+              startDegreeOffset: 180, // 从顶部开始画
+              sectionsSpace: 0,
+              centerSpaceRadius: 15,
+              sections: [
+                PieChartSectionData(
+                  color: Colors.yellow,
+                  value: 100,
+                  radius: piesize,
+                  showTitle: false,
+                ),
+              ],
             ),
           ),
-        ],
-        series: <CircularSeries>[
-          // 背景环
-          DoughnutSeries<_ChartData, String>(
-            dataSource: [_ChartData('background', 100)],
-            xValueMapper: (_ChartData data, _) => data.x,
-            yValueMapper: (_ChartData data, _) => data.y,
-            pointColorMapper: (_, __) => Colors.yellow,
-            radius: '100%',
-            innerRadius: '0%',
-            animationDuration: 0, // 背景环不需要动画
+
+          // 上层绿色环（仅占进度）
+          PieChart(
+            PieChartData(
+              startDegreeOffset: 180,
+              sectionsSpace: 0,
+              centerSpaceRadius: 15,
+              sections: [
+                PieChartSectionData(
+                  color: Colors.green,
+                  value: percent * 100,
+                  radius: piesize,
+                  showTitle: false,
+                ),
+                PieChartSectionData(
+                  color: Colors.transparent,
+                  value: 100 - percent * 100,
+                  radius: piesize,
+                  showTitle: false,
+                ),
+              ],
+            ),
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.easeInOut,
           ),
-          // 进度环
-          DoughnutSeries<_ChartData, String>(
-            dataSource: [_ChartData('progress', percent * 100)],
-            xValueMapper: (_ChartData data, _) => data.x,
-            yValueMapper: (_ChartData data, _) => data.y,
-            pointColorMapper: (_, __) => Colors.green,
-            radius: '100%',
-            innerRadius: '60%',
-            startAngle: 270,
-            endAngle: 270 + (percent * 360).toInt(),
-            animationDuration: 800, // 动画持续时间（毫秒）
-            animationDelay: 0, // 动画延迟时间
-            enableTooltip: false, // 禁用工具提示
+
+          // 中间的百分比文字
+          Text(
+            '${(percent * 100).toStringAsFixed(0)}%',
+            style: const TextStyle(fontSize: 12),
           ),
         ],
       ),

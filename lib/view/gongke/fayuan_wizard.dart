@@ -22,7 +22,7 @@ class VMFaYuanData {
   }
 
   bool isDateValid() {
-    print('isDateValid: startDate=$startDate, endDate=$endDate');
+    //print('isDateValid: startDate=$startDate, endDate=$endDate');
     if (startDate == null || endDate == null) return false;
     // 确保结束日期不早于开始日期
     if (endDate!.isBefore(startDate!)) return false;
@@ -126,7 +126,7 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
 
   // 在加载数据后更新控制器的值
   Future<void> _loadExistingData() async {
-    print('--------------------------------_loadExistingData----');
+    //print('--------------------------------_loadExistingData----');
     final fayuan = await globalDB.managers.faYuan
         .filter((t) => t.id(fayuanId!))
         .getSingle();
@@ -186,11 +186,11 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
       _data.startDate ??= startDate;
       _data.endDate ??= endDate;
 
-      print('------------------loadInitialValues----');
-      print('startDate: $startDate');
-      print('endDate: $endDate');
-      print('_data.startDate: ${_data.startDate}');
-      print('_data.endDate: ${_data.endDate}');
+      //print('------------------loadInitialValues----');
+      //print('startDate: $startDate');
+      //print('endDate: $endDate');
+      //print('_data.startDate: ${_data.startDate}');
+      //print('_data.endDate: ${_data.endDate}');
       startDateController.text = DateTools.getStringByDate(_data.startDate!);
       endDateController.text = DateTools.getStringByDate(_data.endDate!);
     });
@@ -236,10 +236,10 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
 
   // 修改 _updateDateControllers 方法
   void _updateDateControllers() {
-    print('Updating date controllers...');
-    print('1 Start Date: ${_data.startDate}');
-    print('1 End Date: ${_data.endDate}');
-    print('1 Duration Days: $_durationDays');
+    // print('Updating date controllers...');
+    // print('1 Start Date: ${_data.startDate}');
+    // print('1 End Date: ${_data.endDate}');
+    // print('1 Duration Days: $_durationDays');
     startDateController.text = _data.startDate != null
         ? DateTools.getDateStringByDate(_data.startDate!)
         : '';
@@ -247,9 +247,9 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
         ? DateTools.getDateStringByDate(_data.endDate!)
         : '';
     _durationDays = _data.getDurationDays(); // 更新时长
-    print('2 Start Date: ${_data.startDate}');
-    print('2 End Date: ${_data.endDate}');
-    print('2 Duration Days: $_durationDays');
+    // print('2 Start Date: ${_data.startDate}');
+    // print('2 End Date: ${_data.endDate}');
+    // print('2 Duration Days: $_durationDays');
   }
 
   Widget _buildStep2() {
@@ -274,7 +274,7 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
                       _data.startDate = date;
                       _updateDateControllers(); // 更新显示
                     });
-                    print(_data.startDate);
+                    //print(_data.startDate);
                   }
                 },
               ),

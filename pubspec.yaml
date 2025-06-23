@@ -36,10 +36,6 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  syncfusion_flutter_charts: ^29.1.39
-  syncfusion_flutter_core: ^29.1.39
-  syncfusion_flutter_datepicker: ^29.1.39
-  syncfusion_flutter_calendar: ^29.1.39
   #syncfusion_flutter_pdf: ^29.1.39
   intl: ^0.20.2
   styled_widget: ^0.4.1
@@ -50,7 +46,7 @@ dependencies:
   sqlite3_flutter_libs: ^0.5.13
   path_provider: ^2.1.5
   path: ^1.9.0
-
+  fl_chart: ^1.0.0
   shared_preferences: ^2.2.2
   pdfx: 2.9.2
   flutter_slidable: ^4.0.0
@@ -65,6 +61,7 @@ dependencies:
   carousel_slider: ^5.1.1  #图片轮播
   wakelock_plus: ^1.3.2 #防息屏
   device_info_plus: ^9.1.2 #设备信息
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter

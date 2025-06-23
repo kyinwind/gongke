@@ -165,28 +165,7 @@ class _SettingPageState extends State<SettingPage> {
                   '''  作者本人为了日常做学佛的功课，所以才起意制作了本app分享，希望也能帮到各位佛友。
   在此鸣谢下列单位、人员以及各个flutter组件的开发者（恕不能一一列出人名，仅列出使用的组件）:
   仁慧草堂:本app所提供的经书电子版、图片多数来自于仁慧草堂分享，少数来自于网络收集。
-  syncfusion_flutter_charts
-  syncfusion_flutter_calendar
-  intl
-  styled_widget
-  sqlite3、sqlite3_flutter_libs
-  drift
-  path_provider
-  path
-  shared_preferences
-  pdfx
-  flutter_slidable
-  image_picker
-  flutter_image_compress
-  table_calendar
-  lunar
-  sensors_plus
-  flutter_svg
-  audioplayers
-  flutter_tts
-  carousel_slider
-  wakelock_plus
-  device_info_plus...''',
+  cupertino_icons、intl、styled_widget、sqlite3、drift、drift_flutter、sqlite3_flutter_libs、path_provider、path、fl_chart、shared_preferences、pdfx、flutter_slidable、image_picker、flutter_image_compress、table_calendar、lunar、sensors_plus、flutter_svg、audioplayers、flutter_tts、carousel_slider、wakelock_plus、device_info_plus...''',
                   textAlign: TextAlign.left, // ✅ 添加对齐
                 ),
               ),

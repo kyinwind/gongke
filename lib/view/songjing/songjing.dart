@@ -510,7 +510,8 @@ class _SongJingPageState extends State<SongJingPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => PdfViewerPage(pdfFileName: pdfName),
+        builder: (context) =>
+            PdfViewerPage(pdfFileName: pdfName, pdfType: 'jingshu'),
       ),
     );
   }

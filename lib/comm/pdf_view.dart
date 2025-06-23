@@ -7,10 +7,16 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'platform_tools.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:flutter_pdf_text/flutter_pdf_text.dart';
 
 class PdfViewerPage extends StatefulWidget {
   final String pdfFileName; //带pdf后缀的文件名,jingshu的fileUrl字段
-  const PdfViewerPage({super.key, required this.pdfFileName});
+  final String pdfType; // 'jingshu' or 'shanshu'
+  const PdfViewerPage({
+    super.key,
+    required this.pdfFileName,
+    required this.pdfType,
+  });
 
   @override
   State<PdfViewerPage> createState() => _PdfViewerPageState();
@@ -26,7 +32,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   int _pages = 0; //文档总页码
   int _currentIndex = 0; //当前读到的双页分组序号
   int _page = 1; //记录单页模式下的页码
-  bool _isDoublePage = false;
+  bool _isDoublePage = false; //是否双页模式
 
   // 全局管理焦点节点
   final FocusNode focusNode = FocusNode();
@@ -35,6 +41,10 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   late int curPage = 1; //初始值为1
 
   final FlutterTts flutterTts = FlutterTts();
+
+  //pdfdoc
+  late PDFDoc pdfdoc;
+  bool isOnGonging = false; //是否正在播放声音
 
   @override
   void initState() {
@@ -105,6 +115,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
       _isDoublePage = true; // 如果打开 app 时是横屏的，默认显示双页
     }
     _loadPdf().then((_) {
+      _loadPdfText();
       _getCurPage().then((_) {
         _jumpToPage(curPage);
       });
@@ -165,7 +176,6 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
         }
       } else {
         // 非 Android 平台（如 iOS、Web、macOS,windows）
-
         doc = await PdfDocument.openAsset('assets/pdfs/${widget.pdfFileName}');
       }
 
@@ -184,6 +194,27 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     }
   }
 
+  Future<void> _loadPdfText() async {
+    try {
+      // 1. 从 assets 加载 pdf 文件为字节流
+      ByteData data = await rootBundle.load(
+        'assets/pdfs/${widget.pdfFileName}',
+      );
+      Uint8List bytes = data.buffer.asUint8List();
+
+      // 2. 把 PDF 文件写入临时文件（因为 flutter_pdf_text 需要文件路径）
+      final tempDir = await getTemporaryDirectory();
+      final tempFile = File('${tempDir.path}/temp.pdf');
+      await tempFile.writeAsBytes(bytes, flush: true);
+
+      // 3. 加载 PDF 文本
+      pdfdoc = await PDFDoc.fromPath(tempFile.path);
+      //final text = await doc.text;  // 这是读取整个pdf文本
+    } catch (e) {
+      print('加载 PDF text 出错: $e');
+    }
+  }
+
   Future<void> _getCurPage() async {
     final shanshu = await globalDB.managers.jingShu
         .filter((f) => f.fileUrl.equals(widget.pdfFileName))
@@ -195,10 +226,16 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   Future<void> _speak(String text, VoidCallback onDone) async {
     await flutterTts.setLanguage("zh-CN");
     await flutterTts.setSpeechRate(0.5);
+    isOnGonging = true;
     await flutterTts.speak(text);
     flutterTts.setCompletionHandler(() {
       onDone();
     });
+  }
+
+  Future<void> _stop() async {
+    isOnGonging = false;
+    await flutterTts.stop();
   }
 
   @override
@@ -329,9 +366,71 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     FocusScope.of(context).requestFocus(focusNode);
   }
 
+  String processText(String input) {
+    List<String> lines = input.split('\n');
+
+    List<String> processedLines = [];
+
+    for (var line in lines) {
+      String trimmedLine = line.trim();
+
+      // 跳过空行
+      if (trimmedLine.isEmpty) continue;
+
+      // 跳过页码行：包含 "of"，前后都是数字（可带 "page"）
+      final pageNumRegex = RegExp(
+        r'^(page\s*)?(\d+\s*(of|\/)\s*\d+)$',
+        caseSensitive: false,
+      );
+
+      if (pageNumRegex.hasMatch(trimmedLine)) continue;
+
+      processedLines.add(trimmedLine);
+    }
+
+    return processedLines.join();
+  }
+
+  void _listenText(int pagenum) async {
+    if (!_isDoublePage && pagenum > 0) {
+      final pagecount = pdfdoc.pages.length;
+      String text = await pdfdoc.pages[pagenum].text;
+      print(text);
+      //去掉最后一行页码，去掉换行符
+      text = processText(text);
+      if (pagenum + 2 <= pagecount) {
+        _speak(text, () {
+          _listenText(pagenum + 1);
+        });
+      } else {
+        _speak(text, () {});
+      }
+    }
+  }
+
   Widget _buildNavigatorButton() {
     return Column(
       children: [
+        widget.pdfType == 'shanshu'
+            ? IconButton(
+                icon: !isOnGonging
+                    ? const Icon(Icons.record_voice_over, color: Colors.blue)
+                    : const Icon(Icons.stop_circle, color: Colors.red),
+                tooltip: '听书',
+                onPressed: () {
+                  setState(() {
+                    if (!isOnGonging) {
+                      isOnGonging = true;
+                      _listenText(_page - 1);
+                    } else {
+                      _stop();
+                      isOnGonging = false;
+                    }
+                  });
+                  focusNode.requestFocus(); // 处理完事件后重新获取焦点
+                },
+              )
+            : SizedBox(),
         Spacer(),
         IconButton(
           icon: const Icon(Icons.arrow_upward),

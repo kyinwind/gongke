@@ -200,7 +200,8 @@ class _ShanShuPageState extends State<ShanShuPage> {
     final int? selectedPage = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => PdfViewerPage(pdfFileName: pdfName),
+        builder: (context) =>
+            PdfViewerPage(pdfFileName: pdfName, pdfType: 'shanshu'),
       ),
     );
     // 处理返回的页码（用户点击返回按钮时 selectedPage 可能为 null）

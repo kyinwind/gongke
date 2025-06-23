@@ -141,7 +141,8 @@ class _GongKeSettingPageState extends State<GongKeSettingPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => PdfViewerPage(pdfFileName: pdfName),
+        builder: (context) =>
+            PdfViewerPage(pdfFileName: pdfName, pdfType: 'jingshu'),
       ),
     );
   }

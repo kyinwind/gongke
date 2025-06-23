@@ -433,7 +433,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
             : SizedBox(),
         Spacer(),
         IconButton(
-          icon: const Icon(Icons.arrow_upward),
+          icon: const Icon(Icons.arrow_upward, color: Colors.blue),
           tooltip: '上一页',
           onPressed: () {
             _handlePreviousPage();
@@ -442,13 +442,16 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
         ),
         Spacer(),
         IconButton(
-          icon: Icon(_isDoublePage ? Icons.filter_1 : Icons.filter_2),
+          icon: Icon(
+            _isDoublePage ? Icons.filter_1 : Icons.filter_2,
+            color: Colors.blue,
+          ),
           tooltip: _isDoublePage ? '切换为单页显示' : '切换为双页显示',
           onPressed: _togglePageMode,
         ),
         Spacer(),
         IconButton(
-          icon: const Icon(Icons.arrow_downward),
+          icon: const Icon(Icons.arrow_downward, color: Colors.blue),
           tooltip: '下一页',
           onPressed: () {
             _handleNextPage();
@@ -525,21 +528,16 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                   _buildThumbnailList(Axis.vertical),
                 ],
               )
-            : Column(
-                children: [
-                  Expanded(
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        _isDoublePage
-                            ? _buildDoublePageView()
-                            : _buildSinglePageView(),
-                        Row(children: [Spacer(), _buildNavigatorButton()]),
-                      ],
-                    ),
-                  ),
-                  //_buildThumbnailList(Axis.horizontal),
-                ],
+            : Expanded(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    _isDoublePage
+                        ? _buildDoublePageView()
+                        : _buildSinglePageView(),
+                    Row(children: [Spacer(), _buildNavigatorButton()]),
+                  ],
+                ),
               ),
       ),
     );

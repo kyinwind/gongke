@@ -62,6 +62,7 @@ dependencies:
   wakelock_plus: ^1.3.2 #防息屏
   device_info_plus: ^9.1.2 #设备信息
   flutter_pdf_text: ^0.9.0 #获取pdf文本
+  flutter_foreground_task: ^9.1.0  #android前台服务，用于音频持续播放
   
 dev_dependencies:
   flutter_test:

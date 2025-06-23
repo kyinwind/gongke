@@ -7,11 +7,14 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'platform_tools.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_pdf_text/flutter_pdf_text.dart';
+import 'pub_tools.dart';
 
 class PdfViewerPage extends StatefulWidget {
   final String pdfFileName; //带pdf后缀的文件名,jingshu的fileUrl字段
   final String pdfType; // 'jingshu' or 'shanshu'
+
   const PdfViewerPage({
     super.key,
     required this.pdfFileName,
@@ -23,6 +26,7 @@ class PdfViewerPage extends StatefulWidget {
 }
 
 class _PdfViewerPageState extends State<PdfViewerPage> {
+  String _bookName = ''; //经书或善书名称
   PdfDocument? _document;
   PdfController? _pdfController; //这是pdfx的controller
 
@@ -46,9 +50,37 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   late PDFDoc pdfdoc;
   bool isOnGonging = false; //是否正在播放声音
 
+  final ValueNotifier<Object?> _taskDataListenable = ValueNotifier(null);
+  void _onReceiveTaskData(Object data) {
+    print('--------------------------接收到数据: $data');
+    _taskDataListenable.value = data;
+    if (data is Map && data['buttonPressed'] == 'btn_stop') {
+      flutterTts.stop(); // 页面中你的 TTS 停止方法
+      setState(() {
+        isOnGonging = false;
+      });
+    } else if (data is Map && data['buttonPressed'] == 'btn_start') {
+      // 开始播放的代码
+      _listenText(_page - 1);
+      setState(() {
+        isOnGonging = true;
+      });
+    }
+  }
+
+  // void _incrementCount() {
+  //   FlutterForegroundTask.sendDataToTask(MyTaskHandler.incrementCountCommand);
+  // }
+
+  String getBookName() {
+    return getJingShuNameByFile(widget.pdfFileName);
+  }
+
   @override
   void initState() {
     super.initState();
+    _bookName = getBookName();
+
     _pageController = PageController(initialPage: _currentIndex);
 
     focusNode.requestFocus();
@@ -57,6 +89,47 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
       if (!focusNode.hasFocus) {
         focusNode.requestFocus();
       }
+    });
+    //初始化前台服务
+    FlutterForegroundTask.initCommunicationPort();
+    // Add a callback to receive data sent from the TaskHandler.
+    FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Request permissions and initialize the service.
+      requestPermissions();
+      initService();
+    });
+  }
+
+  @override
+  void dispose() {
+    _pdfController?.dispose();
+    _pageController?.dispose();
+    focusNode.dispose();
+    flutterTts.stop();
+    // Remove a callback to receive data sent from the TaskHandler.
+    FlutterForegroundTask.removeTaskDataCallback(_onReceiveTaskData);
+    stopService();
+    _taskDataListenable.dispose();
+    super.dispose();
+  }
+
+  @override
+  // ... 已有代码 ...
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.of(context).orientation == Orientation.landscape) {
+      _isDoublePage = true; // 如果打开 app 时是横屏的，默认显示双页
+    }
+    _loadPdf().then((_) {
+      if (widget.pdfType == 'shanshu' &&
+          (Platform.isIOS || Platform.isAndroid)) {
+        _loadPdfText();
+      }
+      _getCurPage().then((_) {
+        _jumpToPage(curPage);
+      });
     });
   }
 
@@ -103,21 +176,6 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
             }
           }
         }
-      });
-    });
-  }
-
-  @override
-  // ... 已有代码 ...
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (MediaQuery.of(context).orientation == Orientation.landscape) {
-      _isDoublePage = true; // 如果打开 app 时是横屏的，默认显示双页
-    }
-    _loadPdf().then((_) {
-      _loadPdfText();
-      _getCurPage().then((_) {
-        _jumpToPage(curPage);
       });
     });
   }
@@ -236,15 +294,6 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   Future<void> _stop() async {
     isOnGonging = false;
     await flutterTts.stop();
-  }
-
-  @override
-  void dispose() {
-    _pdfController?.dispose();
-    _pageController?.dispose();
-    focusNode.dispose();
-    flutterTts.stop();
-    super.dispose();
   }
 
   Widget _buildDoublePageView() {
@@ -395,12 +444,16 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     if (!_isDoublePage && pagenum > 0) {
       final pagecount = pdfdoc.pages.length;
       String text = await pdfdoc.pages[pagenum].text;
-      print(text);
       //去掉最后一行页码，去掉换行符
       text = processText(text);
+      print(text);
+      startService('正在朗读 ${_bookName}');
       if (pagenum + 2 <= pagecount) {
         _speak(text, () {
+          startService('正在朗读 ${_bookName}');
           _listenText(pagenum + 1);
+          //跳往下一页
+          _handleNextPage();
         });
       } else {
         _speak(text, () {});
@@ -411,7 +464,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   Widget _buildNavigatorButton() {
     return Column(
       children: [
-        widget.pdfType == 'shanshu'
+        widget.pdfType == 'shanshu' && (Platform.isIOS || Platform.isAndroid)
             ? IconButton(
                 icon: !isOnGonging
                     ? const Icon(Icons.record_voice_over, color: Colors.blue)
@@ -464,6 +517,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   }
 
   void _backToParentPage() {
+    flutterTts.stop();
     // 检查组件是否还挂载
     if (mounted) {
       Navigator.pop(context, _page); // 点击返回按钮时返回上一个页面
@@ -528,16 +582,20 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                   _buildThumbnailList(Axis.vertical),
                 ],
               )
-            : Expanded(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    _isDoublePage
-                        ? _buildDoublePageView()
-                        : _buildSinglePageView(),
-                    Row(children: [Spacer(), _buildNavigatorButton()]),
-                  ],
-                ),
+            : Column(
+                children: [
+                  Expanded(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        _isDoublePage
+                            ? _buildDoublePageView()
+                            : _buildSinglePageView(),
+                        Row(children: [Spacer(), _buildNavigatorButton()]),
+                      ],
+                    ),
+                  ),
+                ],
               ),
       ),
     );
@@ -714,4 +772,150 @@ class PdfPageView extends StatelessWidget {
       },
     );
   }
+}
+
+// The callback function should always be a top-level or static function.
+@pragma('vm:entry-point')
+void startCallback() {
+  FlutterForegroundTask.setTaskHandler(MyTaskHandler());
+}
+
+class MyTaskHandler extends TaskHandler {
+  // Called when the task is started.
+  @override
+  Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
+    print('onStart(starter: ${starter.name})');
+  }
+
+  // Called based on the eventAction set in ForegroundTaskOptions.
+  @override
+  void onRepeatEvent(DateTime timestamp) {
+    // Send data to main isolate.
+    final Map<String, dynamic> data = {
+      "timestampMillis": timestamp.millisecondsSinceEpoch,
+    };
+    FlutterForegroundTask.sendDataToMain(data);
+  }
+
+  // Called when the task is destroyed.
+  @override
+  Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {
+    print('onDestroy(isTimeout: $isTimeout)');
+  }
+
+  // Called when data is sent using `FlutterForegroundTask.sendDataToTask`.
+  @override
+  void onReceiveData(Object data) {
+    print('onReceiveData: $data');
+  }
+
+  // Called when the notification button is pressed.
+  @override
+  void onNotificationButtonPressed(String id) {
+    print('onNotificationButtonPressed: $id');
+    FlutterForegroundTask.sendDataToMain({'buttonPressed': id});
+  }
+
+  // Called when the notification itself is pressed.
+  @override
+  void onNotificationPressed() {
+    print('onNotificationPressed');
+  }
+
+  // Called when the notification itself is dismissed.
+  @override
+  void onNotificationDismissed() {
+    print('onNotificationDismissed');
+  }
+}
+
+//前台服务请求权限
+Future<void> requestPermissions() async {
+  // Android 13+, you need to allow notification permission to display foreground service notification.
+  //
+  // iOS: If you need notification, ask for permission.
+  final NotificationPermission notificationPermission =
+      await FlutterForegroundTask.checkNotificationPermission();
+  if (notificationPermission != NotificationPermission.granted) {
+    await FlutterForegroundTask.requestNotificationPermission();
+  } else {
+    print('--------------NotificationPermission ok');
+  }
+
+  if (Platform.isAndroid) {
+    // Android 12+, there are restrictions on starting a foreground service.
+    //
+    // To restart the service on device reboot or unexpected problem, you need to allow below permission.
+    if (!await FlutterForegroundTask.isIgnoringBatteryOptimizations) {
+      // This function requires `android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` permission.
+      await FlutterForegroundTask.requestIgnoreBatteryOptimization();
+    } else {
+      print('--------------isIgnoringBatteryOptimizations ok');
+    }
+
+    // Use this utility only if you provide services that require long-term survival,
+    // such as exact alarm service, healthcare service, or Bluetooth communication.
+    //
+    // This utility requires the "android.permission.SCHEDULE_EXACT_ALARM" permission.
+    // Using this permission may make app distribution difficult due to Google policy.
+    if (!await FlutterForegroundTask.canScheduleExactAlarms) {
+      // When you call this function, will be gone to the settings page.
+      // So you need to explain to the user why set it.
+      await FlutterForegroundTask.openAlarmsAndRemindersSettings();
+    } else {
+      print('--------------openAlarmsAndRemindersSettings ok');
+    }
+  }
+}
+
+void initService() {
+  FlutterForegroundTask.init(
+    androidNotificationOptions: AndroidNotificationOptions(
+      channelId: 'foreground_service',
+      channelName: 'Foreground Service Notification',
+      channelDescription:
+          'This notification appears when the foreground service is running.',
+      onlyAlertOnce: true,
+    ),
+    iosNotificationOptions: const IOSNotificationOptions(
+      showNotification: false,
+      playSound: false,
+    ),
+    foregroundTaskOptions: ForegroundTaskOptions(
+      eventAction: ForegroundTaskEventAction.repeat(5000),
+      autoRunOnBoot: true,
+      autoRunOnMyPackageReplaced: true,
+      allowWakeLock: true,
+      allowWifiLock: true,
+    ),
+  );
+}
+
+Future<ServiceRequestResult> startService(String msg) async {
+  if (await FlutterForegroundTask.isRunningService) {
+    return FlutterForegroundTask.restartService();
+  } else {
+    return FlutterForegroundTask.startService(
+      // You can manually specify the foregroundServiceType for the service
+      // to be started, as shown in the comment below.
+      // serviceTypes: [
+      //   ForegroundServiceTypes.dataSync,
+      //   ForegroundServiceTypes.remoteMessaging,
+      // ],
+      serviceId: 256,
+      notificationTitle: '功课助手',
+      notificationText: '${msg}',
+      notificationIcon: null,
+      notificationButtons: [
+        const NotificationButton(id: 'btn_stop', text: '停止播放'),
+        const NotificationButton(id: 'btn_start', text: '开始播放'),
+      ],
+      notificationInitialRoute: '/second',
+      callback: startCallback,
+    );
+  }
+}
+
+Future<ServiceRequestResult> stopService() {
+  return FlutterForegroundTask.stopService();
 }

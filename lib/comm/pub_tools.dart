@@ -144,7 +144,6 @@ final Map<String, String> jingShuFiles = {
   '《大乘入楞伽经》': '18.pdf',
   '《大佛顶首楞严神咒》': '19.pdf',
   '《大佛顶首楞严经》': '20.pdf',
-  '《大佛顶首楞严经浅释》宣化上人': '21.pdf',
   '《大悲咒》（84句）': '22.pdf',
   '《大方广佛华严经普贤菩萨行愿品》': '23.pdf',
   '《大方广圆觉修多罗了义经》': '24.pdf',
@@ -166,10 +165,29 @@ final Map<String, String> jingShuFiles = {
   '地藏三经《地藏菩萨本愿经》': '40.pdf',
   '地藏三经《地藏菩萨本愿经》（仿瓷版）': '41.pdf',
   '地藏三经《大乘大集地藏十轮经》': '42.pdf',
+  '《大佛顶首楞严经浅释》宣化上人': '10000.pdf',
+  '广钦老和尚事迹-开示录': '10001.pdf',
+  '宽净法师-西方极乐世界游记': '10002.pdf',
+  '倓虚法师-影尘回忆录': '10003.pdf',
+  '黄念祖居士点滴开示': '10004.pdf',
+  '果卿居士-现代因果实录(一)': '10005.pdf',
+  '果卿居士-现代因果实录(二)': '10006.pdf',
+  '果卿居士-现代因果实录(三)': '10007.pdf',
+  '了凡四训': '10008.pdf',
+  '于凌波居士-向知识分子介绍佛教': '10009.pdf',
 };
 
 String getPdfFileByName(String jingShuName) {
   return jingShuFiles[jingShuName] ?? '';
+}
+
+String getJingShuNameByFile(String filename) {
+  return jingShuFiles.entries
+      .firstWhere(
+        (entry) => entry.value == filename,
+        orElse: () => MapEntry('', ''),
+      )
+      .key;
 }
 
 class AppButtonStyle {

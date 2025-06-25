@@ -53,8 +53,11 @@ extension PdfiumTextExtraction on DynamicLibrary {
 
 // 提取 PDF 文本
 Future<WinPDFDoc> loadPdfAndExtractText(String filePath) async {
-  final libraryPath = path.join(Directory.current.path, 'pdfium.dll');
-  final dylib = DynamicLibrary.open(libraryPath);
+  //final libraryPath = path.join(Directory.current.path, 'pdfium.dll');
+  //print('------------------------loadPdfAndExtractText');
+  final dylib = DynamicLibrary.open(
+    'pdfium_all.dll',
+  ); //不用自己拼路径，而是让系统自己去找，当前目录和系统目录
   final pdfium = PDFiumBindings(dylib);
   final callocator = calloc;
 
@@ -113,7 +116,7 @@ Future<WinPDFDoc> loadPdfAndExtractText(String filePath) async {
         pdfium.FPDF_ClosePage(page.cast());
       }
     }
-
+    //print('------------------------loadPdfAndExtractText----------结束');
     return WinPDFDoc(file, pages);
   } finally {
     if (doc != null) pdfium.FPDF_CloseDocument(doc.cast());

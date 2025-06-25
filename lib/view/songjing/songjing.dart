@@ -454,7 +454,7 @@ class _SongJingPageState extends State<SongJingPage> {
     try {
       final query = globalDB.managers.jingShu
           .filter((f) => f.type.equals('jingshu'))
-          .orderBy((t) => t.favoriteDateTime.desc() & t.createDateTime.desc());
+          .orderBy((t) => t.favoriteDateTime.desc() & t.name.asc());
       final list = query.watch(); // 获取所有记录
       setState(() {
         jingshudatalist = list;
@@ -472,7 +472,7 @@ class _SongJingPageState extends State<SongJingPage> {
   Future<void> fetchByWords(String str) async {
     try {
       final query = globalDB.managers.jingShu
-          .orderBy((t) => t.favoriteDateTime.desc() & t.createDateTime.desc())
+          .orderBy((t) => t.favoriteDateTime.desc() & t.name.asc())
           .filter(
             (f) => f.name.contains(str.trim()) & f.type.equals('jingshu'),
           );

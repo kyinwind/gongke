@@ -175,6 +175,9 @@ final Map<String, String> jingShuFiles = {
   '果卿居士-现代因果实录(三)': '10007.pdf',
   '了凡四训': '10008.pdf',
   '于凌波居士-向知识分子介绍佛教': '10009.pdf',
+  '坐禅': '10010.pdf',
+  '坐禅之问答录': '10011.pdf',
+  '坐禅2·次世代版终极佛法': '10012.pdf',
 };
 
 String getPdfFileByName(String jingShuName) {

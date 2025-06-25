@@ -10,6 +10,8 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_pdf_text/flutter_pdf_text.dart';
 import 'pub_tools.dart';
+import 'pdfium_api_tools.dart';
+import 'package:flutter/widgets.dart';
 
 class PdfViewerPage extends StatefulWidget {
   final String pdfFileName; //带pdf后缀的文件名,jingshu的fileUrl字段
@@ -46,8 +48,15 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
 
   final FlutterTts flutterTts = FlutterTts();
 
+  // 添加一个标志来避免重复更新
+  bool _isPageChanging = false;
+
+  //添加一个标记，来表明text提取完成。
+  bool _isTextDone = false;
+
   //pdfdoc
   late PDFDoc pdfdoc;
+  late WinPDFDoc windoc;
   bool isOnGonging = false; //是否正在播放声音
 
   final ValueNotifier<Object?> _taskDataListenable = ValueNotifier(null);
@@ -68,6 +77,23 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     }
   }
 
+  void _listenToPageChanges() {
+    // 当_page变化时，自动滚动到对应的缩略图位置
+    if (_page > 0 && _thumbnailScrollController.hasClients) {
+      // 页码从1开始，缩略图索引从0开始，所以索引为_page - 1
+      final int thumbnailIndex = _page - 1;
+
+      // 计算滚动位置（假设每个缩略图高度为108.0，包含边距）
+      final double scrollOffset = thumbnailIndex * 108.0;
+
+      // 平滑滚动到目标位置
+      _thumbnailScrollController.animateTo(
+        scrollOffset,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
   // void _incrementCount() {
   //   FlutterForegroundTask.sendDataToTask(MyTaskHandler.incrementCountCommand);
   // }
@@ -100,6 +126,13 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
       requestPermissions();
       initService();
     });
+    //加载pdf文件
+    _loadPdf().then((_) {
+      if (widget.pdfType == 'shanshu' &&
+          (Platform.isIOS || Platform.isAndroid || Platform.isWindows)) {
+        _loadPdfText();
+      }
+    });
   }
 
   @override
@@ -122,14 +155,8 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     if (MediaQuery.of(context).orientation == Orientation.landscape) {
       _isDoublePage = true; // 如果打开 app 时是横屏的，默认显示双页
     }
-    _loadPdf().then((_) {
-      if (widget.pdfType == 'shanshu' &&
-          (Platform.isIOS || Platform.isAndroid)) {
-        _loadPdfText();
-      }
-      _getCurPage().then((_) {
-        _jumpToPage(curPage);
-      });
+    _getCurPage().then((_) {
+      _jumpToPage(curPage);
     });
   }
 
@@ -172,7 +199,13 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
             } else {
               // 使用可选链式调用避免空值异常
               //print('单页模式，跳转至 $pagenum');
-              _pdfController?.jumpToPage(pagenum);
+              //_pdfController?.jumpToPage(pagenum);
+              if (_pdfController != null) {
+                _pdfController!.jumpToPage(pagenum);
+              } else {
+                // 处理控制器未初始化的情况
+                print('PdfController 未初始化，无法跳转到指定页面');
+              }
             }
           }
         }
@@ -226,9 +259,9 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
             );
             await file.writeAsBytes(byteData.buffer.asUint8List(), flush: true);
           }
-          print('PDF file path: $tempDir');
-          print('File exists: ${await file.exists()}');
-          print('File size: ${await file.length()}');
+          // print('PDF file path: $tempDir');
+          // print('File exists: ${await file.exists()}');
+          // print('File size: ${await file.length()}');
           // 打开 PDF
           doc = await PdfDocument.openFile(tempFilePath);
         }
@@ -266,8 +299,29 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
       await tempFile.writeAsBytes(bytes, flush: true);
 
       // 3. 加载 PDF 文本
-      pdfdoc = await PDFDoc.fromPath(tempFile.path);
-      //final text = await doc.text;  // 这是读取整个pdf文本
+      if (Platform.isWindows) {
+        compute(loadPdfAndExtractText, tempFile.path)
+            .then((result) {
+              // 任务完成后在主线程执行
+              if (mounted) {
+                setState(() {
+                  windoc = result;
+                  _isTextDone = true;
+                });
+              }
+            })
+            .catchError((error) {
+              print('PDF文本处理错误: $error');
+            });
+        //windoc = await loadPdfAndExtractText(tempFile.path);
+      } else {
+        pdfdoc = await PDFDoc.fromPath(tempFile.path);
+        if (mounted) {
+          setState(() {
+            _isTextDone = true;
+          });
+        }
+      }
     } catch (e) {
       print('加载 PDF text 出错: $e');
     }
@@ -424,7 +478,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
       String trimmedLine = line.trim();
 
       // 跳过空行
-      if (trimmedLine.isEmpty) continue;
+      if (trimmedLine.isEmpty || trimmedLine == '') continue;
 
       // 跳过页码行：包含 "of"，前后都是数字（可带 "page"）
       final pageNumRegex = RegExp(
@@ -442,15 +496,27 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
 
   void _listenText(int pagenum) async {
     if (!_isDoublePage && pagenum > 0) {
-      final pagecount = pdfdoc.pages.length;
-      String text = await pdfdoc.pages[pagenum].text;
+      int pageCnt = 0;
+      String text = '';
+      if (Platform.isWindows) {
+        pageCnt = windoc.pageCount;
+        text = windoc.pages[pagenum].text;
+      } else {
+        pageCnt = pdfdoc.pages.length;
+        text = await pdfdoc.pages[pagenum].text;
+      }
+
       //去掉最后一行页码，去掉换行符
       text = processText(text);
-      print(text);
-      startService('正在朗读 ${_bookName}');
-      if (pagenum + 2 <= pagecount) {
+      //print(text);
+      if (Platform.isAndroid || Platform.isIOS) {
+        startService('正在朗读 ${_bookName}');
+      }
+      if (pagenum + 2 <= pageCnt) {
         _speak(text, () {
-          startService('正在朗读 ${_bookName}');
+          if (Platform.isAndroid || Platform.isIOS) {
+            startService('正在朗读 ${_bookName}');
+          }
           _listenText(pagenum + 1);
           //跳往下一页
           _handleNextPage();
@@ -461,10 +527,24 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     }
   }
 
+  bool _getShowVoiceButtonFlag() {
+    // print('${widget.pdfType}');
+    // print('${Platform.isIOS || Platform.isAndroid || Platform.isWindows}');
+    // print('${!_isDoublePage}');
+    // print('${_isTextDone}');
+    // print(
+    //   '--------------:${widget.pdfType == 'shanshu' && (Platform.isIOS || Platform.isAndroid || Platform.isWindows) && !_isDoublePage && _isTextDone}',
+    // );
+    return widget.pdfType == 'shanshu' &&
+        (Platform.isIOS || Platform.isAndroid || Platform.isWindows) &&
+        !_isDoublePage &&
+        _isTextDone;
+  }
+
   Widget _buildNavigatorButton() {
     return Column(
       children: [
-        widget.pdfType == 'shanshu' && (Platform.isIOS || Platform.isAndroid)
+        _getShowVoiceButtonFlag()
             ? IconButton(
                 icon: !isOnGonging
                     ? const Icon(Icons.record_voice_over, color: Colors.blue)
@@ -519,6 +599,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   void _backToParentPage() {
     flutterTts.stop();
     // 检查组件是否还挂载
+    //print('--------开始返回 _page:$_page');
     if (mounted) {
       Navigator.pop(context, _page); // 点击返回按钮时返回上一个页面
     }
@@ -530,78 +611,91 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        // 设置 AppBar 的高度
-        toolbarHeight: 30, // 可根据需要调整高度
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            _backToParentPage();
-          },
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        //print('-----------didpop:$didPop,result:$result');
+        if (!didPop) {
+          _backToParentPage();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          toolbarHeight: 30,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: _backToParentPage,
+          ),
         ),
-      ),
-      body: KeyboardListener(
-        focusNode: focusNode,
-        autofocus: true,
-        onKeyEvent: (event) {
-          //print('这是一个日志消息');
-          //print(event);
-          //print('捕获到键盘事件，类型: ${event.runtimeType}');
-          if (event is KeyDownEvent) {
-            //print('已经进入if判断。。。');
-            if (event.logicalKey == LogicalKeyboardKey.pageDown ||
-                event.logicalKey == LogicalKeyboardKey.arrowDown ||
-                event.logicalKey == LogicalKeyboardKey.arrowRight) {
-              _handleNextPage();
-            } else if (event.logicalKey == LogicalKeyboardKey.pageUp ||
-                event.logicalKey == LogicalKeyboardKey.arrowUp ||
-                event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-              _handlePreviousPage();
-            } else if (event.logicalKey == LogicalKeyboardKey.space ||
-                event.logicalKey == LogicalKeyboardKey.enter) {
-              _handleNextPage();
+        body: KeyboardListener(
+          focusNode: focusNode,
+          autofocus: true,
+          onKeyEvent: (event) {
+            if (event is KeyDownEvent) {
+              if (event.logicalKey == LogicalKeyboardKey.pageDown ||
+                  event.logicalKey == LogicalKeyboardKey.arrowDown ||
+                  event.logicalKey == LogicalKeyboardKey.arrowRight) {
+                _handleNextPage();
+              } else if (event.logicalKey == LogicalKeyboardKey.pageUp ||
+                  event.logicalKey == LogicalKeyboardKey.arrowUp ||
+                  event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+                _handlePreviousPage();
+              } else if (event.logicalKey == LogicalKeyboardKey.space ||
+                  event.logicalKey == LogicalKeyboardKey.enter) {
+                _handleNextPage();
+              }
+              focusNode.requestFocus();
             }
-            focusNode.requestFocus(); // 处理完事件后重新获取焦点
-          }
-        },
-        child: MediaQuery.of(context).orientation == Orientation.landscape
-            ? Row(
-                children: [
-                  Expanded(
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        _isDoublePage
-                            ? _buildDoublePageView()
-                            : _buildSinglePageView(),
-                        Row(children: [Spacer(), _buildNavigatorButton()]),
-                      ],
+          },
+          child: MediaQuery.of(context).orientation == Orientation.landscape
+              ? Row(
+                  children: [
+                    Expanded(
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          _isDoublePage
+                              ? _buildDoublePageView()
+                              : _buildSinglePageView(),
+                          Row(children: [Spacer(), _buildNavigatorButton()]),
+                        ],
+                      ),
                     ),
-                  ),
-                  _buildThumbnailList(Axis.vertical),
-                ],
-              )
-            : Column(
-                children: [
-                  Expanded(
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        _isDoublePage
-                            ? _buildDoublePageView()
-                            : _buildSinglePageView(),
-                        Row(children: [Spacer(), _buildNavigatorButton()]),
-                      ],
+                    _buildThumbnailList(Axis.vertical),
+                  ],
+                )
+              : Column(
+                  children: [
+                    Expanded(
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          _isDoublePage
+                              ? _buildDoublePageView()
+                              : _buildSinglePageView(),
+                          Row(children: [Spacer(), _buildNavigatorButton()]),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+        ),
       ),
     );
   }
 
   Widget _buildThumbnailList(Axis direction) {
+    void _scrollToThumbnail(int pageIndex) {
+      if (_thumbnailScrollController.hasClients) {
+        final offset = pageIndex * 108.0;
+        _thumbnailScrollController.animateTo(
+          offset,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    }
+
     // 在 Widget 构建完成后，自动定位到当前索引页面
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_thumbnailScrollController.hasClients) {
@@ -664,10 +758,25 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
-                              Padding(
-                                padding: const EdgeInsets.all(4.0),
-                                child: Image.memory(snapshot.data!.bytes),
-                              ),
+                              _page == index + 1
+                                  ? Container(
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: Colors.red, // 红色边框
+                                          width: 2.0, // 边框宽度，可根据需求调整
+                                        ),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(4.0),
+                                        child: Image.memory(
+                                          snapshot.data!.bytes,
+                                        ),
+                                      ),
+                                    )
+                                  : Padding(
+                                      padding: const EdgeInsets.all(4.0),
+                                      child: Image.memory(snapshot.data!.bytes),
+                                    ),
                               Container(
                                 color: Colors.white.withOpacity(0.7),
                                 padding: const EdgeInsets.symmetric(
@@ -834,36 +943,38 @@ Future<void> requestPermissions() async {
   // Android 13+, you need to allow notification permission to display foreground service notification.
   //
   // iOS: If you need notification, ask for permission.
-  final NotificationPermission notificationPermission =
-      await FlutterForegroundTask.checkNotificationPermission();
-  if (notificationPermission != NotificationPermission.granted) {
-    await FlutterForegroundTask.requestNotificationPermission();
-  } else {
-    print('--------------NotificationPermission ok');
-  }
-
-  if (Platform.isAndroid) {
-    // Android 12+, there are restrictions on starting a foreground service.
-    //
-    // To restart the service on device reboot or unexpected problem, you need to allow below permission.
-    if (!await FlutterForegroundTask.isIgnoringBatteryOptimizations) {
-      // This function requires `android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` permission.
-      await FlutterForegroundTask.requestIgnoreBatteryOptimization();
+  if (Platform.isAndroid || Platform.isIOS) {
+    final NotificationPermission notificationPermission =
+        await FlutterForegroundTask.checkNotificationPermission();
+    if (notificationPermission != NotificationPermission.granted) {
+      await FlutterForegroundTask.requestNotificationPermission();
     } else {
-      print('--------------isIgnoringBatteryOptimizations ok');
+      print('--------------NotificationPermission ok');
     }
 
-    // Use this utility only if you provide services that require long-term survival,
-    // such as exact alarm service, healthcare service, or Bluetooth communication.
-    //
-    // This utility requires the "android.permission.SCHEDULE_EXACT_ALARM" permission.
-    // Using this permission may make app distribution difficult due to Google policy.
-    if (!await FlutterForegroundTask.canScheduleExactAlarms) {
-      // When you call this function, will be gone to the settings page.
-      // So you need to explain to the user why set it.
-      await FlutterForegroundTask.openAlarmsAndRemindersSettings();
-    } else {
-      print('--------------openAlarmsAndRemindersSettings ok');
+    if (Platform.isAndroid) {
+      // Android 12+, there are restrictions on starting a foreground service.
+      //
+      // To restart the service on device reboot or unexpected problem, you need to allow below permission.
+      if (!await FlutterForegroundTask.isIgnoringBatteryOptimizations) {
+        // This function requires `android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` permission.
+        await FlutterForegroundTask.requestIgnoreBatteryOptimization();
+      } else {
+        print('--------------isIgnoringBatteryOptimizations ok');
+      }
+
+      // Use this utility only if you provide services that require long-term survival,
+      // such as exact alarm service, healthcare service, or Bluetooth communication.
+      //
+      // This utility requires the "android.permission.SCHEDULE_EXACT_ALARM" permission.
+      // Using this permission may make app distribution difficult due to Google policy.
+      if (!await FlutterForegroundTask.canScheduleExactAlarms) {
+        // When you call this function, will be gone to the settings page.
+        // So you need to explain to the user why set it.
+        await FlutterForegroundTask.openAlarmsAndRemindersSettings();
+      } else {
+        print('--------------openAlarmsAndRemindersSettings ok');
+      }
     }
   }
 }

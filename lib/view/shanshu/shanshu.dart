@@ -127,6 +127,36 @@ class _ShanShuPageState extends State<ShanShuPage> {
               favoriteDateTime: Value(null),
               createDateTime: Value(DateTime.now()),
             ),
+            o(
+              name: '坐禅',
+              image: 'assets/images/zuochan.jpeg',
+              fileUrl: '10010.pdf',
+              fileType: 'pdf',
+              type: 'shanshu',
+              remarks: Value('坐禅'),
+              favoriteDateTime: Value(null),
+              createDateTime: Value(DateTime.now()),
+            ),
+            o(
+              name: '坐禅之问答录',
+              image: 'assets/images/zuochanwendalu.jpeg',
+              fileUrl: '10011.pdf',
+              fileType: 'pdf',
+              type: 'shanshu',
+              remarks: Value('坐禅之问答录'),
+              favoriteDateTime: Value(null),
+              createDateTime: Value(DateTime.now()),
+            ),
+            o(
+              name: '坐禅2·次世代版终极佛法',
+              image: 'assets/images/zuochan2.jpeg',
+              fileUrl: '10012.pdf',
+              fileType: 'pdf',
+              type: 'shanshu',
+              remarks: Value('坐禅2·次世代版终极佛法'),
+              favoriteDateTime: Value(null),
+              createDateTime: Value(DateTime.now()),
+            ),
           ],
         );
         fetchAll(); // 插入数据后重新获取所有记录
@@ -144,7 +174,7 @@ class _ShanShuPageState extends State<ShanShuPage> {
     try {
       final query = globalDB.managers.jingShu
           .filter((f) => f.type.equals('shanshu'))
-          .orderBy((t) => t.favoriteDateTime.desc() & t.createDateTime.desc());
+          .orderBy((t) => t.favoriteDateTime.desc() & t.name.asc());
       final list = query.watch(); // 获取所有记录
       setState(() {
         shanshudatalist = list;
@@ -162,7 +192,7 @@ class _ShanShuPageState extends State<ShanShuPage> {
   Future<void> fetchByWords(String str) async {
     try {
       final query = globalDB.managers.jingShu
-          .orderBy((t) => t.favoriteDateTime.desc() & t.createDateTime.desc())
+          .orderBy((t) => t.favoriteDateTime.desc() & t.name.asc())
           .filter(
             (f) => f.name.contains(str.trim()) & f.type.equals('shanshu'),
           );

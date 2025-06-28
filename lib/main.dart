@@ -25,6 +25,7 @@ import 'view/shanshu/shanshu.dart';
 // 导入 path_provider 库以使用 getApplicationDocumentsDirectory 函数
 //import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // 声明全局数据库变量
 late AppDatabase globalDB; // 在main函数中创建单一实例;
@@ -49,7 +50,7 @@ void main() async {
   }
   WidgetsFlutterBinding.ensureInitialized();
   //print(firstDate);
-  runApp(MyApp(db: globalDB)); // 传入数据库实例
+  runApp(ProviderScope(child: MyApp(db: globalDB))); // 传入数据库实例
 }
 
 class MyApp extends StatefulWidget {

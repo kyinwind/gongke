@@ -35,6 +35,9 @@ class VMFaYuanData {
 
   int getDurationDays() {
     if (startDate == null || endDate == null) return 0;
+    //为了计算相隔时间准确，要把起始时间的日期不变，时间部分归零。
+    startDate = DateTime(startDate!.year, startDate!.month, startDate!.day);
+    endDate = DateTime(endDate!.year, endDate!.month, endDate!.day);
     return endDate!.difference(startDate!).inDays + 1;
   }
 }

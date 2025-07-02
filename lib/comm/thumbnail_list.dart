@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:pdfx/pdfx.dart';
+import '../providers/pdf_provider.dart';
 
 class PdfThumbnailList extends StatefulWidget {
-  final PdfDocument document;
+  final List<PageCache> pageCaches; // 使用缓存数据
   final int currentPage;
-  final int totalPages;
   final void Function(int pageIndex) onPageSelected; //pageIndex从1开始
   final double thumbnailWidth;
   final Axis direction; // 新增
 
   const PdfThumbnailList({
     super.key,
-    required this.document,
+    required this.pageCaches,
     required this.currentPage,
-    required this.totalPages,
     required this.onPageSelected,
     this.thumbnailWidth = 50,
-    this.direction = Axis.vertical, // 默认纵向
+    this.direction = Axis.vertical,
   });
 
   @override
@@ -24,59 +23,21 @@ class PdfThumbnailList extends StatefulWidget {
 }
 
 class _PdfThumbnailListState extends State<PdfThumbnailList> {
-  List<Future<PdfPageImage?>>? thumbnails;
-  List<int> pageIndexes = [];
   int? _previewPage;
-
-  @override
-  void initState() {
-    super.initState();
-    int displayCount = widget.totalPages <= 10 ? widget.totalPages : 10;
-    pageIndexes = List.generate(
-      displayCount,
-      (i) => ((i * widget.totalPages) / displayCount).floor(),
-    );
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      List<Future<PdfPageImage?>> tempThumbnails = [];
-      for (var index in pageIndexes) {
-        if (!mounted) return;
-        final page = await widget.document.getPage(index + 1);
-        final pageWidth = page.width.toDouble();
-        final pageHeight = page.height.toDouble();
-        final calculatedHeight = widget.thumbnailWidth * pageHeight / pageWidth;
-        tempThumbnails.add(
-          page.render(
-            width: widget.thumbnailWidth,
-            height: calculatedHeight,
-            format: PdfPageImageFormat.jpeg,
-          ),
-        );
-        page.close();
-      }
-      if (mounted) {
-        setState(() {
-          thumbnails = tempThumbnails;
-        });
-      }
-    });
-  }
 
   void _handleTouch(Offset localPos, Size size) {
     final percent = widget.direction == Axis.vertical
         ? (localPos.dy / size.height).clamp(0.0, 1.0)
         : (localPos.dx / size.width).clamp(0.0, 1.0);
 
-    final actualPage = (percent * widget.totalPages).floor().clamp(
+    final actualPage = (percent * widget.pageCaches.length).floor().clamp(
       0,
-      widget.totalPages - 1,
+      widget.pageCaches.length - 1,
     );
 
     setState(() {
       _previewPage = actualPage + 1;
     });
-
-    // ⚠️ 不再调用 widget.onPageSelected 以避免实时跳转
   }
 
   @override
@@ -98,71 +59,96 @@ class _PdfThumbnailListState extends State<PdfThumbnailList> {
               },
               onPanUpdate: (details) =>
                   _handleTouch(details.localPosition, size),
-              onPanEnd: (_) {
+              onPanEnd: (details) {
                 if (_previewPage != null) {
                   widget.onPageSelected(_previewPage!);
                   setState(() => _previewPage = null);
                 }
               },
-              child: thumbnails == null
-                  ? const Center(
-                      child: CircularProgressIndicator(strokeWidth: 1),
-                    )
-                  : Flex(
-                      direction: widget.direction,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: List.generate(pageIndexes.length, (i) {
-                        return FutureBuilder<PdfPageImage?>(
-                          future: thumbnails![i],
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              final image = snapshot.data!;
-                              final aspectRatio = image.width! / image.height!;
-                              final width = widget.thumbnailWidth;
-                              final height = width / aspectRatio;
-                              return Container(
-                                padding: const EdgeInsets.all(2.0),
-                                child: Image.memory(
-                                  image.bytes,
-                                  width: width,
-                                  height: height,
-                                  fit: BoxFit.contain,
-                                ),
-                              );
-                            } else {
-                              return SizedBox(
-                                width: widget.thumbnailWidth,
-                                height: widget.thumbnailWidth * 1.4,
-                                child: const Center(
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 1,
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                        );
-                      }),
-                    ),
+              onPanCancel: () {
+                if (_previewPage != null) {
+                  widget.onPageSelected(_previewPage!);
+                  setState(() => _previewPage = null);
+                }
+              },
+              child: widget.direction == Axis.vertical
+                  ? Column(children: _buildThumbnails())
+                  : Row(children: _buildThumbnails()),
             );
           },
         ),
         if (_previewPage != null)
           Positioned(
-            top: 20,
+            bottom: 16,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.7),
+                color: Colors.black.withOpacity(0.6),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                '$_previewPage/${widget.totalPages}',
-                style: const TextStyle(color: Colors.white, fontSize: 10),
+                '$_previewPage/${widget.pageCaches.length}',
+                style: const TextStyle(color: Colors.white, fontSize: 14),
               ),
             ),
           ),
       ],
     );
+  }
+
+  /// ✅ 返回根据需求筛选出的要显示的缩略图列表
+  List<PageCache> _buildDisplayCaches() {
+    final totalPages = widget.pageCaches.length;
+
+    if (totalPages <= 10) {
+      // 总页数不超过 10 页，显示全部
+      return widget.pageCaches;
+    }
+
+    List<PageCache> selected = [];
+
+    // 保证第一页和最后一页一定出现
+    selected.add(widget.pageCaches[0]);
+
+    int samplesNeeded = 8; // 除去首尾，最多可显示的中间页数
+    double interval = (totalPages - 2) / (samplesNeeded + 1);
+
+    for (int i = 1; i <= samplesNeeded; i++) {
+      int pageIndex = (i * interval).round(); // 获取接近中间平均分布的索引
+      // 防止越界
+      pageIndex = pageIndex.clamp(1, totalPages - 2);
+      selected.add(widget.pageCaches[pageIndex]);
+    }
+
+    selected.add(widget.pageCaches[totalPages - 1]);
+
+    return selected;
+  }
+
+  List<Widget> _buildThumbnails() {
+    final displayCaches = _buildDisplayCaches();
+
+    return displayCaches.map((cache) {
+      final isSelected = widget.currentPage == cache.pageIndex;
+      final thumbImage = Image.memory(
+        cache.thumbnail.bytes,
+        width: widget.thumbnailWidth,
+        fit: BoxFit.fitWidth,
+      );
+
+      return GestureDetector(
+        onTap: () => widget.onPageSelected(cache.pageIndex),
+        child: Container(
+          margin: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: isSelected ? Colors.blue : Colors.transparent,
+              width: 2,
+            ),
+          ),
+          child: thumbImage,
+        ),
+      );
+    }).toList();
   }
 }

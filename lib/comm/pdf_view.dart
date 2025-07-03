@@ -32,12 +32,14 @@ class PdfViewerPage extends ConsumerStatefulWidget {
 }
 
 class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
-  List<PageCache> _pageCaches = [];
+  List<PageCache> _pageCaches = []; // 缓存的页码列表，包含缩略图和文本，已经生成的page的image也缓存在这里
+  final Map<int, Future<List<Uint8List>>> _doublePageFutures = {};
   String _bookName = ''; //经书或善书名称
   PdfDocument? _document;
+  PdfDocument? _document2; //这个变量用于getpage，不能和_document混用，否则报错
   PdfController? _pdfController; //这是pdfx的controller
   String? _errorMessage; //报错的信息
-  PageController? _pageController; //这是缩略图的controller
+  PageController? _pageController; //这是双页显示的controller
 
   int _pages = 0; //文档总页码
   int _currentIndex = 0; //当前读到的双页分组序号
@@ -51,7 +53,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
   late int _curPage = 1; //初始值为1
 
   final FlutterTts flutterTts = FlutterTts();
-  late PdfDocument doc;
+
   // 添加一个标志来避免重复更新
   bool _isPageChanging = false;
 
@@ -71,10 +73,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     // 获取当前屏幕方向
     final orientation = MediaQuery.of(context).orientation;
     // 根据屏幕方向设置双页模式标志
-    if (Platform.isWindows) {
-      // Windows 平台默认显示双页
-      result = true;
-    } else if (Platform.isAndroid || Platform.isIOS) {
+    if (Platform.isWindows || Platform.isAndroid || Platform.isIOS) {
       // Android 和 iOS 平台根据屏幕宽度判断
       final screenWidth = MediaQuery.of(context).size.width;
       //print('当前屏幕宽度: $screenWidth');
@@ -117,102 +116,98 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
   @override
   void initState() {
     super.initState();
-
+    //print('----------------------initState 开始');
+    _doublePageFutures.clear();
+    _pageCaches.clear();
     _bookName = getBookName();
-    _pageController = PageController(initialPage: _currentIndex);
-    isPad().then((value) {
-      _isPad = value;
-    });
-    focusNode.requestFocus();
-    // 添加焦点监听
-    focusNode.addListener(() {
-      if (!focusNode.hasFocus) {
-        focusNode.requestFocus();
-      }
-    });
-    //初始化前台服务
-    FlutterForegroundTask.initCommunicationPort();
-    // Add a callback to receive data sent from the TaskHandler.
-    FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      try {
-        await requestPermissions();
-        initService();
-
-        ref.read(pdfLoadingDoneProvider.notifier).state = false;
-        ref.read(pdfTextDoneProvider.notifier).state = false;
-        ref.read(pdfControllerProvider.notifier).state = null;
-
-        await _loadPdf();
-        // ✅ 在加载完成后更新 Provider 状态
-        ref.read(pdfControllerProvider.notifier).state = _pdfController;
-        ref.read(pdfLoadingDoneProvider.notifier).state = true;
-        print('----------------------加载 PDF 完成');
-        if (widget.pdfType == 'shanshu' &&
-            (Platform.isIOS || Platform.isAndroid || Platform.isWindows)) {
-          await _loadPdfText();
-        }
-        ref.read(pdfTextDoneProvider.notifier).state = true;
-        print('----------------------加载 PDF text 完成');
-        //跳转页面
+    Future<void> initAsync() async {
+      //print('----------------------initState 初始化_pageController');
+      if (widget.pdfType == 'shanshu') {
         await _getCurPage();
-        print('-------应该跳到第 $_curPage 页');
-        _handleClickAndJump(_curPage);
-        _singePageToDoublePage(_curPage);
-      } catch (e, st) {
-        print('加载 PDF 时出现错误: $e\n$st');
-        setState(() {
-          _errorMessage = e.toString();
-        });
-        ref.read(pdfLoadingDoneProvider.notifier).state = false;
-        ref.read(pdfTextDoneProvider.notifier).state = false;
+        _page = _curPage; // 设置初始页码
+        _currentIndex = _singePageToDoublePage(_curPage);
+        _pageController = PageController(initialPage: _currentIndex);
+        //print('----------------------------取到上一次的页码: $_curPage');
+      } else {
+        _page = 1; // 设置初始页码
+        _currentIndex = 0; // 双页模式下的初始索引
+        _pageController = PageController(initialPage: _currentIndex);
       }
-    });
+      //print('----------------------initState 初始化focusNode');
+      isPad().then((value) {
+        _isPad = value;
+      });
+      focusNode.requestFocus();
+      // 添加焦点监听
+      focusNode.addListener(() {
+        if (!focusNode.hasFocus) {
+          focusNode.requestFocus();
+        }
+      });
+      //print('----------------------initState 初始化初始化前台服务');
+      //初始化前台服务
+      FlutterForegroundTask.initCommunicationPort();
+      // Add a callback to receive data sent from the TaskHandler.
+      FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
+
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        try {
+          await requestPermissions();
+          initService();
+
+          ref.read(pdfLoadingDoneProvider.notifier).state = false;
+          ref.read(pdfTextDoneProvider.notifier).state = false;
+          ref.read(pdfControllerProvider.notifier).state = null;
+          ref.read(pdfThumbnailDoneProvider.notifier).state = false;
+
+          await _loadPdf(_curPage);
+          //print('----------------------加载 PDF 完成1');
+
+          if (widget.pdfType == 'shanshu' &&
+              (Platform.isIOS || Platform.isAndroid || Platform.isWindows)) {
+            await _loadPdfText();
+            ref.read(pdfTextDoneProvider.notifier).state = true;
+          }
+
+          await _copyPage(); //复制一份页码缓存，用于双页显示和缩略图显示
+          ref.read(pdfThumbnailDoneProvider.notifier).state = true;
+
+          //print('----------------------加载 PDF text 完成');
+
+          // ✅ 在加载完成后更新 Provider 状态
+          ref.read(pdfControllerProvider.notifier).state = _pdfController;
+          ref.read(pdfLoadingDoneProvider.notifier).state = true;
+          //print('----------------------加载 initAsync 完成');
+        } catch (e, st) {
+          print('加载 PDF 时出现错误: $e\n$st');
+          setState(() {
+            _errorMessage = e.toString();
+          });
+          ref.read(pdfLoadingDoneProvider.notifier).state = false;
+          ref.read(pdfTextDoneProvider.notifier).state = false;
+        }
+      });
+    }
+
+    initAsync();
+
     //print('--------------------------initstate 完成');
   }
 
-  Future<void> _loadPdf() async {
+  Future<void> _loadPdf(int curPage) async {
+    if (!mounted) return Future.value();
     try {
       //print('------------------------进入 _loadPdf 方法');
       _document = await PdfDocument.openAsset(
         'assets/pdfs/${widget.pdfFileName}',
       );
-      _pages = _document!.pagesCount;
-      //print('--------------------------页数: $_pages');
-      _pageCaches = [];
-      for (int i = 1; i <= _pages; i++) {
-        // 获取每一页的
-        final page = await _document!.getPage(i);
-        //生成缩略图（宽度可根据缩略图组件大小微调）
-        final pageWidth = page.width.toDouble();
-        final pageHeight = page.height.toDouble();
-        final thumbWidth = 100.0;
-        final thumbHeight = thumbWidth * pageHeight / pageWidth;
-        final thumbnail = await page.render(
-          width: thumbWidth,
-          height: thumbHeight,
-          format: PdfPageImageFormat.jpeg,
-        );
-        await page.close();
-
-        _pageCaches.add(
-          PageCache(
-            pageIndex: i,
-            text: '', // 初始时文本为空，稍后会填充
-            thumbnail: thumbnail!,
-          ),
-        );
-      }
-
-      //print('--------------------------_pageCaches加载完成，长度:${_pageCaches.length}');
 
       // 初始化 PdfController，确保只初始化一次
+      //print('-------------------------------开始初始化 PdfController,$curPage');
       _pdfController = PdfController(
         document: Future.value(_document!),
-        initialPage: 1,
+        initialPage: curPage,
       );
-
       if (!mounted) return;
       setState(() {
         _errorMessage = null;
@@ -224,12 +219,78 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     }
   }
 
-  Future<void> _loadPdfText() async {
-    try {
-      if (_pageCaches.isEmpty || _pageCaches.length == 0) {
-        print('_pageCaches 为空，无法加载 PDF 文本');
-        return;
+  Future<void> _copyPage() async {
+    if (!mounted) return Future.value();
+    _pageCaches = [];
+    List<int> pagesToGenerate = []; //缩略图只需要生成10张就可以，为了节省资源
+    _document2 = await PdfDocument.openAsset(
+      'assets/pdfs/${widget.pdfFileName}',
+    );
+    final totalPages = _document2!.pagesCount;
+    if (totalPages <= 10) {
+      // 总页数不超过 10，全部生成
+      pagesToGenerate = List.generate(totalPages, (index) => index + 1);
+    } else {
+      // 大于 10 页时，仅生成首尾 + 中间等距 8 页
+      pagesToGenerate.add(1); // 首页
+      int samplesNeeded = 8;
+      double interval = (totalPages - 2) / (samplesNeeded + 1);
+      for (int i = 1; i <= samplesNeeded; i++) {
+        int pageIndex = (i * interval).round().clamp(2, totalPages - 1);
+        pagesToGenerate.add(pageIndex);
       }
+      pagesToGenerate.add(totalPages); // 尾页
+    }
+    //print('----------------需要生成缩略图的页码: $pagesToGenerate');
+    //先生成缓存list，缩略图先为null，text填写好
+    _pages = _document2!.pagesCount;
+    for (int i = 1; i <= _pages; i++) {
+      _pageCaches.add(
+        PageCache(pageIndex: i, image: null, thumbnail: null, text: ''),
+      );
+    }
+    //print('-----------------开始生成_pageCaches，页码数量: ${_pageCaches.length}');
+    for (final pageIndex in pagesToGenerate) {
+      try {
+        final page = await _document2!.getPage(pageIndex);
+        // 获取每一页的
+        //生成缩略图（宽度可根据缩略图组件大小微调）
+        final pageWidth = page.width.toDouble();
+        final pageHeight = page.height.toDouble();
+        final thumbWidth = 100.0;
+        final thumbHeight = thumbWidth * pageHeight / pageWidth;
+        final pageImage = await page.render(
+          width: thumbWidth, // 适中缩略图尺寸
+          height: thumbHeight,
+          format: PdfPageImageFormat.jpeg,
+        );
+        _pageCaches[pageIndex - 1].thumbnail = pageImage;
+
+        await page.close(); // 及时释放
+      } catch (e) {
+        print('_copyPage Failed to generate thumbnail for page $pageIndex: $e');
+      }
+    }
+    //print('---------------------_copyPage 完成');
+    setState(() {});
+  }
+
+  //得到第pagenum页的text
+  Future<String> getText(int pagenum) async {
+    if (!mounted) return Future.value();
+    String txt = '';
+    if (Platform.isWindows) {
+      txt = windoc.pages[pagenum - 1].text;
+    } else {
+      txt = await pdfdoc.pages[pagenum - 1].text;
+    }
+    txt = processText(txt);
+    return txt;
+  }
+
+  Future<void> _loadPdfText() async {
+    if (!mounted) return Future.value();
+    try {
       // 1. 从 assets 加载 pdf 文件为字节流
       ByteData data = await rootBundle.load(
         'assets/pdfs/${widget.pdfFileName}',
@@ -260,28 +321,23 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     }
   }
 
-  Future getPdfText(int pageNum) async {
-    //pagenum从1开始
-    if (Platform.isWindows) {
-      return windoc.pages[pageNum - 1].text;
-    } else {
-      return await pdfdoc.pages[pageNum - 1].text;
-    }
-  }
-
   @override
   void dispose() {
+    //print('--------------------------dispose _pdfController');
     _pdfController?.dispose();
+    //print('--------------------------dispose _pageController');
     _pageController?.dispose();
+    //print('--------------------------dispose focusNode');
     focusNode.dispose();
+    //print('--------------------------dispose flutterTts');
     flutterTts.stop();
     // Remove a callback to receive data sent from the TaskHandler.
     FlutterForegroundTask.removeTaskDataCallback(_onReceiveTaskData);
     stopService();
     _taskDataListenable.dispose();
-    // if (_document != null && !_document!.isClosed) {
-    //   _document!.close();
-    // }
+    //print('--------------------------dispose _taskDataListenable');
+    _doublePageFutures.clear();
+    _pageCaches.clear();
     super.dispose();
   }
 
@@ -290,68 +346,6 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     super.didChangeDependencies();
     _isDoublePage = _getIsDoubleFlag();
     //print('--------------------------didChangeDependencies 完成');
-  }
-
-  void _togglePageMode() {
-    if (!_isDoublePage) {
-      //单转双
-      _currentIndex = _pdfController!.page.toInt() ~/ 2;
-    } else {
-      //双转单
-      _currentIndex = _currentIndex * 2 + 1;
-    }
-    setState(() {
-      _isDoublePage = !_isDoublePage;
-      //print('切换到 ${_isDoublePage ? '双页' : '单页'} 模式');
-      //print('------ _page:${_page},_currentIndex:${_currentIndex}-------');
-      _jumpToPage(_page);
-    });
-  }
-
-  void _jumpToPage(int pagenum) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // 增加额外延迟，确保 PageView 完全构建
-      Future.delayed(const Duration(milliseconds: 300)).then((_) {
-        if (mounted) {
-          //print(' ------ _jumpToPage开始跳转页面 $pagenum -------- ');
-          if (pagenum != 1 && _pdfController != null) {
-            if (_isDoublePage) {
-              final doublePageIndex = _singePageToDoublePage(pagenum);
-              // print(
-              //   '---------开始跳转页面doublePageIndex $doublePageIndex---------------',
-              // );
-              if (_pageController != null && _pageController!.hasClients) {
-                _pageController?.jumpToPage(doublePageIndex);
-                setState(() {
-                  _currentIndex = doublePageIndex;
-                });
-              } else {
-                print('_pageController 未关联到 PageView，无法跳转');
-              }
-            } else {
-              // 使用可选链式调用避免空值异常
-              //print('单页模式，跳转至 $pagenum');
-              //_pdfController?.jumpToPage(pagenum);
-              if (_pdfController != null) {
-                final controller = _pdfController!;
-                try {
-                  print('正在跳转至第$pagenum页,总页数:${controller.pagesCount}');
-                  controller.jumpToPage(pagenum);
-                } catch (e, stack) {
-                  print('页面跳转异常: $e');
-                  print('当前页面参数: pagenum=$pagenum');
-                  print('控制器状态: isDisposed=${controller.toString()}');
-                  print(stack);
-                }
-              } else {
-                // 处理控制器未初始化的情况
-                print('PdfController 未初始化，无法跳转到指定页面');
-              }
-            }
-          }
-        }
-      });
-    });
   }
 
   //从单页码转为双页码
@@ -369,15 +363,20 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     return page * 2 + 1;
   }
 
-  Future<void> _getCurPage() async {
+  Future<int> _getCurPage() async {
+    if (!mounted) return 1;
+    int curPage = 1; //默认第一页
     final shanshu = await globalDB.managers.jingShu
         .filter((f) => f.fileUrl.equals(widget.pdfFileName))
         .getSingle();
     //('get shanshu.curPageNum : ${shanshu.curPageNum}');
-    _curPage = shanshu.curPageNum ?? 1;
+    curPage = shanshu.curPageNum ?? 1;
+    _curPage = curPage;
+    return curPage;
   }
 
   Future<void> _speak(String text, VoidCallback onDone) async {
+    if (!mounted) return Future.value();
     await flutterTts.setLanguage("zh-CN");
     await flutterTts.setSpeechRate(0.5);
     isOnGonging = true;
@@ -388,58 +387,166 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
   }
 
   Future<void> _stop() async {
+    if (!mounted) return Future.value();
     isOnGonging = false;
     await flutterTts.stop();
   }
 
   Widget _buildDoublePageView() {
     return PageView.builder(
-      scrollDirection: Axis.vertical, // 设置滑动方向为垂直方向
+      scrollDirection: Axis.vertical,
       itemCount: (_pages / 2).ceil(),
       controller: _pageController,
       onPageChanged: (index) {
-        //这个index是双页分组的索引,从0开始
         _page = _doublePageToSinglePage(index);
-        //_jumpToPage((index * 2 + 1));
         setState(() {
           _currentIndex = index;
         });
-        //print('------双页分组index: $index------');
       },
       itemBuilder: (context, index) {
         final leftPage = index * 2 + 1;
         final rightPage = leftPage + 1;
+        //print('0---------当前双页: 左页 $leftPage, 右页 $rightPage');
 
-        return Row(
-          children: [
-            Expanded(flex: 4, child: SizedBox()),
-            Expanded(
-              flex: 10,
-              child: PdfPageView(
-                pageNumber: leftPage,
-                controller:
-                    _pdfController ??
-                    PdfController(document: PdfDocument.openData(Uint8List(0))),
-              ),
-            ),
-            Expanded(flex: 1, child: SizedBox()),
-            (rightPage <= _pages)
-                ? Expanded(
-                    flex: 10,
-                    child: PdfPageView(
-                      pageNumber: rightPage,
-                      controller: _pdfController!,
-                    ),
-                  )
-                : Expanded(child: SizedBox()),
-            Expanded(flex: 4, child: SizedBox()),
-          ],
+        Future<List<Uint8List>> _loadDoublePage(int index) {
+          if (_doublePageFutures[index] != null)
+            return _doublePageFutures[index]!;
+          //print('1---------加载双页索引$index: 左页 $leftPage, 右页 $rightPage');
+          _doublePageFutures[index] = () async {
+            if (_pdfController == null || _document == null) {
+              return [Uint8List(0), Uint8List(0)];
+            }
+            final leftPage = index * 2 + 1;
+            final rightPage = leftPage + 1;
+            PdfPageImage? leftImage;
+            PdfPageImage? rightImage;
+
+            if (_pageCaches[leftPage - 1].image == null) {
+              leftImage = await _renderPage(context, _pdfController!, leftPage);
+              _pageCaches[leftPage - 1].image = leftImage;
+            } else {
+              leftImage = _pageCaches[leftPage - 1].image;
+            }
+            //print('2---------------------: 左页 $leftPage 加载完成！');
+            if (rightPage <= _pages) {
+              if (_pageCaches[rightPage - 1].image == null) {
+                rightImage = await _renderPage(
+                  context,
+                  _pdfController!,
+                  rightPage,
+                );
+                _pageCaches[rightPage - 1].image = rightImage;
+              } else {
+                rightImage = _pageCaches[rightPage - 1].image;
+              }
+            } else {
+              rightImage = null;
+            }
+            //print('3---------------------: 右页 $rightPage 加载完成！');
+            return [
+              leftImage?.bytes ?? Uint8List(0),
+              rightImage?.bytes ?? Uint8List(0),
+            ];
+          }();
+          return _doublePageFutures[index]!;
+        }
+
+        return FutureBuilder<List<Uint8List>>(
+          future: _loadDoublePage(index),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final images = snapshot.data!;
+
+            return Row(
+              children: [
+                const Expanded(flex: 4, child: SizedBox()),
+                Expanded(
+                  flex: 10,
+                  child: images[0].isNotEmpty
+                      ? Image.memory(images[0], fit: BoxFit.contain)
+                      : const Center(child: Text('左页加载失败')),
+                ),
+                const Expanded(flex: 1, child: SizedBox()),
+                Expanded(
+                  flex: 10,
+                  child: (rightPage <= _pages)
+                      ? (images[1].isNotEmpty
+                            ? Image.memory(images[1], fit: BoxFit.contain)
+                            : const Center(child: Text('右页加载失败')))
+                      : const SizedBox(),
+                ),
+                const Expanded(flex: 4, child: SizedBox()),
+              ],
+            );
+          },
         );
       },
     );
   }
 
+  Future<PdfPageImage?> _renderPage(
+    BuildContext context,
+    PdfController controller,
+    int pageNumber,
+  ) async {
+    if (!mounted) return Future.value();
+    final doc = await controller.document;
+    if (pageNumber < 1 || pageNumber > doc.pagesCount) {
+      print('无效的 pageNumber: $pageNumber, 页数范围: 1 - ${doc.pagesCount}');
+      return null;
+    }
+    //print('有效的 doc:${doc.pagesCount}, 尝试获取第 $pageNumber 页');
+    final page = await doc.getPage(pageNumber);
+    try {
+      try {
+        final width = page.width;
+        final height = page.height;
+        if (width == null || height == null || width <= 0 || height <= 0) {
+          print('PDF page 宽高无效 width=$width height=$height');
+          await page.close();
+          return null;
+        }
+        //print('---------------有效的page.width:$width, height:$height.');
+
+        final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+        if (devicePixelRatio <= 0) {
+          print('设备像素密度无效: $devicePixelRatio');
+          await page.close();
+          return null;
+        }
+
+        double clarityFactor = Platform.isWindows ? 1.5 : 0.5;
+        final renderWidth = (width * devicePixelRatio * clarityFactor);
+        final renderHeight = (height * devicePixelRatio * clarityFactor);
+
+        //print('渲染尺寸: width=$renderWidth, height=$renderHeight');
+
+        //print('---------------开始渲染pdf page $pageNumber.');
+        final image = await page.render(
+          width: renderWidth.toDouble(),
+          height: renderHeight.toDouble(),
+          format: PdfPageImageFormat.png,
+        );
+        if (image == null || image.bytes.isEmpty) {
+          print('page.render 返回了 null 或空字节数组');
+          await page.close();
+          return null;
+        }
+        //print("page $pageNumber 渲染完成，图像长度: ${image.bytes.length}");
+        return image;
+      } catch (e, stackTrace) {
+        print('渲染页面 $pageNumber 出错: $e $stackTrace');
+        return null;
+      }
+    } finally {
+      await page.close();
+    }
+  }
+
   Widget _buildSinglePageView() {
+    print('--------------------------_buildSinglePageView start');
     if (_pdfController == null) {
       //print('--------------------------_pdfController is null');
       return const Center(child: CircularProgressIndicator());
@@ -448,23 +555,58 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     PdfView pdf = PdfView(
       controller: _pdfController!,
       onPageChanged: (page) {
-        _page = page;
-        _currentIndex = _singePageToDoublePage(page);
+        setState(() {
+          _page = page;
+          _currentIndex = _singePageToDoublePage(page);
+        });
       },
       scrollDirection: Axis.vertical,
     );
+    print('--------------------------_buildSinglePageView end');
     return pdf;
   }
 
   void _handleClickAndJump(int pageNumber) {
     //print('点击缩略图跳转到第 $pageNumber 页');
-    if (_isDoublePage) {
-      final doublePageIndex = (pageNumber - 1) ~/ 2;
-      _pageController?.jumpToPage(doublePageIndex);
-    } else {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _pdfController?.jumpToPage(pageNumber);
-      });
+    try {
+      if (_isDoublePage) {
+        print('----------------_handleClickAndJump--------双页模式');
+        final doublePageIndex = _singePageToDoublePage(pageNumber);
+        _pages = _document!.pagesCount;
+        if (_pageController!.hasClients) {
+          _pageController?.jumpToPage(doublePageIndex);
+        } else {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _pageController?.jumpToPage(doublePageIndex);
+            // 强制刷新，不管 onPageChanged 是否触发
+            setState(() {
+              _page = pageNumber;
+              _currentIndex = _singePageToDoublePage(pageNumber);
+            });
+          });
+        }
+        _currentIndex = doublePageIndex;
+        _page = pageNumber;
+        print(
+          '----------------应该跳到$pageNumber页--------跳转到双页索引: $doublePageIndex',
+        );
+      } else {
+        print('----------------_handleClickAndJump--------单页模式');
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          print('-----------------当前单页页码: ${_pdfController!.page}');
+          if (_pdfController != null && _pdfController!.page != pageNumber) {
+            _pdfController?.jumpToPage(pageNumber);
+            // 强制刷新
+            setState(() {
+              _page = pageNumber;
+              _currentIndex = _singePageToDoublePage(pageNumber);
+            });
+          }
+        });
+      }
+    } catch (e) {
+      print('-----------------跳转到第 $pageNumber 页出错: $e');
     }
   }
 
@@ -496,6 +638,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
       setState(() {
         if (_currentIndex < (_pages / 2).ceil() - 1) {
           _currentIndex++;
+          _page = _doublePageToSinglePage(_currentIndex);
           // print(
           //   '当前页码索引: $_currentIndex，总组数: ${(_pages / 2).ceil().toInt()}，翻到下一页',
           // );
@@ -511,6 +654,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
+      _currentIndex = _singePageToDoublePage(_pdfController!.page);
     }
     // 使用 FocusScope 确保焦点正确设置
     FocusScope.of(context).requestFocus(focusNode);
@@ -542,24 +686,16 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
   }
 
   void _listenText(int pagenum) async {
-    if (!_isDoublePage && pagenum > 0) {
-      int pageCnt = 0;
-      String text = '';
-      if (Platform.isWindows) {
-        pageCnt = windoc.pageCount;
-        text = windoc.pages[pagenum].text;
-      } else {
-        pageCnt = pdfdoc.pages.length;
-        text = await pdfdoc.pages[pagenum].text;
-      }
-
-      //去掉最后一行页码，去掉换行符
-      text = processText(text);
+    //pagenum 页码从1开始
+    if (!_isDoublePage && pagenum >= 1) {
+      int pageCnt = _pageCaches.length;
+      String text = await getText(pagenum);
+      print('${text}');
       //print(text);
       if (Platform.isAndroid || Platform.isIOS) {
         startService('正在朗读 ${_bookName}');
       }
-      if (pagenum + 2 <= pageCnt) {
+      if (pagenum + 1 <= pageCnt) {
         _speak(text, () {
           if (Platform.isAndroid || Platform.isIOS) {
             startService('正在朗读 ${_bookName}');
@@ -597,7 +733,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
                   setState(() {
                     if (!isOnGonging) {
                       isOnGonging = true;
-                      _listenText(_page - 1);
+                      _listenText(_page);
                     } else {
                       _stop();
                       isOnGonging = false;
@@ -619,18 +755,18 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
           },
         ),
         Spacer(),
-        _isPad
-            ? IconButton(
-                padding: EdgeInsets.zero,
-                constraints: BoxConstraints(),
-                icon: Icon(
-                  _isDoublePage ? Icons.filter_1 : Icons.filter_2,
-                  color: Colors.blue,
-                ),
-                tooltip: _isDoublePage ? '切换为单页显示' : '切换为双页显示',
-                onPressed: _togglePageMode,
-              )
-            : SizedBox(),
+        // _isPad
+        //     ? IconButton(
+        //         padding: EdgeInsets.zero,
+        //         constraints: BoxConstraints(),
+        //         icon: Icon(
+        //           _isDoublePage ? Icons.filter_1 : Icons.filter_2,
+        //           color: Colors.blue,
+        //         ),
+        //         tooltip: _isDoublePage ? '切换为单页显示' : '切换为双页显示',
+        //         onPressed: _togglePageMode,
+        //       )
+        //     : SizedBox(),
         Spacer(),
         IconButton(
           padding: EdgeInsets.zero,
@@ -676,7 +812,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     //print('-----------_document:${_document.toString()}');
     final isLoading = ref.watch(pdfLoadingDoneProvider);
     final pdfController = ref.watch(pdfControllerProvider);
-
+    final _isThumbnailDone = ref.watch(pdfThumbnailDoneProvider);
     if (!isLoading || pdfController == null) {
       return const Center(
         child: Column(
@@ -750,9 +886,12 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
                         ],
                       ),
                     ),
-                    _showThumbnailFlag
+                    _showThumbnailFlag && _isThumbnailDone
                         ? PdfThumbnailList(
-                            pageCaches: [..._pageCaches],
+                            key: ValueKey(
+                              'thumbnailList_${_isDoublePage ? 'vertical' : 'horizontal'}',
+                            ),
+                            pageCaches: _pageCaches,
                             currentPage: _page,
                             onPageSelected: (pageIndex) {
                               _handleClickAndJump(pageIndex);
@@ -776,9 +915,12 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
                         ],
                       ),
                     ),
-                    _showThumbnailFlag
+                    _showThumbnailFlag && _isThumbnailDone
                         ? PdfThumbnailList(
-                            pageCaches: [..._pageCaches],
+                            key: ValueKey(
+                              'thumbnailList_${_isDoublePage ? 'vertical' : 'horizontal'}',
+                            ),
+                            pageCaches: _pageCaches,
                             currentPage: _page - 1,
                             onPageSelected: (pageIndex) {
                               _handleClickAndJump(pageIndex);
@@ -796,112 +938,35 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
   }
 }
 
-class PdfPageView extends StatelessWidget {
-  final int pageNumber;
-  final PdfController controller;
+// class PdfPageView extends StatelessWidget {
+//   final int pageNumber;
+//   final PdfController controller;
 
-  const PdfPageView({
-    super.key,
-    required this.pageNumber,
-    required this.controller,
-  });
+//   const PdfPageView({
+//     super.key,
+//     required this.pageNumber,
+//     required this.controller,
+//   });
 
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<PdfPageImage?>(
-      future: _renderPage(context),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return Image.memory(snapshot.data!.bytes, fit: BoxFit.contain);
-        } else if (snapshot.hasError) {
-          print('Error loading page $pageNumber: ${snapshot.error}');
-          return Center(
-            child: Text('Error loading page $pageNumber: ${snapshot.error}'),
-          );
-        } else {
-          return const Center(child: CircularProgressIndicator());
-        }
-      },
-    );
-  }
-
-  Future<PdfPageImage?> _renderPage(BuildContext context) async {
-    final doc = await controller.document;
-    if (pageNumber < 1 || pageNumber > doc.pagesCount) {
-      print('无效的 pageNumber: $pageNumber, 页数范围: 1 - ${doc.pagesCount}');
-      return null;
-    } else {
-      print('有效的 doc:${doc.pagesCount}, 尝试获取第 $pageNumber 页');
-    }
-    try {
-      final page = await doc.getPage(pageNumber);
-      try {
-        final width = page.width;
-        final height = page.height;
-        if (width == null || height == null) {
-          print('PDF page width 或 height 为 null, 无法渲染.');
-          return null;
-        }
-        if (width <= 0 || height <= 0) {
-          print('PDF page width 或 height 无效: width=$width, height=$height');
-          return null;
-        }
-        print('---------------有效的page.width:${page.width}.');
-        // 获取设备像素密度
-        final double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
-        if (devicePixelRatio <= 0) {
-          print('设备像素密度无效: devicePixelRatio=$devicePixelRatio');
-          return null;
-        }
-        // 根据设备像素密度调整渲染尺寸，乘以一个系数以进一步提高清晰度
-        double clarityFactor = 1;
-        if (Platform.isWindows) {
-          clarityFactor = 1.5;
-        } else {
-          // 其他平台的清晰度系数
-          clarityFactor = 1.0; // 可以根据需要调整
-        }
-
-        final double renderWidth = width * devicePixelRatio * clarityFactor;
-        final double renderHeight = height * devicePixelRatio * clarityFactor;
-
-        if (renderWidth <= 0 || renderHeight <= 0) {
-          print('渲染尺寸无效: renderWidth=$renderWidth, renderHeight=$renderHeight');
-          return null;
-        }
-
-        double scaleFactor =
-            MediaQuery.of(context).size.width / (width * clarityFactor);
-        if (height * scaleFactor > MediaQuery.of(context).size.height) {
-          scaleFactor =
-              MediaQuery.of(context).size.height / (height * clarityFactor);
-        }
-        print('---------------开始渲染pdf page $pageNumber.');
-        final image = await page.render(
-          width: renderWidth,
-          height: renderHeight,
-          format: PdfPageImageFormat.jpeg,
-        );
-        if (image == null) {
-          print('page.render 返回了 null');
-        } else {
-          print('page.render正常返回：${image.pageNumber}');
-        }
-        return image;
-      } catch (e, stackTrace) {
-        print('渲染页面 $pageNumber 出错: $e');
-        print('渲染页面 $pageNumber 出错堆栈: $stackTrace');
-        return null;
-      } finally {
-        await page.close(); // 释放资源，防止白屏/卡死
-      }
-    } catch (e, stackTrace) {
-      print('获取第 $pageNumber 页出错: $e');
-      print('获取第 $pageNumber 页出错堆栈: $stackTrace');
-      return null;
-    }
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return FutureBuilder<PdfPageImage?>(
+//       future: _renderPage(context, controller, pageNumber),
+//       builder: (context, snapshot) {
+//         if (snapshot.hasData) {
+//           return Image.memory(snapshot.data!.bytes, fit: BoxFit.contain);
+//         } else if (snapshot.hasError) {
+//           print('Error loading page $pageNumber: ${snapshot.error}');
+//           return Center(
+//             child: Text('Error loading page $pageNumber: ${snapshot.error}'),
+//           );
+//         } else {
+//           return const Center(child: CircularProgressIndicator());
+//         }
+//       },
+//     );
+//   }
+// }
 
 // The callback function should always be a top-level or static function.
 @pragma('vm:entry-point')

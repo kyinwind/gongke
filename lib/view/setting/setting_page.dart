@@ -178,6 +178,8 @@ class _SettingPageState extends State<SettingPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
                     SizedBox(height: 8),
+                    Text('v0.9.6 (2025-07-04)', textAlign: TextAlign.left),
+                    Text('• 完善双页显示和缩略图显示', textAlign: TextAlign.left), // ✅
                     Text('v0.9.4 (2025-06-26)', textAlign: TextAlign.left), // ✅
                     Text(
                       '• 听书功能支持win平台\n• 增加坐禅系列电子书\n• 修改经书和善书按照名称排序',

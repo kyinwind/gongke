@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:pdfx/pdfx.dart';
 import '../providers/pdf_provider.dart';
 
 class PdfThumbnailList extends StatefulWidget {
-  final List<PageCache> pageCaches; // 使用缓存数据
+  final List<PageCache> pageCaches;
   final int currentPage;
-  final void Function(int pageIndex) onPageSelected; //pageIndex从1开始
+  final void Function(int pageIndex) onPageSelected;
   final double thumbnailWidth;
-  final Axis direction; // 新增
+  final Axis direction;
 
   const PdfThumbnailList({
     super.key,
@@ -40,8 +39,44 @@ class _PdfThumbnailListState extends State<PdfThumbnailList> {
     });
   }
 
+  List<PageCache> _buildDisplayCaches() {
+    return widget.pageCaches.where((cache) => cache.thumbnail != null).toList();
+  }
+
+  List<Widget> _buildThumbnails() {
+    final displayCaches = _buildDisplayCaches();
+
+    return displayCaches.map((cache) {
+      final isSelected = widget.currentPage == cache.pageIndex;
+
+      return GestureDetector(
+        onTap: () {
+          print('---------------点击缩略图: ${cache.pageIndex}');
+          widget.onPageSelected(cache.pageIndex);
+        },
+        child: Container(
+          margin: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: isSelected ? Colors.blue : Colors.transparent,
+              width: 2,
+            ),
+          ),
+          child: Image.memory(
+            cache.thumbnail!.bytes,
+            width: widget.thumbnailWidth,
+            fit: widget.direction == Axis.horizontal
+                ? BoxFit.fitWidth
+                : BoxFit.fitHeight,
+          ),
+        ),
+      );
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final thumbnails = _buildThumbnails();
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -50,13 +85,6 @@ class _PdfThumbnailListState extends State<PdfThumbnailList> {
             final size = constraints.biggest;
             return GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTapUp: (details) {
-                _handleTouch(details.localPosition, size);
-                if (_previewPage != null) {
-                  widget.onPageSelected(_previewPage!);
-                  setState(() => _previewPage = null);
-                }
-              },
               onPanUpdate: (details) =>
                   _handleTouch(details.localPosition, size),
               onPanEnd: (details) {
@@ -65,21 +93,22 @@ class _PdfThumbnailListState extends State<PdfThumbnailList> {
                   setState(() => _previewPage = null);
                 }
               },
-              onPanCancel: () {
-                if (_previewPage != null) {
-                  widget.onPageSelected(_previewPage!);
-                  setState(() => _previewPage = null);
-                }
-              },
               child: widget.direction == Axis.vertical
-                  ? Column(children: _buildThumbnails())
-                  : Row(children: _buildThumbnails()),
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: thumbnails,
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: thumbnails,
+                    ),
             );
           },
         ),
         if (_previewPage != null)
           Positioned(
-            bottom: 16,
+            top: widget.direction == Axis.vertical ? 16 : null,
+            bottom: widget.direction == Axis.horizontal ? 16 : null,
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
               decoration: BoxDecoration(
@@ -94,61 +123,5 @@ class _PdfThumbnailListState extends State<PdfThumbnailList> {
           ),
       ],
     );
-  }
-
-  /// ✅ 返回根据需求筛选出的要显示的缩略图列表
-  List<PageCache> _buildDisplayCaches() {
-    final totalPages = widget.pageCaches.length;
-
-    if (totalPages <= 10) {
-      // 总页数不超过 10 页，显示全部
-      return widget.pageCaches;
-    }
-
-    List<PageCache> selected = [];
-
-    // 保证第一页和最后一页一定出现
-    selected.add(widget.pageCaches[0]);
-
-    int samplesNeeded = 8; // 除去首尾，最多可显示的中间页数
-    double interval = (totalPages - 2) / (samplesNeeded + 1);
-
-    for (int i = 1; i <= samplesNeeded; i++) {
-      int pageIndex = (i * interval).round(); // 获取接近中间平均分布的索引
-      // 防止越界
-      pageIndex = pageIndex.clamp(1, totalPages - 2);
-      selected.add(widget.pageCaches[pageIndex]);
-    }
-
-    selected.add(widget.pageCaches[totalPages - 1]);
-
-    return selected;
-  }
-
-  List<Widget> _buildThumbnails() {
-    final displayCaches = _buildDisplayCaches();
-
-    return displayCaches.map((cache) {
-      final isSelected = widget.currentPage == cache.pageIndex;
-      final thumbImage = Image.memory(
-        cache.thumbnail.bytes,
-        width: widget.thumbnailWidth,
-        fit: BoxFit.fitWidth,
-      );
-
-      return GestureDetector(
-        onTap: () => widget.onPageSelected(cache.pageIndex),
-        child: Container(
-          margin: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: isSelected ? Colors.blue : Colors.transparent,
-              width: 2,
-            ),
-          ),
-          child: thumbImage,
-        ),
-      );
-    }).toList();
   }
 }

@@ -408,7 +408,8 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
     for (var i = 0; i < _data.gkiODList.length; i++) {
       var rec = _data.gkiODList[i];
       cnt = rec.cnt;
-      gongketext += "(${i + 1})${rec.gongketype.label}${rec.name}${cnt}遍。";
+      gongketext +=
+          "(${i + 1})${rec.gongketype.label}${rec.name}${cnt}${getDanWeiByLabel(rec.gongketype.label)}。";
       if (i < _data.gkiODList.length - 1) {
         gongketext += "\n";
       }
@@ -565,7 +566,11 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
               // 数量输入框
               TextField(
                 controller: cntController,
-                decoration: const InputDecoration(labelText: '数量'),
+                decoration: InputDecoration(
+                  labelText: selectedType != null
+                      ? '数量（${getDanWeiByLabel(selectedType!.label)}）'
+                      : '数量',
+                ),
                 keyboardType: TextInputType.number,
               ),
             ],

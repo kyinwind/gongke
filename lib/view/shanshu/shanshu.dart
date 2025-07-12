@@ -157,6 +157,26 @@ class _ShanShuPageState extends State<ShanShuPage> {
               favoriteDateTime: Value(null),
               createDateTime: Value(DateTime.now()),
             ),
+            o(
+              name: '《心经》吕新国',
+              image: 'assets/images/xinjing-lvxinguo.png',
+              fileUrl: '10013.pdf',
+              fileType: 'pdf',
+              type: 'shanshu',
+              remarks: Value('《心经》吕新国'),
+              favoriteDateTime: Value(null),
+              createDateTime: Value(DateTime.now()),
+            ),
+            o(
+              name: '《金刚经》吕新国',
+              image: 'assets/images/jingangjing-lvxinguo.jpg',
+              fileUrl: '10014.pdf',
+              fileType: 'pdf',
+              type: 'shanshu',
+              remarks: Value('《金刚经》吕新国'),
+              favoriteDateTime: Value(null),
+              createDateTime: Value(DateTime.now()),
+            ),
           ],
         );
         fetchAll(); // 插入数据后重新获取所有记录

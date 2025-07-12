@@ -114,7 +114,7 @@ class _GongKeSettingPageState extends State<GongKeSettingPage> {
   }
 
   String getGongkeItemLabel(GongKeItemData item) {
-    return '${getLabelSafely(item.gongketype)}: ${item.name} ${item.cnt}遍';
+    return '${getLabelSafely(item.gongketype)}: ${item.name} ${item.cnt} ${getDanWei(item.gongketype)}';
   }
 
   Widget _buildDateCard() {

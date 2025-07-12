@@ -137,28 +137,31 @@ class _GongKeStatPageState extends State<GongKeStatPage> {
 
   Widget _buildStatistics() {
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '一、时间统计\n从${DateTools.getDateStringByDate(_startDate)}到${DateTools.getDateStringByDate(_endDate)}'
-              '共$totalDays天,$planDays天做了功课计划，其中有$practiceDays天坚持做了功课',
-            ),
-            const SizedBox(height: 16),
-            const Text('二、功课完成情况：\n在此期间您共:'),
-            const SizedBox(height: 8),
-            ...gongkeStats.entries.map((entry) {
-              final parts = entry.key.split(':');
-              return Padding(
-                padding: const EdgeInsets.only(left: 16, bottom: 8),
-                child: Text(
-                  '${parts[0]}: ${parts[1]} ${entry.value}${getDanWeiByLabel(parts[0])}',
-                ),
-              );
-            }).toList(),
-          ],
+      child: SizedBox(
+        width: double.infinity,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '一、时间统计\n从${DateTools.getDateStringByDate(_startDate)}到${DateTools.getDateStringByDate(_endDate)}'
+                '共$totalDays天,$planDays天做了功课计划，其中有$practiceDays天坚持做了功课',
+              ),
+              const SizedBox(height: 16),
+              const Text('二、功课完成情况：\n在此期间您共:'),
+              const SizedBox(height: 8),
+              ...gongkeStats.entries.map((entry) {
+                final parts = entry.key.split(':');
+                return Padding(
+                  padding: const EdgeInsets.only(left: 16, bottom: 8),
+                  child: Text(
+                    '${parts[0]}: ${parts[1]} ${entry.value}${getDanWeiByLabel(parts[0])}',
+                  ),
+                );
+              }).toList(),
+            ],
+          ),
         ),
       ),
     );

@@ -66,6 +66,7 @@ dependencies:
   flutter_foreground_task: ^9.1.0  #android前台服务，用于音频持续播放
   pdfium_bindings: ^2.0.1  #在win下读取pdf text
   ffi: ^2.1.4
+  msix: ^3.16.9
 dev_dependencies:
   flutter_test:
     sdk: flutter

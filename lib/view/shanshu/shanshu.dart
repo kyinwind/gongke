@@ -5,6 +5,7 @@ import '../../comm/pdf_view.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gongke/main.dart';
 import 'package:drift/drift.dart' hide Column;
+import '../../comm/pub_tools.dart';
 
 class ShanShuPage extends StatefulWidget {
   const ShanShuPage({super.key});
@@ -22,166 +23,24 @@ class _ShanShuPageState extends State<ShanShuPage> {
   void initState() {
     super.initState();
     fetchAll();
-    // 检查 shanshudatalist 是否为空，如果为空则插入三条记录
-    shanshudatalist.first.then((list) {
-      if (list.isEmpty) {
-        globalDB.managers.jingShu.bulkCreate(
-          (o) => [
-            o(
-              name: '《大佛顶首楞严经浅释》宣化上人',
-              image: 'assets/images/lengyanjingqianshi.jpeg',
-              fileUrl: '10000.pdf',
-              fileType: 'pdf',
-              type: 'shanshu',
-              remarks: Value('《大佛顶首楞严经浅释》宣化上人'),
-              favoriteDateTime: Value(null),
-              createDateTime: Value(DateTime.now()),
-            ),
-            o(
-              name: '广钦老和尚事迹-开示录',
-              image: 'assets/images/guangqinlaoheshang.jpg',
-              fileUrl: '10001.pdf',
-              fileType: 'pdf',
-              type: 'shanshu',
-              remarks: Value('广钦老和尚事迹-开示录'),
-              favoriteDateTime: Value(null),
-              createDateTime: Value(DateTime.now()),
-            ),
-            o(
-              name: '宽净法师-西方极乐世界游记',
-              image: 'assets/images/kuanjingfashi.png',
-              fileUrl: '10002.pdf',
-              fileType: 'pdf',
-              type: 'shanshu',
-              remarks: Value('宽净法师-西方极乐世界游记'),
-              favoriteDateTime: Value(null),
-              createDateTime: Value(DateTime.now()),
-            ),
-            o(
-              name: '倓虚法师-影尘回忆录',
-              image: 'assets/images/tanxufashi.jpg',
-              fileUrl: '10003.pdf',
-              fileType: 'pdf',
-              type: 'shanshu',
-              remarks: Value('倓虚法师-影尘回忆录'),
-              favoriteDateTime: Value(null),
-              createDateTime: Value(DateTime.now()),
-            ),
-            o(
-              name: '黄念祖居士点滴开示',
-              image: 'assets/images/huangnianzhujushi.jpeg',
-              fileUrl: '10004.pdf',
-              fileType: 'pdf',
-              type: 'shanshu',
-              remarks: Value('黄念祖居士点滴开示'),
-              favoriteDateTime: Value(null),
-              createDateTime: Value(DateTime.now()),
-            ),
-            o(
-              name: '果卿居士-现代因果实录(一)',
-              image: 'assets/images/xiandaiiynguoshilu.jpeg',
-              fileUrl: '10005.pdf',
-              fileType: 'pdf',
-              type: 'shanshu',
-              remarks: Value('果卿居士-现代因果实录(一)'),
-              favoriteDateTime: Value(null),
-              createDateTime: Value(DateTime.now()),
-            ),
-            o(
-              name: '果卿居士-现代因果实录(二)',
-              image: 'assets/images/xiandaiiynguoshilu.jpeg',
-              fileUrl: '10006.pdf',
-              fileType: 'pdf',
-              type: 'shanshu',
-              remarks: Value('果卿居士-现代因果实录(二)'),
-              favoriteDateTime: Value(null),
-              createDateTime: Value(DateTime.now()),
-            ),
-            o(
-              name: '果卿居士-现代因果实录(三)',
-              image: 'assets/images/xiandaiiynguoshilu.jpeg',
-              fileUrl: '10007.pdf',
-              fileType: 'pdf',
-              type: 'shanshu',
-              remarks: Value('果卿居士-现代因果实录(三)'),
-              favoriteDateTime: Value(null),
-              createDateTime: Value(DateTime.now()),
-            ),
-            o(
-              name: '了凡四训',
-              image: 'assets/images/liaofansixun.jpg',
-              fileUrl: '10008.pdf',
-              fileType: 'pdf',
-              type: 'shanshu',
-              remarks: Value('了凡四训'),
-              favoriteDateTime: Value(null),
-              createDateTime: Value(DateTime.now()),
-            ),
-            o(
-              name: '于凌波居士-向知识分子介绍佛教',
-              image: 'assets/images/jieshaofojiao.jpeg',
-              fileUrl: '10009.pdf',
-              fileType: 'pdf',
-              type: 'shanshu',
-              remarks: Value('于凌波居士-向知识分子介绍佛教'),
-              favoriteDateTime: Value(null),
-              createDateTime: Value(DateTime.now()),
-            ),
-            o(
-              name: '坐禅',
-              image: 'assets/images/zuochan.jpeg',
-              fileUrl: '10010.pdf',
-              fileType: 'pdf',
-              type: 'shanshu',
-              remarks: Value('坐禅'),
-              favoriteDateTime: Value(null),
-              createDateTime: Value(DateTime.now()),
-            ),
-            o(
-              name: '坐禅之问答录',
-              image: 'assets/images/zuochanwendalu.jpeg',
-              fileUrl: '10011.pdf',
-              fileType: 'pdf',
-              type: 'shanshu',
-              remarks: Value('坐禅之问答录'),
-              favoriteDateTime: Value(null),
-              createDateTime: Value(DateTime.now()),
-            ),
-            o(
-              name: '坐禅2·次世代版终极佛法',
-              image: 'assets/images/zuochan2.jpeg',
-              fileUrl: '10012.pdf',
-              fileType: 'pdf',
-              type: 'shanshu',
-              remarks: Value('坐禅2·次世代版终极佛法'),
-              favoriteDateTime: Value(null),
-              createDateTime: Value(DateTime.now()),
-            ),
-            o(
-              name: '《心经》吕新国',
-              image: 'assets/images/xinjing-lvxinguo.png',
-              fileUrl: '10013.pdf',
-              fileType: 'pdf',
-              type: 'shanshu',
-              remarks: Value('《心经》吕新国'),
-              favoriteDateTime: Value(null),
-              createDateTime: Value(DateTime.now()),
-            ),
-            o(
-              name: '《金刚经》吕新国',
-              image: 'assets/images/jingangjing-lvxinguo.jpg',
-              fileUrl: '10014.pdf',
-              fileType: 'pdf',
-              type: 'shanshu',
-              remarks: Value('《金刚经》吕新国'),
-              favoriteDateTime: Value(null),
-              createDateTime: Value(DateTime.now()),
-            ),
-          ],
-        );
-        fetchAll(); // 插入数据后重新获取所有记录
-      }
+    initShanShuData().then((_) {
+      // 初始化善书数据
+      fetchAll();
     });
+  }
+
+  Future<void> initShanShuData() async {
+    // 检查 jingshudatalist ,如果为空则插入经书数据
+    bool exists = false;
+    final dataList = await shanshudatalist.first;
+    // 等待 Future 完成，获取 List<JingShuData>
+    for (final item in shanShuList) {
+      exists = dataList.any((o) => o.name == item.name.value);
+      if (exists) {
+        continue; // 如果已经存在，则跳过插入
+      }
+      await globalDB.into(globalDB.jingShu).insert(item);
+    }
   }
 
   @override

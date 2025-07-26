@@ -1,7 +1,7 @@
 display_name: 诵经助手
 publisher_display_name: 自在清风
 identity_name: BF9189DD.48248878B78C1
-msix_version: 1.0.0
+msix_version: 1.0.0.0
 
 # 发布到 Microsoft Store 必须设置
 publisher: CN=A760DC78-F7E9-480B-9C7A-33DB2FDBD7EC
@@ -9,7 +9,8 @@ publisher: CN=A760DC78-F7E9-480B-9C7A-33DB2FDBD7EC
 # 应用描述
 description: |
   诵经助手是一款帮助佛友管理与记录日常佛学修行功课的免费工具。
-  1、帮助佛友通过发愿建立功课计划，并记录佛友功课每天完成情况2、以小组件形式放置桌面，督促佛友每日完成功课，精进修行。
+  1、帮助佛友通过发愿建立功课计划，并记录佛友功课每天完成情况
+  2、以小组件形式放置桌面，督促佛友每日完成功课，精进修行。
   3、40多部常用佛经，包含金刚经、地藏经、六祖坛经等经书，十多部善书供佛友日常学习、念诵。
   4、可自己制作或导入佛友制作的开示语录，以小组件形式放在桌面，提醒自己每日修行。
   5、经书排版合理，适合手机、pad观看。
@@ -17,33 +18,12 @@ description: |
   7、app下载使用完全免费
 
 # 图标设置（建议使用 256x256 的 PNG）
-logo_path: assets/icons/icon.png
-
+logo_path: C:\dev\gongke\gongke\assets\icons\icon256.png
+languages: zh-CN
 # 架构
 # 可选: x64, x86, arm64, neutral
 # Store 推荐上传 x64 或 x64+x86。
 architecture: x64
 
 # 权限配置
-capabilities:
-  - internetClient
-  - location
-  - microphone
-  - webcam
-  # 根据需要添加其他权限，如:
-  # - documentsLibrary
-  # - picturesLibrary
-  # - videosLibrary
-
-# 发布配置（可选，用于 sideload 场景）
-# certificate_path: path/to/your/certificate.pfx
-# certificate_password: your_password
-
-# 入口点可选设置
-# If you need to specify a custom entry point
-# executable_file_name: YourApp.exe
-
-# 可选：使用外部命令完成构建前操作
-# pre_build_command: echo Pre-build steps
-# 可选：使用外部命令完成构建后操作
-# post_build_command: echo Post-build steps
+capabilities: internetClient, location, microphone, webcam

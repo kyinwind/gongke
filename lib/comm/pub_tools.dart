@@ -181,8 +181,8 @@ final Map<String, String> jingShuFiles = {
   '坐禅': '10010.pdf',
   '坐禅之问答录': '10011.pdf',
   '坐禅2·次世代版终极佛法': '10012.pdf',
-  '《心经》吕新国': '10013.pdf',
-  '《金刚经》吕新国': '10014.pdf',
+  '《心经》吕新国讲解': '10013.pdf',
+  '《金刚经》吕新国讲解': '10014.pdf',
 };
 
 String getPdfFileByName(String jingShuName) {
@@ -810,22 +810,22 @@ List<JingShuCompanion> shanShuList = [
     createDateTime: Value(DateTime.now()),
   ),
   JingShuCompanion(
-    name: Value('《心经》吕新国'),
+    name: Value('《心经》吕新国讲解'),
     image: Value('assets/images/xinjing-lvxinguo.png'),
     fileUrl: Value('10013.pdf'),
     fileType: Value('pdf'),
     type: Value('shanshu'),
-    remarks: Value('《心经》吕新国'),
+    remarks: Value('《心经》吕新国讲解'),
     favoriteDateTime: Value(null),
     createDateTime: Value(DateTime.now()),
   ),
   JingShuCompanion(
-    name: Value('《金刚经》吕新国'),
+    name: Value('《金刚经》吕新国讲解'),
     image: Value('assets/images/jingangjing-lvxinguo.jpg'),
     fileUrl: Value('10014.pdf'),
     fileType: Value('pdf'),
     type: Value('shanshu'),
-    remarks: Value('《金刚经》吕新国'),
+    remarks: Value('《金刚经》吕新国讲解'),
     favoriteDateTime: Value(null),
     createDateTime: Value(DateTime.now()),
   ),

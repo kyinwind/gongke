@@ -1,99 +1,64 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:gongke/comm/pub_tools.dart';
+import 'package:file_picker/file_picker.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
   State<SettingPage> createState() => _SettingPageState();
 }
 
-final List<Map<String, String>> help_slides = [
-  {
-    'image': 'assets/help/01.jpg',
-    'title': '首页',
-    'description': '发愿功课，功课完成日历一目了然',
-  },
-  {
-    'image': 'assets/help/02.jpg',
-    'title': '发愿向导',
-    'description': '跟随发愿向导，制定功课计划。',
-  },
-  {
-    'image': 'assets/help/03.jpg',
-    'title': '完成功课记录',
-    'description': '点击日历日期，完成当天功课。',
-  },
-  {
-    'image': 'assets/help/04.jpg',
-    'title': '完成功课小工具-功课计数',
-    'description': '对于念咒类功课，提供晃动手机计数功能，适合在外散步时做功课。',
-  },
-  {
-    'image': 'assets/help/05.jpg',
-    'title': '完成功课小工具-念佛计数',
-    'description': '对于念佛类功课，提供电子木鱼功能',
-  },
-  {
-    'image': 'assets/help/06.jpg',
-    'title': '功课统计',
-    'description': '可随时查看统计功课完成情况',
-  },
-  {
-    'image': 'assets/help/07.jpg',
-    'title': '藏经阁',
-    'description': '40多部常用经书供持诵学习',
-  },
-  {
-    'image': 'assets/help/08.jpg',
-    'title': '大德开示',
-    'description': '每天一句大德开示，勉励自己精进修行。',
-  },
-  {
-    'image': 'assets/help/09.jpg',
-    'title': '拜忏',
-    'description': '根据自己体力和发愿，自定义人声引导拜忏，自净其意。',
-  },
-];
-final List<Widget> imageSliders = help_slides
+const double picheight = 400;
+
+final help_sllides = Platform.isWindows
+    ? help_slides_windows
+    : help_slides_android;
+
+final List<Widget> imageSliders = help_sllides
     .map(
       (item) => Container(
-        child: Container(
-          margin: EdgeInsets.all(5.0),
-          child: ClipRRect(
-            borderRadius: BorderRadius.all(Radius.circular(5.0)),
-            child: Stack(
-              children: <Widget>[
-                Image.asset(item['image']!, fit: BoxFit.fill, height: 1400),
-                Positioned(
-                  bottom: 0.0,
-                  left: 0.0,
-                  right: 0.0,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Color.fromARGB(200, 0, 0, 0),
-                          Color.fromARGB(0, 0, 0, 0),
-                        ],
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                      ),
-                    ),
-                    padding: EdgeInsets.symmetric(
-                      vertical: 10.0,
-                      horizontal: 20.0,
-                    ),
-                    child: Text(
-                      '${item['title']!}\n${item['description']!}',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+        margin: const EdgeInsets.all(8.0),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Colors.yellow,
+                    width: 1,
+                  ), // 黄色边框，宽度为3
+                ),
+                child: SizedBox(
+                  height: picheight,
+                  child: Image.asset(
+                    item['image']!,
+                    fit: BoxFit.contain,
+                    height: picheight,
                   ),
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                item['title'] ?? '',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: Text(
+                  item['description'] ?? '',
+                  style: const TextStyle(fontSize: 14),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -131,7 +96,7 @@ class _SettingPageState extends State<SettingPage> {
                       textAlign: TextAlign.left, // ✅ 添加对齐
                     ),
                     const SelectableText(
-                      '技术支持网站: https://zhuanlan.zhihu.com/p/713033250',
+                      '技术支持网站: https://tieba.baidu.com/p/9908596817',
                       textAlign: TextAlign.left,
                     ),
                     // const SelectableText(
@@ -148,10 +113,10 @@ class _SettingPageState extends State<SettingPage> {
                 '使用帮助',
                 CarouselSlider(
                   options: CarouselOptions(
-                    aspectRatio: 1.0,
+                    height: picheight + 150,
                     enlargeCenterPage: true,
                     enlargeStrategy: CenterPageEnlargeStrategy.zoom,
-                    enlargeFactor: 0.4,
+                    enlargeFactor: 0.3,
                   ),
                   items: imageSliders,
                 ),
@@ -178,8 +143,8 @@ class _SettingPageState extends State<SettingPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
                     SizedBox(height: 8),
-
-                    Text('v1.0.1 (2025-07-27)', textAlign: TextAlign.left),
+                    Text('v1.0.3 (2025-07-29)', textAlign: TextAlign.left),
+                    Text('• 增加欢迎页面', textAlign: TextAlign.left),
                     Text('• 增加经书、善书、开示文件导入功能', textAlign: TextAlign.left),
                     Text('• 准备上架应用商店', textAlign: TextAlign.left),
                     Text('v1.0.0 (2025-07-19)', textAlign: TextAlign.left),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:gongke/main.dart';
 import '../../database.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -17,7 +16,9 @@ class ImportFilesPage extends StatefulWidget {
 
 class _ImportFilesPageState extends State<ImportFilesPage> {
   String _jingshuType = '';
-  final TextEditingController _directoryController = TextEditingController();
+  final TextEditingController _directoryController =
+      TextEditingController(); // 目录选择器
+  List<String> _selectedFiles = []; // 选择的文件列表
   bool _isDirectorySelected = false;
   String _title = '';
   String _content = '';
@@ -76,19 +77,46 @@ class _ImportFilesPageState extends State<ImportFilesPage> {
     }
   }
 
+  Future<void> _selectFiles() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      allowMultiple: true,
+      type: _jingshuType == 'kaishi' ? FileType.custom : FileType.custom,
+      allowedExtensions: _jingshuType == 'kaishi' ? ['json'] : ['pdf'],
+    );
+
+    if (result != null) {
+      setState(() {
+        _selectedFiles = result.paths.whereType<String>().toList();
+        _isDirectorySelected = _selectedFiles.isNotEmpty;
+      });
+    }
+  }
+
   Future<void> _confirmImport() async {
     late List<JingShuData> list;
     late List<TipBookData> tipList;
     int count = 0;
-    if (_directoryController.text.isEmpty) return;
-
-    final directory = Directory(_directoryController.text);
-    if (!await directory.exists()) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('目录不存在')));
-      return;
+    late List<FileSystemEntity> files;
+    //print('-------------------------进入_confirmImport');
+    if (Platform.isWindows) {
+      if (_directoryController.text.isEmpty) return;
+      final directory = Directory(_directoryController.text);
+      files = directory.listSync();
+      //print('------------------查询${directory}所有文件成功${files.length}');
+      if (!await directory.exists()) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('目录不存在')));
+        return;
+      }
     }
+    if (Platform.isAndroid) {
+      if (_selectedFiles.isEmpty) return;
+      // print(
+      //   '------------------查询${_selectedFiles}所有文件成功${_selectedFiles.length}',
+      // );
+    }
+
     if (_jingshuType != 'kaishi') {
       try {
         final query = globalDB.managers.jingShu
@@ -99,20 +127,34 @@ class _ImportFilesPageState extends State<ImportFilesPage> {
         print('查询所有记录时出错: $e');
         // 可以在这里设置一个空的 Stream 或者错误提示的 Stream
       }
+      //print('------------------查询所有经书成功${list.length}');
 
-      final files = directory.listSync();
-      for (final file in files) {
-        if (file is File && path.extension(file.path).toLowerCase() == '.pdf') {
-          print('---------------${file.path}');
-          //如果当前导入的文件已经存在，则不导入
-          String filename_pdf = file.path.split('\\').last;
-          String filename_withoutpdf = filename_pdf.replaceAll('.pdf', '');
-          bool exists = list.any((o) => o.name == filename_withoutpdf);
-          print('----------- ${filename_withoutpdf}--${exists}');
-          if (exists) {
-            continue; // 如果已经存在，则跳过插入
+      if (Platform.isWindows) {
+        for (final file in files) {
+          //print('------------------${file.path}');
+          if (file is File &&
+              path.extension(file.path).toLowerCase() == '.pdf') {
+            //print('---------------${file.path}');
+            //如果当前导入的文件已经存在，则不导入
+            String filename_pdf = file.path.split('\\').last;
+            String filename_withoutpdf = filename_pdf.replaceAll('.pdf', '');
+            bool exists = list.any((o) => o.name == filename_withoutpdf);
+            //print('----------- ${filename_withoutpdf}--${exists}');
+            if (exists) {
+              continue; // 如果已经存在，则跳过插入
+            }
+            await createJingShu(file.path, _jingshuType, list);
+            count++;
           }
-          await createJingShu(file.path, _jingshuType, list);
+        }
+      } else {
+        for (final filePath in _selectedFiles) {
+          if (path.extension(filePath).toLowerCase() != '.pdf') continue;
+          final filename = path.basenameWithoutExtension(filePath);
+          //print('${filename}');
+          bool exists = list.any((o) => o.name == filename);
+          if (exists) continue;
+          await createJingShu(filePath, _jingshuType, list);
           count++;
         }
       }
@@ -127,20 +169,30 @@ class _ImportFilesPageState extends State<ImportFilesPage> {
         print('查询所有记录时出错: $e');
         // 可以在这里设置一个空的 Stream 或者错误提示的 Stream
       }
-      final files = directory.listSync();
-      for (final file in files) {
-        if (file is File &&
-            path.extension(file.path).toLowerCase() == '.json') {
-          print('---------------${file.path}');
-          //如果当前导入的文件已经存在，则不导入
-          String filename_json = file.path.split('\\').last;
-          String filename_withoutjson = filename_json.replaceAll('.json', '');
-          bool exists = tipList.any((o) => o.name == filename_withoutjson);
-          print('----------- ${filename_withoutjson}--${exists}');
-          if (exists) {
-            continue; // 如果已经存在，则跳过插入
+      if (Platform.isWindows) {
+        for (final file in files) {
+          if (file is File &&
+              path.extension(file.path).toLowerCase() == '.json') {
+            //print('---------------${file.path}');
+            //如果当前导入的文件已经存在，则不导入
+            String filename_json = file.path.split('\\').last;
+            String filename_withoutjson = filename_json.replaceAll('.json', '');
+            bool exists = tipList.any((o) => o.name == filename_withoutjson);
+            //print('----------- ${filename_withoutjson}--${exists}');
+            if (exists) {
+              continue; // 如果已经存在，则跳过插入
+            }
+            await createTipBook(file.path, filename_withoutjson);
+            count++;
           }
-          await createTipBook(file.path, filename_withoutjson);
+        }
+      } else {
+        for (final filePath in _selectedFiles) {
+          if (path.extension(filePath).toLowerCase() != '.json') continue;
+          final filename = path.basenameWithoutExtension(filePath);
+          bool exists = tipList.any((o) => o.name == filename);
+          if (exists) continue;
+          await createTipBook(filePath, filename);
           count++;
         }
       }
@@ -154,9 +206,9 @@ class _ImportFilesPageState extends State<ImportFilesPage> {
   Future<void> createTipBook(String filePath, String name) async {
     // 实现开示创建逻辑
     debugPrint('创建开示: $filePath, 名称: $name');
-    String filename_json = filePath.split('\\').last;
-    String filename_withoutjson = filename_json.replaceAll('.json', '');
-    print('------------------${filePath}');
+    String filename_json = path.basename(filePath);
+    String filename_withoutjson = path.basenameWithoutExtension(filePath);
+    //print('------------------${filename_json}');
     final jsonString = await File(filePath).readAsString();
     final jsonData = json.decode(jsonString);
     // 开启事务
@@ -204,10 +256,10 @@ class _ImportFilesPageState extends State<ImportFilesPage> {
   ) async {
     // 实现经书创建逻辑
     debugPrint('创建经书: $filePath, 类型: $jingshuType');
-    String filename_pdf = filePath.split('\\').last;
-    String filename_withoutpdf = filename_pdf.replaceAll('.pdf', '');
-    print('filename_pdf:${filename_pdf}');
-    print('filename_withoutpdf:${filename_withoutpdf}');
+    String filename_pdf = path.basename(filePath);
+    String filename_withoutpdf = path.basenameWithoutExtension(filePath);
+    //print('filename_pdf:${filename_pdf}');
+    //print('filename_withoutpdf:${filename_withoutpdf}');
     bool exists = false;
 
     exists = list.any((o) => o.name == filename_withoutpdf);
@@ -217,7 +269,7 @@ class _ImportFilesPageState extends State<ImportFilesPage> {
     String? imagePath = _jingshuType.contains('shanshu')
         ? 'assets/images/shanshu.png'
         : 'assets/images/jingshu.png';
-
+    //print('filename:${filename_withoutpdf}');
     final item = JingShuCompanion(
       name: Value(filename_withoutpdf),
       image: Value(imagePath!),
@@ -255,20 +307,35 @@ class _ImportFilesPageState extends State<ImportFilesPage> {
           alignment: Alignment.centerLeft, // 添加 Align widget
           child: Column(
             children: [
-              TextField(
-                controller: _directoryController,
-                decoration: InputDecoration(
-                  labelText: '目录路径',
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.folder_open),
-                    onPressed: _selectDirectory,
-                  ),
-                  border: const OutlineInputBorder(),
-                ),
-                readOnly: true,
-              ),
+              Platform.isWindows
+                  ? TextField(
+                      controller: _directoryController,
+                      decoration: InputDecoration(
+                        labelText: '目录路径',
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.folder_open),
+                          onPressed: () {
+                            _selectDirectory();
+                          },
+                        ),
+                        border: const OutlineInputBorder(),
+                      ),
+                      readOnly: true,
+                    )
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text('已选择文件数: ${_selectedFiles.length}'),
+                        Spacer(),
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.file_open),
+                          label: const Text('选择文件'),
+                          onPressed: _selectFiles,
+                        ),
+                      ],
+                    ),
               const SizedBox(height: 20),
-              if (_isDirectorySelected)
+              if (_isDirectorySelected || _selectedFiles.isNotEmpty)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [

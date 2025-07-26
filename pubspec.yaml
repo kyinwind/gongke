@@ -17,7 +17,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.1+1
+version: 1.0.3+1
 
 environment:
   sdk: ^3.8.0
@@ -159,7 +159,7 @@ msix_config:
   display_name: 诵经助手
   publisher_display_name: 自在清风
   identity_name: BF9189DD.48248878B78C1
-  msix_version: 1.0.1.0
+  msix_version: 1.0.3.0
 
   # 发布到 Microsoft Store 必须设置
   publisher: CN=A760DC78-F7E9-480B-9C7A-33DB2FDBD7EC
@@ -176,7 +176,7 @@ msix_config:
     7、app下载使用完全免费
 
   # 图标设置（建议使用 256x256 的 PNG）
-  logo_path: C:\dev\gongke\gongke\assets\icons\icon256.png
+  logo_path: assets/icons/icon256.png
   languages: zh-CN
   # 架构
   # 可选: x64, x86, arm64, neutral

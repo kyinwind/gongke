@@ -38,7 +38,9 @@
 ## windows
 发布在github上，目前还没有发布到应用商店，需要自行下载exe使用。
 # 技术支持
-技术支持网站: https://zhuanlan.zhihu.com/p/713033250
+技术支持网站: 
+https://zhuanlan.zhihu.com/p/713033250
+https://tieba.baidu.com/p/9908596817
 希望大家多提使用意见，谢谢！
 
 # 许可证

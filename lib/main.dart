@@ -24,11 +24,12 @@ import 'view/setting/setting_page.dart';
 import 'view/shanshu/shanshu.dart';
 import 'view/songjing/import_files.dart';
 // 导入 path_provider 库以使用 getApplicationDocumentsDirectory 函数
-//import 'package:path_provider/path_provider.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:drift/native.dart';
+import 'welcome.dart'; // 导入你的 WelcomePage
 
 // 声明全局数据库变量
 late AppDatabase globalDB; // 在main函数中创建单一实例;
@@ -42,11 +43,17 @@ void main() async {
 
   // 等待 SharedPreferences 初始化
   await SharedPreferences.getInstance();
-
-  // 获取当前工作目录
-  String exeDir = p.dirname(Platform.resolvedExecutable);
-  String dbPath = p.join(exeDir, 'app.db');
-  print('数据库路径: $dbPath');
+  final hasSeenWelcome = await getBoolValue('hasSeenWelcome') ?? false;
+  // 根据平台选择合适的数据库存储路径
+  late String dbPath;
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    String exeDir = p.dirname(Platform.resolvedExecutable);
+    dbPath = p.join(exeDir, 'app.db');
+  } else {
+    // For Android and iOS, use the app's documents directory
+    final dbFolder = await getApplicationDocumentsDirectory();
+    dbPath = p.join(dbFolder.path, 'app.db');
+  }
 
   final executor = NativeDatabase(File(dbPath));
   globalDB = AppDatabase(executor);
@@ -58,19 +65,42 @@ void main() async {
   }
   WidgetsFlutterBinding.ensureInitialized();
   //print(firstDate);
-  runApp(ProviderScope(child: MyApp(db: globalDB))); // 传入数据库实例
+  runApp(
+    ProviderScope(
+      child: MyApp(db: globalDB, hasSeenWelcome: hasSeenWelcome),
+    ),
+  ); // 传入数据库实例
 }
 
 class MyApp extends StatefulWidget {
   final AppDatabase db; // 添加数据库字段
-
-  const MyApp({super.key, required this.db}); // 修改构造函数
+  final bool hasSeenWelcome;
+  const MyApp({
+    super.key,
+    required this.db,
+    required this.hasSeenWelcome,
+  }); // 修改构造函数
 
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
+  bool _hasSeenWelcome = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _hasSeenWelcome = widget.hasSeenWelcome;
+  }
+
+  Future<void> _finishWelcome() async {
+    await saveBoolValue('hasSeenWelcome', true);
+    setState(() {
+      _hasSeenWelcome = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     String fontFamily;
@@ -80,14 +110,16 @@ class _MyAppState extends State<MyApp> {
       fontFamily = 'Roboto';
     }
     return MaterialApp(
-      // title: '功课助手',
+      // title: '诵经助手',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         textTheme: TextTheme(
           bodyMedium: TextStyle(fontFamily: fontFamily),
         ).apply(fontFamily: fontFamily),
       ),
-      home: TabbedHomePage(title: 'Flutter Demo Home Page'),
+      home: _hasSeenWelcome
+          ? TabbedHomePage(title: '诵经助手')
+          : WelcomePage(onFinish: _finishWelcome),
       // 添加路由配置
       routes: {
         '/Tip': (context) => const TipPage(),

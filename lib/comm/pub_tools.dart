@@ -867,3 +867,104 @@ List<JingShuCompanion> shanShuList = [
     createDateTime: Value(DateTime.now()),
   ),
 ];
+
+final List<Map<String, String>> help_slides_android = [
+  {
+    'image': 'assets/help/01.jpg',
+    'title': '首页',
+    'description': '发愿功课，功课完成日历一目了然',
+  },
+  {
+    'image': 'assets/help/02.jpg',
+    'title': '发愿向导',
+    'description': '跟随发愿向导，制定功课计划。',
+  },
+  {
+    'image': 'assets/help/03.jpg',
+    'title': '完成功课记录',
+    'description': '点击日历日期，完成当天功课。',
+  },
+  {
+    'image': 'assets/help/04.jpg',
+    'title': '小工具-功课计数',
+    'description': '对于念咒类功课，提供晃动手机计数功能，适合在外散步时做功课。',
+  },
+  {
+    'image': 'assets/help/05.jpg',
+    'title': '小工具-念佛计数',
+    'description': '对于念佛类功课，提供电子木鱼功能',
+  },
+  {
+    'image': 'assets/help/06.jpg',
+    'title': '功课统计',
+    'description': '可随时查看统计功课完成情况',
+  },
+  {
+    'image': 'assets/help/07.jpg',
+    'title': '藏经阁',
+    'description': '40多部常用经书供持诵学习',
+  },
+  {
+    'image': 'assets/help/08.jpg',
+    'title': '大德开示',
+    'description': '每天一句大德开示，勉励自己精进修行。',
+  },
+  {
+    'image': 'assets/help/09.jpg',
+    'title': '拜忏',
+    'description': '根据自己体力和发愿，自定义人声引导拜忏，自净其意。',
+  },
+  {
+    'image': 'assets/help/10.jpg',
+    'title': '文件导入',
+    'description': '本app不包含经书、善书和开示文件，需要用户自己导入使用，请关注app技术支持网站。',
+  },
+];
+
+final List<Map<String, String>> help_slides_windows = [
+  {
+    'image': 'assets/help/101.png',
+    'title': '首页',
+    'description': '发愿功课，功课完成日历一目了然',
+  },
+  {
+    'image': 'assets/help/102.png',
+    'title': '发愿向导',
+    'description': '跟随发愿向导，制定功课计划。',
+  },
+  {
+    'image': 'assets/help/103.png',
+    'title': '完成功课记录',
+    'description': '点击日历日期，完成当天功课。',
+  },
+  {
+    'image': 'assets/help/104.png',
+    'title': '双页显示经书',
+    'description': '使用空格，回车翻页，使用上下键切换页。',
+  },
+  {
+    'image': 'assets/help/105.png',
+    'title': '完成功课小工具-功课计数',
+    'description': '对于念咒类功课，提供计数小工具。\n同样对于念佛、打坐提供电子木鱼和打坐计时工具。',
+  },
+  {
+    'image': 'assets/help/106.png',
+    'title': '双页显示善书，单页显示可以听书',
+    'description': '可以记住上一次读到的页码，下次打开时直接从上次页码开始。\n单页显示时可以听书。',
+  },
+  {
+    'image': 'assets/help/107.png',
+    'title': '大德开示',
+    'description': '每天一句大德开示，勉励自己精进修行。',
+  },
+  {
+    'image': 'assets/help/108.png',
+    'title': '拜忏',
+    'description': '根据自己体力和发愿，自定义人声引导拜忏，自净其意。',
+  },
+  {
+    'image': 'assets/help/109.png',
+    'title': '文件导入',
+    'description': '本app不包含经书、善书和开示文件，需要用户自己导入使用，请关注app技术支持网站。',
+  },
+];

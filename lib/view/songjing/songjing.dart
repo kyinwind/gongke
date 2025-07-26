@@ -6,6 +6,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gongke/main.dart';
 import 'package:drift/drift.dart' hide Column;
 import '../../comm/pub_tools.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SongJingPage extends StatefulWidget {
   const SongJingPage({super.key});
@@ -18,14 +19,21 @@ class _SongJingPageState extends State<SongJingPage> {
   final TextEditingController _searchController = TextEditingController();
   Stream<List<JingShuData>> jingshudatalist = Stream.value([]);
   //String? imagePath = 'assets/images/jingshu.png';
+  bool _appBuildFlag = false;
 
   @override
   void initState() {
     super.initState();
+    // 初始化配置
+    _appBuildFlag = appBuildFlag;
+
     fetchAll();
-    initJingShuData().then((_) {
-      fetchAll();
-    });
+    if (_appBuildFlag) {
+      // 如果是完整版，就增加内置文件
+      initJingShuData().then((_) {
+        fetchAll();
+      });
+    }
   }
 
   Future<void> initJingShuData() async {
@@ -52,7 +60,7 @@ class _SongJingPageState extends State<SongJingPage> {
   Future<void> fetchAll() async {
     try {
       final query = globalDB.managers.jingShu
-          .filter((f) => f.type.equals('jingshu'))
+          .filter((f) => f.type.contains('jingshu'))
           .orderBy((t) => t.favoriteDateTime.desc() & t.name.asc());
       final list = query.watch(); // 获取所有记录
       setState(() {
@@ -73,7 +81,7 @@ class _SongJingPageState extends State<SongJingPage> {
       final query = globalDB.managers.jingShu
           .orderBy((t) => t.favoriteDateTime.desc() & t.name.asc())
           .filter(
-            (f) => f.name.contains(str.trim()) & f.type.equals('jingshu'),
+            (f) => f.name.contains(str.trim()) & f.type.contains('jingshu'),
           );
       final list = query.watch(); // 获取所有记录
       setState(() {
@@ -105,13 +113,10 @@ class _SongJingPageState extends State<SongJingPage> {
   }
 
   // 跳转到PDF页面
-  void _navigateToPdfView(String pdfName) {
+  void _navigateToPdfView(JingShuData jingshu) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) =>
-            PdfViewerPage(pdfFileName: pdfName, pdfType: 'jingshu'),
-      ),
+      MaterialPageRoute(builder: (context) => PdfViewerPage(jingshu: jingshu)),
     );
   }
 
@@ -119,15 +124,38 @@ class _SongJingPageState extends State<SongJingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: TextField(
-          controller: _searchController,
-          decoration: InputDecoration(
-            hintText: '输入关键字搜索经书',
-            border: InputBorder.none,
-          ),
-          onChanged: (value) {
-            fetchByWords(value);
-          },
+        // 这两个控件不能正常显示可能是因为在 AppBar 的 title 中直接使用 Row，
+        // 没有给子控件设置合适的约束，导致 TextField 宽度无限大报错。
+        // 以下解决方案通过 Expanded 限制 TextField 宽度，并添加样式提升显示效果。
+        title: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: '输入关键字搜索经书',
+                  border: InputBorder.none,
+                ),
+                onChanged: (value) {
+                  fetchByWords(value);
+                },
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.arrow_circle_down),
+              color: Colors.blue,
+              iconSize: 35,
+              onPressed: () {
+                // 跳转到新增页面
+                Navigator.pushNamed(
+                  context,
+                  '/ImportFiles',
+                  arguments: {'jingshutype': 'jingshu'},
+                );
+              },
+            ),
+          ],
         ),
       ),
       body: SlidableAutoCloseBehavior(
@@ -141,6 +169,14 @@ class _SongJingPageState extends State<SongJingPage> {
               return Center(child: Text('数据加载出错: ${snapshot.error}'));
             }
             final list = snapshot.data ?? [];
+            if (list.length == 0) {
+              return Center(
+                child: Container(
+                  padding: EdgeInsets.all(16),
+                  child: Column(children: [Text('当前暂无数据，需要导入经书文件。')]),
+                ),
+              );
+            }
             return ListView.builder(
               itemCount: list.length,
               itemBuilder: (context, index) {
@@ -181,7 +217,11 @@ class _SongJingPageState extends State<SongJingPage> {
                               .filter((f) => f.id(list[index].id))
                               .delete();
                           // 重新获取数据
-                          await fetchAll();
+                          if (_searchController.text.isNotEmpty) {
+                            await fetchByWords(_searchController.text);
+                          } else {
+                            await fetchAll();
+                          }
                         },
                         backgroundColor: Color(0xFFFE4A49),
                         foregroundColor: Colors.white,
@@ -205,7 +245,7 @@ class _SongJingPageState extends State<SongJingPage> {
                       ],
                     ),
                     onTap: () {
-                      _navigateToPdfView(list[index].fileUrl);
+                      _navigateToPdfView(list[index]);
                     },
                   ).padding(all: 10),
                 );

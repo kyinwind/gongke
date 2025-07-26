@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gongke/database.dart';
 import 'package:gongke/main.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:flutter/services.dart';
@@ -18,14 +19,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/pdf_provider.dart';
 
 class PdfViewerPage extends ConsumerStatefulWidget {
-  final String pdfFileName; //带pdf后缀的文件名,jingshu的fileUrl字段
-  final String pdfType; // 'jingshu' or 'shanshu'
+  final JingShuData jingshu; //jingshu对象
 
-  const PdfViewerPage({
-    super.key,
-    required this.pdfFileName,
-    required this.pdfType,
-  });
+  const PdfViewerPage({super.key, required this.jingshu});
 
   @override
   ConsumerState<PdfViewerPage> createState() => _PdfViewerPageState();
@@ -109,20 +105,17 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     }
   }
 
-  String getBookName() {
-    return getJingShuNameByFile(widget.pdfFileName);
-  }
-
   @override
   void initState() {
     super.initState();
     //print('----------------------initState 开始');
     _doublePageFutures.clear();
     _pageCaches.clear();
-    _bookName = getBookName();
+    _bookName = widget.jingshu.name;
+
     Future<void> initAsync() async {
       //print('----------------------initState 初始化_pageController');
-      if (widget.pdfType == 'shanshu') {
+      if (widget.jingshu.type.contains('shanshu')) {
         await _getCurPage();
         _page = _curPage; // 设置初始页码
         _currentIndex = _singePageToDoublePage(_curPage);
@@ -163,7 +156,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
           await _loadPdf(_curPage);
           //print('----------------------加载 PDF 完成1');
 
-          if (widget.pdfType == 'shanshu' &&
+          if (widget.jingshu.type.contains('shanshu') &&
               (Platform.isIOS || Platform.isAndroid || Platform.isWindows)) {
             await _loadPdfText();
             ref.read(pdfTextDoneProvider.notifier).state = true;
@@ -198,10 +191,14 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     if (!mounted) return Future.value();
     try {
       //print('------------------------进入 _loadPdf 方法');
-      _document = await PdfDocument.openAsset(
-        'assets/pdfs/${widget.pdfFileName}',
-      );
-
+      if (widget.jingshu.type == 'shanshu' ||
+          widget.jingshu.type == 'jingshu') {
+        _document = await PdfDocument.openAsset(
+          'assets/pdfs/${widget.jingshu.fileUrl}',
+        );
+      } else {
+        _document = await PdfDocument.openFile(widget.jingshu.fileUrl);
+      }
       // 初始化 PdfController，确保只初始化一次
       //print('-------------------------------开始初始化 PdfController,$curPage');
       _pdfController = PdfController(
@@ -223,9 +220,13 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     if (!mounted) return Future.value();
     _pageCaches = [];
     List<int> pagesToGenerate = []; //缩略图只需要生成10张就可以，为了节省资源
-    _document2 = await PdfDocument.openAsset(
-      'assets/pdfs/${widget.pdfFileName}',
-    );
+    if (widget.jingshu.type == 'shanshu' || widget.jingshu.type == 'jingshu') {
+      _document2 = await PdfDocument.openAsset(
+        'assets/pdfs/${widget.jingshu.fileUrl}',
+      );
+    } else {
+      _document2 = await PdfDocument.openFile(widget.jingshu.fileUrl);
+    }
     final totalPages = _document2!.pagesCount;
     if (totalPages <= 10) {
       // 总页数不超过 10，全部生成
@@ -290,24 +291,33 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
 
   Future<void> _loadPdfText() async {
     if (!mounted) return Future.value();
+    late ByteData data;
     try {
+      //print('---------------------');
       // 1. 从 assets 加载 pdf 文件为字节流
-      ByteData data = await rootBundle.load(
-        'assets/pdfs/${widget.pdfFileName}',
-      );
+      if (widget.jingshu.type == 'shanshu' ||
+          widget.jingshu.type == 'jingshu') {
+        data = await rootBundle.load('assets/pdfs/${widget.jingshu.fileUrl}');
+      } else {
+        // 当文件不是从 assets 加载时，使用 File 直接读取本地文件
+        data = await File(
+          widget.jingshu.fileUrl,
+        ).readAsBytes().then((bytes) => ByteData.view(bytes.buffer));
+      }
       Uint8List bytes = data.buffer.asUint8List();
-
+      //print('------------------第一步加载成功');
       // 2. 把 PDF 文件写入临时文件（因为 flutter_pdf_text 需要文件路径）
       final tempDir = await getTemporaryDirectory();
       final tempFile = File('${tempDir.path}/temp.pdf');
       await tempFile.writeAsBytes(bytes, flush: true);
-
+      //print('------------------第二步临时文件生成成功');
       // 3. 加载 PDF 文本
       if (Platform.isWindows) {
         compute(loadPdfAndExtractText, tempFile.path)
             .then((result) {
               // 任务完成后在主线程执行
               windoc = result;
+              //print('------------------第3步成功');
             })
             .catchError((error) {
               print('PDF文本处理错误: $error');
@@ -366,9 +376,20 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
   Future<int> _getCurPage() async {
     if (!mounted) return 1;
     int curPage = 1; //默认第一页
-    final shanshu = await globalDB.managers.jingShu
-        .filter((f) => f.fileUrl.equals(widget.pdfFileName))
-        .getSingle();
+    late JingShuData shanshu;
+    final results = await globalDB.managers.jingShu
+        .filter((f) => f.name(widget.jingshu.name))
+        .filter((f) => f.type(widget.jingshu.type))
+        .get();
+    if (results.isEmpty) {
+      return 1;
+    } else if (results.length > 1) {
+      // 多条结果处理（例如取第一条或提示用户）
+      shanshu = results.first;
+    } else {
+      // 单条结果处理
+      shanshu = results.single;
+    }
     //('get shanshu.curPageNum : ${shanshu.curPageNum}');
     curPage = shanshu.curPageNum ?? 1;
     _curPage = curPage;
@@ -712,7 +733,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
 
   bool _getShowVoiceButtonFlag() {
     final _isTextDone = ref.read(pdfTextDoneProvider);
-    return widget.pdfType == 'shanshu' &&
+    return widget.jingshu.type.contains('shanshu') &&
         (Platform.isIOS || Platform.isAndroid || Platform.isWindows) &&
         !_isDoublePage &&
         _isTextDone;

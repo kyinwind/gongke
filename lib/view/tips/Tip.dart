@@ -8,6 +8,7 @@ import 'dart:convert'; // 导入 dart:convert 库，确保已导入
 import 'package:flutter/services.dart';
 import '../../viewmodel/current_record.dart';
 import 'package:intl/intl.dart';
+import '../../comm/pub_tools.dart';
 
 // 为了让页面能够上下滑动，将 Scaffold 的 body 用 SingleChildScrollView 包裹
 class TipPage extends StatefulWidget {
@@ -34,7 +35,11 @@ class _TipPageState extends State<TipPage> {
     // 监听 Stream 的第一个值
     final firstValue = await records.first;
     if (firstValue.isEmpty) {
-      await importTip();
+      if (appBuildFlag) {
+        //如果是完整版本，则导入内置开示文件
+        await importTip();
+      }
+
       fetchTip();
     }
     await _loadCurrentRecord();
@@ -55,7 +60,7 @@ class _TipPageState extends State<TipPage> {
         .difference(DateFormat('yyyy-MM-dd').parse(firstDate!))
         .inDays;
     final seq = difference + 1;
-
+    print('-------------应该读取第${seq}个记录');
     var curRecord = CurrentRecord();
 
     // 获取所有按照favoriteDateTime和createDateTime排序的tipbooks
@@ -79,10 +84,14 @@ class _TipPageState extends State<TipPage> {
       //   print('Record ${i + 1} ID: ${allRecords[i].id}');
       // }
     }
-
+    //对seq针对allRecords.length的长度求余
+    if (allRecords.isEmpty) {
+      return curRecord; // 或者返回 null，或给出默认值
+    }
+    final newseq = seq % allRecords.length;
     // 如果有足够的记录，获取第seq个记录
-    if (allRecords.length >= seq && seq > 0) {
-      final record = allRecords[seq - 1];
+    if (allRecords.length >= newseq && newseq >= 0) {
+      final record = allRecords[newseq - 1];
       curRecord.id = record.id;
       curRecord.content = record.content;
 
@@ -162,7 +171,7 @@ class _TipPageState extends State<TipPage> {
     super.dispose();
   }
 
-  String? imagePath = 'assets/images/jingshu.png';
+  String? imagePath = 'assets/images/shanshu.png';
   // 设置为最爱
   Future<void> _setFavorite(TipBookData book) async {
     var favoriteDateTime = book.favoriteDateTime;
@@ -192,16 +201,22 @@ class _TipPageState extends State<TipPage> {
         //toolbarHeight: 40,
         actions: [
           //Spacer(),
-          // IconButton(
-          //   icon: const Icon(Icons.import_export),
-          //   onPressed: () {
-          //     // 跳转到导入页面
-          //     Navigator.pushNamed(context, '/ImportTip');
-          //   },
-          // ),
-          // Text('  '),
+          const SizedBox(width: 8),
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: const Icon(Icons.arrow_circle_down),
+            color: Colors.blue,
+            iconSize: 35,
+            onPressed: () {
+              // 跳转到新增页面
+              Navigator.pushNamed(
+                context,
+                '/ImportFiles',
+                arguments: {'jingshutype': 'kaishi'},
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.add_circle, color: Colors.blue, size: 35),
             onPressed: () {
               // 跳转到新增页面
               Navigator.pushNamed(

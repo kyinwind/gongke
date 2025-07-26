@@ -60,7 +60,7 @@ class _TipRecordPageState extends State<TipRecordPage> {
         actions: [
           Spacer(),
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: const Icon(Icons.add_circle, color: Colors.blue, size: 35),
             onPressed: () {
               // 跳转到新增页面
               Navigator.pushNamed(

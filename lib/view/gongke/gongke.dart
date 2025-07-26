@@ -430,7 +430,11 @@ class _GongKePageState extends State<GongKePage> {
                         Tooltip(
                           message: '添加新的发愿', // 为添加按钮也添加提示
                           child: IconButton(
-                            icon: const Icon(Icons.add),
+                            icon: const Icon(
+                              Icons.add_circle,
+                              color: Colors.blue,
+                              size: 35,
+                            ),
                             onPressed: () {
                               Navigator.pushNamed(
                                 context,

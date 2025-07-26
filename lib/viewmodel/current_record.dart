@@ -6,7 +6,7 @@ class CurrentRecord {
   int id;
 
   CurrentRecord({
-    this.content = '',
+    this.content = '暂时无数据',
     this.bookId = 0,
     this.id = 0,
     this.bookName = '',

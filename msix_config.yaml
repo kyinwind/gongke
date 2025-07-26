@@ -1,7 +1,7 @@
 display_name: 诵经助手
 publisher_display_name: 自在清风
 identity_name: BF9189DD.48248878B78C1
-msix_version: 1.0.0.0
+msix_version: 1.0.1.0
 
 # 发布到 Microsoft Store 必须设置
 publisher: CN=A760DC78-F7E9-480B-9C7A-33DB2FDBD7EC

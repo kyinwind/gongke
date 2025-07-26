@@ -22,10 +22,13 @@ import 'view/baichan/new_bai_chan.dart';
 import 'view/baichan/bai_chan_play.dart';
 import 'view/setting/setting_page.dart';
 import 'view/shanshu/shanshu.dart';
+import 'view/songjing/import_files.dart';
 // 导入 path_provider 库以使用 getApplicationDocumentsDirectory 函数
 //import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart' as p;
+import 'package:drift/native.dart';
 
 // 声明全局数据库变量
 late AppDatabase globalDB; // 在main函数中创建单一实例;
@@ -40,8 +43,13 @@ void main() async {
   // 等待 SharedPreferences 初始化
   await SharedPreferences.getInstance();
 
-  // 初始化数据库
-  globalDB = AppDatabase();
+  // 获取当前工作目录
+  String exeDir = p.dirname(Platform.resolvedExecutable);
+  String dbPath = p.join(exeDir, 'app.db');
+  print('数据库路径: $dbPath');
+
+  final executor = NativeDatabase(File(dbPath));
+  globalDB = AppDatabase(executor);
 
   // 检查并存储首次运行时间
   firstDate = await getDateValue('firstDate');
@@ -99,6 +107,7 @@ class _MyAppState extends State<MyApp> {
         '/BaiChan/NewBaiChan': (context) => const NewBaiChanPage(),
         '/BaiChan/BaiChanPlay': (context) => const BaiChanPlayPage(),
         '/Setting': (context) => const SettingPage(),
+        '/ImportFiles': (context) => const ImportFilesPage(),
       },
       initialRoute: '/',
       localizationsDelegates: const [

@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:drift/drift.dart';
 
 class SoftwareVersion extends Table with AutoIncrementingPrimaryKey {
@@ -93,7 +91,8 @@ class JingShu extends Table
         FavoriteDateTimeColumn,
         RemarksColumn {
   TextColumn get name => text()();
-  TextColumn get type => text()(); //jingshu,shanshu
+  TextColumn get type =>
+      text()(); //jingshu,shanshu(内置经书和善书),externaljingshu,externalshanshu（外部导入的经书和善书）
   TextColumn get image => text()();
   TextColumn get fileUrl => text()();
   TextColumn get fileType => text()();

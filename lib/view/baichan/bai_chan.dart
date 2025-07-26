@@ -82,7 +82,7 @@ class _BaiChanListPageState extends State<BaiChanPage> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.add_circle),
+            icon: const Icon(Icons.add_circle, color: Colors.blue, size: 35),
             onPressed: () async {
               final result = await Navigator.pushNamed(
                 context,

@@ -543,16 +543,27 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
               // 根据选择的类型显示不同的输入方式
               if (selectedType == GongKeType.songjing)
                 // 经书下拉列表
-                DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: '选择经书'),
-                  value: selectedJingShu,
-                  items: jingShuFiles.keys.map((name) {
-                    return DropdownMenuItem(value: name, child: Text(name));
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedJingShu = value;
-                    });
+                FutureBuilder<Map<String, String>>(
+                  future: getJingShuFiles(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return DropdownButtonFormField<String>(
+                        decoration: const InputDecoration(labelText: '选择经书'),
+                        value: selectedJingShu,
+                        items: snapshot.data!.keys.map((name) {
+                          return DropdownMenuItem(
+                            value: name,
+                            child: Text(name),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedJingShu = value;
+                          });
+                        },
+                      );
+                    }
+                    return const CircularProgressIndicator();
                   },
                 )
               else if (selectedType != null)

@@ -1120,7 +1120,7 @@ Future<ServiceRequestResult> startService(String msg) async {
       //   ForegroundServiceTypes.remoteMessaging,
       // ],
       serviceId: 256,
-      notificationTitle: '功课助手',
+      notificationTitle: '诵经助手',
       notificationText: '${msg}',
       notificationIcon: null,
       notificationButtons: [

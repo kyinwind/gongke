@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gongke/database.dart';
 import '../../comm/audio_tools.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import '../../comm/pub_tools.dart';
 
 class NianShengHaoPage extends StatefulWidget {
   const NianShengHaoPage({super.key});
@@ -182,12 +183,16 @@ class _NianShengHaoPageState extends State<NianShengHaoPage> {
               ),
               child: Column(
                 children: [
-                  ElevatedButton(
-                    onPressed: startOrPause,
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(120, 48),
+                  Align(
+                    alignment: Alignment.center,
+                    child: SizedBox(
+                      width: 200,
+                      child: ElevatedButton(
+                        onPressed: startOrPause,
+                        style: AppButtonStyle.primaryButton,
+                        child: Text(isRunning ? "暂停" : "开始"),
+                      ),
                     ),
-                    child: Text(isRunning ? "暂停" : "开始"),
                   ),
                   const SizedBox(height: 12),
                   Text("总共 $total 声，当前第 $current 声"),

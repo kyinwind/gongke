@@ -7,6 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'package:path/path.dart' as path;
+import '../../comm/pub_tools.dart';
 
 class ImportFilesPage extends StatefulWidget {
   const ImportFilesPage({super.key});
@@ -340,10 +341,12 @@ class _ImportFilesPageState extends State<ImportFilesPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton(
+                      style: AppButtonStyle.primaryButton,
                       onPressed: _confirmImport,
                       child: const Text('确定导入'),
                     ),
                     ElevatedButton(
+                      style: AppButtonStyle.primaryButton,
                       onPressed: () => Navigator.pop(context),
                       child: const Text('退出'),
                     ),

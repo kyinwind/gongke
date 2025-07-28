@@ -274,12 +274,14 @@ class _NewBaiChanPageState extends State<NewBaiChanPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   ElevatedButton(
+                    style: AppButtonStyle.primaryButton,
                     onPressed: () {
                       Navigator.pop(context);
                     },
                     child: Text('取消'),
                   ),
                   ElevatedButton(
+                    style: AppButtonStyle.primaryButton,
                     onPressed: () async {
                       await saveData();
                       Navigator.of(context).pop(true);

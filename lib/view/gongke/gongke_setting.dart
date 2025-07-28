@@ -295,37 +295,55 @@ class _GongKeSettingPageState extends State<GongKeSettingPage> {
         const SizedBox(width: 30),
         Expanded(
           flex: 2,
-          child: ElevatedButton(
-            style: AppButtonStyle.primaryButton,
-            onPressed: _canEdit
-                ? () {
-                    if (!mounted) return;
-                    _setAllComplete();
-                    Navigator.pop(context);
-                    updateCallback();
-                  }
-                : null, // 不可编辑时禁用按钮
-            child: const Text('全部完成', style: TextStyle(color: Colors.white)),
+          child: Align(
+            alignment: Alignment.center,
+            child: SizedBox(
+              width: 200,
+              child: ElevatedButton(
+                style: AppButtonStyle.primaryButton,
+                onPressed: _canEdit
+                    ? () {
+                        if (!mounted) return;
+                        _setAllComplete();
+                        Navigator.pop(context);
+                        updateCallback();
+                      }
+                    : null, // 不可编辑时禁用按钮
+                child: const Text(
+                  '全部完成',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
           ),
         ),
         const SizedBox(width: 30),
         Expanded(
           flex: 2,
-          child: ElevatedButton(
-            style: AppButtonStyle.primaryButton,
-            onPressed: () {
-              String gongkeText = '!!';
-              for (var record in dayRecords) {
-                if (record.isComplete) {
-                  gongkeText += '${record.name}${record.cnt},';
-                }
-              }
-              Clipboard.setData(ClipboardData(text: gongkeText));
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('已复制到剪贴板')));
-            },
-            child: const Text('报课文本', style: TextStyle(color: Colors.white)),
+          child: Align(
+            alignment: Alignment.center,
+            child: SizedBox(
+              width: 200,
+              child: ElevatedButton(
+                style: AppButtonStyle.primaryButton,
+                onPressed: () {
+                  String gongkeText = '!!';
+                  for (var record in dayRecords) {
+                    if (record.isComplete) {
+                      gongkeText += '${record.name}${record.cnt},';
+                    }
+                  }
+                  Clipboard.setData(ClipboardData(text: gongkeText));
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('已复制到剪贴板')));
+                },
+                child: const Text(
+                  '报课文本',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
           ),
         ),
         const SizedBox(width: 30),

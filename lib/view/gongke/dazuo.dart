@@ -149,11 +149,15 @@ class _DaZuoPageState extends State<DaZuoPage> {
               ),
             ),
             SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: isGoingon ? () => stopTimer() : () => startTimer(gki!),
-              child: Text(isGoingon ? "结束" : "开始"),
-              style: ElevatedButton.styleFrom(
-                minimumSize: Size(double.infinity, 50),
+            Align(
+              alignment: Alignment.center,
+              child: SizedBox(
+                width: 200,
+                child: ElevatedButton(
+                  style: AppButtonStyle.primaryButton,
+                  onPressed: isGoingon ? stopTimer : () => startTimer(gki!),
+                  child: Text(isGoingon ? "结束" : "开始"),
+                ),
               ),
             ),
           ],

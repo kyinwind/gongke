@@ -46,14 +46,9 @@ void main() async {
   final hasSeenWelcome = await getBoolValue('hasSeenWelcome') ?? false;
   // 根据平台选择合适的数据库存储路径
   late String dbPath;
-  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    String exeDir = p.dirname(Platform.resolvedExecutable);
-    dbPath = p.join(exeDir, 'app.db');
-  } else {
-    // For Android and iOS, use the app's documents directory
-    final dbFolder = await getApplicationDocumentsDirectory();
-    dbPath = p.join(dbFolder.path, 'app.db');
-  }
+
+  final dbFolder = await getApplicationSupportDirectory();
+  dbPath = p.join(dbFolder.path, 'app.db');
 
   final executor = NativeDatabase(File(dbPath));
   globalDB = AppDatabase(executor);

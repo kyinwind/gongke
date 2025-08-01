@@ -6,7 +6,6 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gongke/main.dart';
 import 'package:drift/drift.dart' hide Column;
 import '../../comm/pub_tools.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class SongJingPage extends StatefulWidget {
   const SongJingPage({super.key});

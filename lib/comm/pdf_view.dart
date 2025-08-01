@@ -6,17 +6,15 @@ import 'package:flutter/services.dart';
 import 'dart:io'; // 引入 dart:io 来判断平台
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
-import 'platform_tools.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_pdf_text/flutter_pdf_text.dart';
-import 'pub_tools.dart';
 import 'pdfium_api_tools.dart';
-import 'package:device_info_plus/device_info_plus.dart';
-import 'dart:math';
 import 'thumbnail_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/pdf_provider.dart';
+import 'tts_tools.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
+import 'shared_preferences.dart';
 
 class PdfViewerPage extends ConsumerStatefulWidget {
   final JingShuData jingshu; //jingshu对象
@@ -48,18 +46,13 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
   //当前页码，即当前阅读到的页码
   late int _curPage = 1; //初始值为1
 
-  final FlutterTts flutterTts = FlutterTts();
-
-  // 添加一个标志来避免重复更新
-  bool _isPageChanging = false;
-
-  //是否是ipad，是否适合显示双页
-  bool _isPad = false;
   //模式显示缩略图
   bool _showThumbnailFlag = true;
   //pdfdoc
   late PDFDoc pdfdoc;
   late WinPDFDoc windoc;
+  //tts工具类
+  TtsTools tts = TtsTools(); // TTS工具类实例
   bool isOnGonging = false; //是否正在播放声音
 
   // 根据条件得出当前是否显示双页，true需要显示双页
@@ -92,16 +85,27 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     //print('--------------------------接收到数据: $data');
     _taskDataListenable.value = data;
     if (data is Map && data['buttonPressed'] == 'btn_stop') {
-      flutterTts.stop(); // 页面中你的 TTS 停止方法
+      tts.stop(); // 页面中你的 TTS 停止方法
       setState(() {
         isOnGonging = false;
       });
     } else if (data is Map && data['buttonPressed'] == 'btn_start') {
       // 开始播放的代码
-      _listenText(_page - 1);
+      _listenText(_page);
       setState(() {
         isOnGonging = true;
       });
+    }
+  }
+
+  Future<void> setPhoneWakeLock(bool isEnable) async {
+    final flag = await getBoolValue('allow_wakelock_flag') ?? false; //是否允许防止息屏
+    if (flag) {
+      if (isEnable) {
+        WakelockPlus.enable();
+      } else {
+        WakelockPlus.disable();
+      }
     }
   }
 
@@ -127,9 +131,9 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
         _pageController = PageController(initialPage: _currentIndex);
       }
       //print('----------------------initState 初始化focusNode');
-      isPad().then((value) {
-        _isPad = value;
-      });
+      // isPad().then((value) {
+      //   _isPad = value;
+      // });
       focusNode.requestFocus();
       // 添加焦点监听
       focusNode.addListener(() {
@@ -159,6 +163,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
           if (widget.jingshu.type.contains('shanshu') &&
               (Platform.isIOS || Platform.isAndroid || Platform.isWindows)) {
             await _loadPdfText();
+            //print('----------------------加载 PDF text 完成');
             ref.read(pdfTextDoneProvider.notifier).state = true;
           }
 
@@ -182,8 +187,13 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
       });
     }
 
+    // 调用异步初始化函数
     initAsync();
 
+    //设置 TTS 回调函数
+    tts.flutterTts.setCompletionHandler(() {
+      ttsCallBackOnCompletion(_page);
+    });
     //print('--------------------------initstate 完成');
   }
 
@@ -333,6 +343,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
 
   @override
   void dispose() {
+    setPhoneWakeLock(false);
     //print('--------------------------dispose _pdfController');
     _pdfController?.dispose();
     //print('--------------------------dispose _pageController');
@@ -340,7 +351,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     //print('--------------------------dispose focusNode');
     focusNode.dispose();
     //print('--------------------------dispose flutterTts');
-    flutterTts.stop();
+    tts.stop();
     // Remove a callback to receive data sent from the TaskHandler.
     FlutterForegroundTask.removeTaskDataCallback(_onReceiveTaskData);
     stopService();
@@ -359,19 +370,8 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
   }
 
   //从单页码转为双页码
-  int _singePageToDoublePage(int page) {
-    int returnvalue = 0;
-    int tempvalue = page;
-    if (page % 2 == 0) {
-      tempvalue = page - 1;
-    }
-    returnvalue = ((tempvalue ~/ 2));
-    return returnvalue;
-  }
-
-  int _doublePageToSinglePage(int page) {
-    return page * 2 + 1;
-  }
+  int _singePageToDoublePage(int page) => (page - 1) ~/ 2;
+  int _doublePageToSinglePage(int index) => index * 2 + 1;
 
   Future<int> _getCurPage() async {
     if (!mounted) return 1;
@@ -394,23 +394,6 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     curPage = shanshu.curPageNum ?? 1;
     _curPage = curPage;
     return curPage;
-  }
-
-  Future<void> _speak(String text, VoidCallback onDone) async {
-    if (!mounted) return Future.value();
-    await flutterTts.setLanguage("zh-CN");
-    await flutterTts.setSpeechRate(0.5);
-    isOnGonging = true;
-    await flutterTts.speak(text);
-    flutterTts.setCompletionHandler(() {
-      onDone();
-    });
-  }
-
-  Future<void> _stop() async {
-    if (!mounted) return Future.value();
-    isOnGonging = false;
-    await flutterTts.stop();
   }
 
   Widget _buildDoublePageView() {
@@ -567,7 +550,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
   }
 
   Widget _buildSinglePageView() {
-    print('--------------------------_buildSinglePageView start');
+    //print('--------------------------_buildSinglePageView start');
     if (_pdfController == null) {
       //print('--------------------------_pdfController is null');
       return const Center(child: CircularProgressIndicator());
@@ -583,7 +566,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
       },
       scrollDirection: Axis.vertical,
     );
-    print('--------------------------_buildSinglePageView end');
+    //print('--------------------------_buildSinglePageView end');
     return pdf;
   }
 
@@ -591,7 +574,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     //print('点击缩略图跳转到第 $pageNumber 页');
     try {
       if (_isDoublePage) {
-        print('----------------_handleClickAndJump--------双页模式');
+        //print('----------------_handleClickAndJump--------双页模式');
         final doublePageIndex = _singePageToDoublePage(pageNumber);
         _pages = _document!.pagesCount;
         if (_pageController!.hasClients) {
@@ -608,14 +591,14 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
         }
         _currentIndex = doublePageIndex;
         _page = pageNumber;
-        print(
-          '----------------应该跳到$pageNumber页--------跳转到双页索引: $doublePageIndex',
-        );
+        // print(
+        //   '----------------应该跳到$pageNumber页--------跳转到双页索引: $doublePageIndex',
+        // );
       } else {
-        print('----------------_handleClickAndJump--------单页模式');
+        //print('----------------_handleClickAndJump--------单页模式');
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          print('-----------------当前单页页码: ${_pdfController!.page}');
+          //print('-----------------当前单页页码: ${_pdfController!.page}');
           if (_pdfController != null && _pdfController!.page != pageNumber) {
             _pdfController?.jumpToPage(pageNumber);
             // 强制刷新
@@ -708,35 +691,41 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
 
   void _listenText(int pagenum) async {
     //pagenum 页码从1开始
-    if (!_isDoublePage && pagenum >= 1) {
-      int pageCnt = _pageCaches.length;
+    int pageCnt = _pageCaches.length;
+    if (!_isDoublePage && pagenum >= 1 && pagenum <= pageCnt) {
       String text = await getText(pagenum);
-      print('${text}');
-      //print(text);
+      print('${pagenum}');
+      print(text);
       if (Platform.isAndroid || Platform.isIOS) {
         startService('正在朗读 ${_bookName}');
       }
-      if (pagenum + 1 <= pageCnt) {
-        _speak(text, () {
-          if (Platform.isAndroid || Platform.isIOS) {
-            startService('正在朗读 ${_bookName}');
-          }
-          _listenText(pagenum + 1);
-          //跳往下一页
-          _handleNextPage();
-        });
-      } else {
-        _speak(text, () {});
+      print('---page:${_pdfController!.page}-----pagenum:$pagenum');
+      if (_pdfController != null && _pdfController!.page != pagenum) {
+        _pdfController?.jumpToPage(pagenum);
+        _page = pagenum; // 更新当前页码
       }
+      isOnGonging = true;
+      await setPhoneWakeLock(true); //避免息屏
+      await tts.speak(text, null);
+      await setPhoneWakeLock(true);
     }
+  }
+
+  void ttsCallBackOnCompletion(int pagenum) {
+    print('-------------------------------------------回调函数被调用了');
+    isOnGonging = false;
+    _listenText(pagenum + 1);
   }
 
   bool _getShowVoiceButtonFlag() {
     final _isTextDone = ref.read(pdfTextDoneProvider);
-    return widget.jingshu.type.contains('shanshu') &&
+    final flag =
+        widget.jingshu.type.contains('shanshu') &&
         (Platform.isIOS || Platform.isAndroid || Platform.isWindows) &&
         !_isDoublePage &&
         _isTextDone;
+    //print('--------_getShowVoiceButtonFlag: ${flag}');
+    return flag;
   }
 
   Widget _buildNavigatorButton() {
@@ -753,11 +742,14 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
                 onPressed: () {
                   setState(() {
                     if (!isOnGonging) {
-                      isOnGonging = true;
                       _listenText(_page);
                     } else {
-                      _stop();
-                      isOnGonging = false;
+                      // 如果正在朗读，停止朗读
+                      tts.pause();
+                    }
+                    isOnGonging = !isOnGonging;
+                    if (!isOnGonging) {
+                      setPhoneWakeLock(false); //没有播放的时候，就允许息屏了
                     }
                   });
                   focusNode.requestFocus(); // 处理完事件后重新获取焦点
@@ -820,7 +812,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
   }
 
   void _backToParentPage() {
-    flutterTts.stop();
+    //tts.stop();
     // 检查组件是否还挂载
     //print('--------开始返回 _page:$_page');
     if (mounted) {
@@ -1137,22 +1129,22 @@ Future<ServiceRequestResult> stopService() {
   return FlutterForegroundTask.stopService();
 }
 
-Future<bool> isPad() async {
-  if (Platform.isIOS) {
-    final iosInfo = await DeviceInfoPlugin().iosInfo;
-    return iosInfo.model.toLowerCase().contains('ipad');
-  } else if (Platform.isAndroid) {
-    //final androidInfo = await DeviceInfoPlugin().androidInfo;
-    // 安卓平板通常屏幕密度和尺寸较大
-    final view = WidgetsBinding.instance.platformDispatcher.views.first;
-    final size = view.physicalSize / view.devicePixelRatio;
-    final diagonal = sqrt(size.width * size.width + size.height * size.height);
-    return diagonal > 10 * 160; // 10 英寸约为 1600 点
-  } else if (Platform.isWindows) {
-    return true;
-  }
-  return false;
-}
+// Future<bool> isPad() async {
+//   if (Platform.isIOS) {
+//     final iosInfo = await DeviceInfoPlugin().iosInfo;
+//     return iosInfo.model.toLowerCase().contains('ipad');
+//   } else if (Platform.isAndroid) {
+//     //final androidInfo = await DeviceInfoPlugin().androidInfo;
+//     // 安卓平板通常屏幕密度和尺寸较大
+//     final view = WidgetsBinding.instance.platformDispatcher.views.first;
+//     final size = view.physicalSize / view.devicePixelRatio;
+//     final diagonal = sqrt(size.width * size.width + size.height * size.height);
+//     return diagonal > 10 * 160; // 10 英寸约为 1600 点
+//   } else if (Platform.isWindows) {
+//     return true;
+//   }
+//   return false;
+// }
 
 //使用状态，在pdf加载完毕再显示pdf页面
 class PdfLoadProvider with ChangeNotifier {

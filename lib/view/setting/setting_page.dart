@@ -1,9 +1,8 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:gongke/comm/pub_tools.dart';
-import 'package:file_picker/file_picker.dart';
+import '../../comm/shared_preferences.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -66,9 +65,16 @@ final List<Widget> imageSliders = help_sllides
     .toList();
 
 class _SettingPageState extends State<SettingPage> {
+  bool _allowWakelock = false;
   @override
   void initState() {
     super.initState();
+
+    getBoolValue('allow_wakelock_flag').then((value) {
+      setState(() {
+        _allowWakelock = value ?? false;
+      });
+    });
   }
 
   @override
@@ -81,6 +87,33 @@ class _SettingPageState extends State<SettingPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Platform.isAndroid || Platform.isIOS
+                  ? _buildSection(
+                      '系统设置',
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SwitchListTile(
+                            title: const Text('允许听书时禁止息屏'),
+                            value: _allowWakelock,
+                            onChanged: (bool value) async {
+                              print('-----------开关值：${value}');
+                              // 处理开关状态改变的逻辑
+                              setState(() {
+                                _allowWakelock = value;
+                                saveBoolValue('allow_wakelock_flag', value);
+                              });
+                            },
+                          ),
+                          const Text(
+                            '如果允许，则听书时一直亮屏。反之则听两三页之后手机自动息屏。',
+                            textAlign: TextAlign.left, // ✅ 添加对齐
+                            style: TextStyle(fontSize: 14, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    )
+                  : SizedBox(),
               _buildSection(
                 '意见反馈',
                 Column(

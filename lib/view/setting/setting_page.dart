@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:gongke/comm/pub_tools.dart';
 import '../../comm/shared_preferences.dart';
+import 'package:toastification/toastification.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -128,10 +130,33 @@ class _SettingPageState extends State<SettingPage> {
                       style: TextStyle(color: Theme.of(context).primaryColor),
                       textAlign: TextAlign.left, // ✅ 添加对齐
                     ),
-                    const SelectableText(
-                      '技术支持网站: https://tieba.baidu.com/p/9908596817',
-                      textAlign: TextAlign.left,
+                    ElevatedButton(
+                      child: Text('https://tieba.baidu.com/p/9908596817'),
+                      onPressed: () async {
+                        final url = 'https://tieba.baidu.com/p/9908596817';
+                        final uri = Uri.parse(url);
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(
+                            uri,
+                            mode: LaunchMode.externalApplication,
+                          );
+                        } else {
+                          Toastification().show(
+                            title: TextButton(
+                              onPressed: () {
+                                copyToClipboard(url);
+                              },
+                              child: Text('打开链接失败，请点击复制链接后手动打开'),
+                            ),
+                            type: ToastificationType.error,
+                          );
+                        }
+                      },
                     ),
+                    // const SelectableText(
+                    //   '技术支持网站: https://tieba.baidu.com/p/9908596817',
+                    //   textAlign: TextAlign.left,
+                    // ),
                     // const SelectableText(
                     //   '技术支持qq:966451045',
                     //   textAlign: TextAlign.left,
@@ -176,6 +201,8 @@ class _SettingPageState extends State<SettingPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
                     SizedBox(height: 8),
+                    Text('v1.0.5 (2025-08-30)', textAlign: TextAlign.left),
+                    Text('• 诵经时可以播放电子木鱼', textAlign: TextAlign.left),
                     Text('v1.0.3 (2025-07-29)', textAlign: TextAlign.left),
                     Text('• 增加欢迎页面', textAlign: TextAlign.left),
                     Text('• 增加经书、善书、开示文件导入功能', textAlign: TextAlign.left),

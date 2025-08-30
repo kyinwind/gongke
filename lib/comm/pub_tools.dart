@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:drift/drift.dart';
 import 'package:gongke/database.dart';
-import '../main.dart';
+import 'package:gongke/main.dart';
+import 'package:flutter/services.dart';
 
 bool appBuildFlag = false; // false,lite版本；true，完整功能版本
 //别忘了同时修改pubspec.yaml文件，把pdfs，tips目录的注释去掉
@@ -968,3 +969,16 @@ final List<Map<String, String>> help_slides_windows = [
     'description': '本app不包含经书、善书和开示文件，需要用户自己导入使用，请关注app技术支持网站。',
   },
 ];
+
+// 复制文本到系统剪贴板
+void copyToClipboard(String text) {
+  Clipboard.setData(ClipboardData(text: text))
+      .then((_) {
+        // 复制成功后的回调，可以在这里显示提示信息
+        print('内容已复制到剪贴板');
+      })
+      .catchError((error) {
+        // 复制失败的处理
+        print('复制失败: $error');
+      });
+}

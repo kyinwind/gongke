@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
-enum TtsState { playing, stopped, paused, continued }
+//enum TtsState { playing, stopped, paused, continued }
 
 class TtsTools {
   late FlutterTts flutterTts;
@@ -15,13 +15,6 @@ class TtsTools {
   double pitch = 1.0;
   double rate = 0.5;
   bool isCurrentLanguageInstalled = false;
-
-  TtsState ttsState = TtsState.stopped;
-
-  bool get isPlaying => ttsState == TtsState.playing;
-  bool get isStopped => ttsState == TtsState.stopped;
-  bool get isPaused => ttsState == TtsState.paused;
-  bool get isContinued => ttsState == TtsState.continued;
 
   bool get isIOS => !kIsWeb && Platform.isIOS;
   bool get isAndroid => !kIsWeb && Platform.isAndroid;
@@ -43,36 +36,7 @@ class TtsTools {
       _getDefaultEngine();
       _getDefaultVoice();
     }
-
-    flutterTts.setStartHandler(() {
-      print("Playing");
-      ttsState = TtsState.playing;
-    });
-
-    // flutterTts.setCompletionHandler(() {
-    //   print("Complete");
-    //   ttsState = TtsState.stopped;
-    // });
-
-    flutterTts.setCancelHandler(() {
-      print("Cancel");
-      ttsState = TtsState.stopped;
-    });
-
-    flutterTts.setPauseHandler(() {
-      print("Paused");
-      ttsState = TtsState.paused;
-    });
-
-    flutterTts.setContinueHandler(() {
-      print("Continued");
-      ttsState = TtsState.continued;
-    });
-
-    // flutterTts.setErrorHandler((msg) {
-    //   print("error: $msg");
-    //   ttsState = TtsState.stopped;
-    // });
+    print("TtsTools 初始化完成");
   }
 
   Future<dynamic> getLanguages() async => await flutterTts.getLanguages;
@@ -98,7 +62,6 @@ class TtsTools {
     await flutterTts.setSpeechRate(rate);
     await flutterTts.setPitch(pitch);
     await flutterTts.speak(text);
-    ttsState = TtsState.stopped;
     if (onDone != null) {
       flutterTts.setCompletionHandler(() {
         onDone();
@@ -113,15 +76,11 @@ class TtsTools {
   Future<void> stop() async {
     flutterTts.setCompletionHandler(() {});
     var result = await flutterTts.stop();
-    if (result == 1) {
-      ttsState = TtsState.stopped;
-    }
+    if (result == 1) {}
   }
 
   Future<void> pause() async {
     var result = await flutterTts.pause();
-    if (result == 1) {
-      ttsState = TtsState.paused;
-    }
+    if (result == 1) {}
   }
 }

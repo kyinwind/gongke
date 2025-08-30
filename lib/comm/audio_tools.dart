@@ -9,8 +9,9 @@ class AudioTools {
   static StreamSubscription<void>? _playerCompleteSubscription;
 
   static Future<void> playLocalAsset(
-    String file, {
-    VoidCallback? onComplete,
+    String file, { // 音频文件名
+    VoidCallback? onComplete, // 播放完成回调
+    double? playbackRate, // 播放速率，默认1.0
   }) async {
     if (_isDisposed) {
       await _player.dispose();
@@ -30,6 +31,9 @@ class AudioTools {
 
     try {
       await _player.stop();
+      if (playbackRate != null) {
+        _player.setPlaybackRate(playbackRate);
+      }
       await _player.play(AssetSource(file));
     } catch (e) {
       debugPrint('音频播放出错: $e');
@@ -38,6 +42,14 @@ class AudioTools {
 
   static Future<void> stop() async {
     if (!_isDisposed) {
+      await _player.stop();
+    }
+  }
+
+  static Future<void> clearAndStop() async {
+    if (!_isDisposed) {
+      _onCompleteCallback = null;
+      await _playerCompleteSubscription?.cancel();
       await _player.stop();
     }
   }

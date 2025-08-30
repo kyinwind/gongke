@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:gongke/main.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-import '../../database.dart';
-import '../../comm/pub_tools.dart';
-import '../../comm/audio_tools.dart';
+import 'package:gongke/database.dart';
+import 'package:gongke/comm/pub_tools.dart';
+import 'package:gongke/comm/audio_tools.dart';
 
 class BaiChanPlayPage extends StatefulWidget {
   const BaiChanPlayPage({super.key});

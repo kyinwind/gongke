@@ -139,10 +139,9 @@ class _GongKeSettingPageState extends State<GongKeSettingPage> {
   // 跳转到PDF页面
   void _navigateToPdfView(JingShuData jingshu) async {
     //根据pdfname找到经书
-
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => PdfViewerPage(jingshu: jingshu!)),
+      MaterialPageRoute(builder: (context) => PdfViewerPage(jingshu: jingshu)),
     );
   }
 
@@ -204,10 +203,10 @@ class _GongKeSettingPageState extends State<GongKeSettingPage> {
                               if (!_canEdit) return;
                               switch (item.gongketype) {
                                 case 'songjing':
-                                  JingShuData? jingshu = await getJingShuByName(
+                                  JingShuData jingshu = await getJingShuByName(
                                     item.name,
                                   );
-                                  _navigateToPdfView(jingshu!);
+                                  _navigateToPdfView(jingshu);
                                   break;
                                 case 'nianzhou':
                                   Navigator.pushNamed(

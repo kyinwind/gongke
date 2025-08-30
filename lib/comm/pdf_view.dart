@@ -8,13 +8,14 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_pdf_text/flutter_pdf_text.dart';
-import 'pdfium_api_tools.dart';
-import 'thumbnail_list.dart';
+import 'package:gongke/comm/pdfium_api_tools.dart';
+import 'package:gongke/comm/thumbnail_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/pdf_provider.dart';
-import 'tts_tools.dart';
+import 'package:gongke/providers/pdf_provider.dart';
+import 'package:gongke/comm/tts_tools.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-import 'shared_preferences.dart';
+import 'package:gongke/comm/shared_preferences.dart';
+import 'package:gongke/comm/audio_tools.dart';
 
 class PdfViewerPage extends ConsumerStatefulWidget {
   final JingShuData jingshu; //jingshu对象
@@ -48,11 +49,16 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
 
   //模式显示缩略图
   bool _showThumbnailFlag = true;
+
+  //是否显示木鱼背景音乐
+  bool _showMuyuFlag = false;
+  bool _muyuIsPlaying = false; //木鱼是否正在播放
+
   //pdfdoc
   late PDFDoc pdfdoc;
   late WinPDFDoc windoc;
   //tts工具类
-  TtsTools tts = TtsTools(); // TTS工具类实例
+  TtsTools ttstools = TtsTools(); // TTS工具类实例
   bool isOnGonging = false; //是否正在播放声音
 
   // 根据条件得出当前是否显示双页，true需要显示双页
@@ -85,7 +91,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     //print('--------------------------接收到数据: $data');
     _taskDataListenable.value = data;
     if (data is Map && data['buttonPressed'] == 'btn_stop') {
-      tts.stop(); // 页面中你的 TTS 停止方法
+      ttstools.stop(); // 页面中你的 TTS 停止方法
       setState(() {
         isOnGonging = false;
       });
@@ -164,7 +170,6 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
               (Platform.isIOS || Platform.isAndroid || Platform.isWindows)) {
             await _loadPdfText();
             //print('----------------------加载 PDF text 完成');
-            ref.read(pdfTextDoneProvider.notifier).state = true;
           }
 
           await _copyPage(); //复制一份页码缓存，用于双页显示和缩略图显示
@@ -191,9 +196,12 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     initAsync();
 
     //设置 TTS 回调函数
-    tts.flutterTts.setCompletionHandler(() {
-      ttsCallBackOnCompletion(_page);
-    });
+    if (widget.jingshu.type.contains('shanshu')) {
+      ttstools.flutterTts.setCompletionHandler(() {
+        ttsCallBackOnCompletion(_page);
+      });
+    }
+
     //print('--------------------------initstate 完成');
   }
 
@@ -327,6 +335,9 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
             .then((result) {
               // 任务完成后在主线程执行
               windoc = result;
+              setState(() {
+                ref.read(pdfTextDoneProvider.notifier).state = true;
+              });
               //print('------------------第3步成功');
             })
             .catchError((error) {
@@ -335,6 +346,9 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
         //windoc = await loadPdfAndExtractText(tempFile.path);
       } else {
         pdfdoc = await PDFDoc.fromPath(tempFile.path);
+        setState(() {
+          ref.read(pdfTextDoneProvider.notifier).state = true;
+        });
       }
     } catch (e) {
       print('加载 PDF text 出错: $e');
@@ -350,8 +364,12 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     _pageController?.dispose();
     //print('--------------------------dispose focusNode');
     focusNode.dispose();
-    //print('--------------------------dispose flutterTts');
-    tts.stop();
+    print('--------------------------dispose flutterTts');
+    //ttstools.flutterTts.setCompletionHandler(() {});
+    if (widget.jingshu.type.contains('shanshu')) {
+      ttstools.stop();
+    }
+
     // Remove a callback to receive data sent from the TaskHandler.
     FlutterForegroundTask.removeTaskDataCallback(_onReceiveTaskData);
     stopService();
@@ -359,7 +377,11 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     //print('--------------------------dispose _taskDataListenable');
     _doublePageFutures.clear();
     _pageCaches.clear();
+    //print('--------------------------dispose _pageCaches');
+    print('--------------------------dispose AudioTools.clearAndStop');
+    AudioTools.clearAndStop();
     super.dispose();
+    print('--------------------------dispose 完成');
   }
 
   @override
@@ -705,8 +727,9 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
         _page = pagenum; // 更新当前页码
       }
       isOnGonging = true;
+
       await setPhoneWakeLock(true); //避免息屏
-      await tts.speak(text, null);
+      await ttstools.speak(text, null);
       await setPhoneWakeLock(true);
     }
   }
@@ -719,12 +742,14 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
 
   bool _getShowVoiceButtonFlag() {
     final _isTextDone = ref.read(pdfTextDoneProvider);
+    print('-----------------_isTextDone: ${_isTextDone}');
+
     final flag =
         widget.jingshu.type.contains('shanshu') &&
         (Platform.isIOS || Platform.isAndroid || Platform.isWindows) &&
         !_isDoublePage &&
         _isTextDone;
-    //print('--------_getShowVoiceButtonFlag: ${flag}');
+    print('--------_getShowVoiceButtonFlag: ${flag}');
     return flag;
   }
 
@@ -745,7 +770,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
                       _listenText(_page);
                     } else {
                       // 如果正在朗读，停止朗读
-                      tts.pause();
+                      ttstools.pause();
                     }
                     isOnGonging = !isOnGonging;
                     if (!isOnGonging) {
@@ -792,6 +817,30 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
           },
         ),
         Spacer(),
+        _showMuyuFlag ? _buildMuyuButtonGroup() : SizedBox(),
+        SizedBox(height: 10),
+        IconButton(
+          padding: EdgeInsets.zero,
+          constraints: BoxConstraints(),
+          icon: Image.asset(
+            // 替换为你的图片路径，例如"assets/images/music_note.png"
+            _showMuyuFlag
+                ? "assets/images/muyu-gray-24.png"
+                : "assets/images/muyu-yellow-24.png",
+            // 根据需要设置图片大小
+            width: 24,
+            height: 24,
+            // 图片加载错误时显示的占位图
+            errorBuilder: (context, error, stackTrace) => Icon(Icons.error),
+          ),
+          tooltip: '木鱼背景音乐',
+          onPressed: () {
+            _showMuyuFlag = !_showMuyuFlag;
+            setState(() {});
+            focusNode.requestFocus(); // 处理完事件后重新获取焦点
+          },
+        ),
+        Spacer(),
         IconButton(
           padding: EdgeInsets.zero,
           constraints: BoxConstraints(),
@@ -811,13 +860,72 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     );
   }
 
-  void _backToParentPage() {
-    //tts.stop();
+  Widget _buildMuyuButtonGroup() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(height: 10),
+        _buildMuyuButton(mp3Filename: 'mp3/muyu_normal_0_7.mp3', text: '||  '),
+        SizedBox(height: 10),
+        _buildMuyuButton(mp3Filename: 'mp3/muyu_normal.mp3', text: '||| '),
+        SizedBox(height: 10),
+        _buildMuyuButton(mp3Filename: 'mp3/muyu_normal_2.mp3', text: '||||'),
+      ],
+    );
+  }
+
+  Widget _buildMuyuButton({
+    required String mp3Filename, // 只读的音频文件名
+    required String text,
+    double rate = 1.0,
+  }) {
+    return SizedBox(
+      width: 100, // 设置固定宽度
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          // 移除边框
+          side: BorderSide.none,
+        ),
+        child: Row(
+          children: [
+            Text(text),
+            _muyuIsPlaying
+                ? Icon(Icons.pause_circle, color: Colors.red)
+                : Icon(Icons.play_circle, color: Colors.blue),
+          ],
+        ),
+        onPressed: () {
+          if (_muyuIsPlaying) {
+            AudioTools.stop();
+          } else {
+            AudioTools.playLocalAsset(
+              mp3Filename,
+              onComplete: _handlePlayComplete,
+              playbackRate: rate,
+            );
+          }
+          setState(() {
+            _muyuIsPlaying = !_muyuIsPlaying;
+          });
+        },
+      ),
+    );
+  }
+
+  void _handlePlayComplete() {
+    setState(() {
+      _muyuIsPlaying = false;
+    });
+  }
+
+  Future<void> _backToParentPage() async {
     // 检查组件是否还挂载
-    //print('--------开始返回 _page:$_page');
+    print('--------开始返回 _page:$_page');
     if (mounted) {
       Navigator.pop(context, _page); // 点击返回按钮时返回上一个页面
     }
+    print('--------开始返回 _page:$_page 结束');
   }
 
   @override

@@ -97,10 +97,25 @@ class _GongKeSettingPageState extends State<GongKeSettingPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            const Text(
-              '当天功课完成情况设定',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            Row(
+              children: [
+                const Text(
+                  '当天功课完成情况设定',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.share),
+                  color: Colors.blue,
+                  iconSize: 35,
+                  onPressed: () {
+                    // 跳转到新增页面
+                    Navigator.pushNamed(context, '/ShareCardPage');
+                  },
+                ),
+              ],
             ),
+
             const SizedBox(height: 16),
             _buildDateCard(),
             const SizedBox(height: 12),

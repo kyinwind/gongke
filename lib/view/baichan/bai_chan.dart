@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:gongke/model/tables.dart';
 import 'package:drift/drift.dart' hide Column;
-import 'new_bai_chan.dart';
-import 'bai_chan_play.dart';
-import '../../database.dart';
-import '../../main.dart';
+import 'package:gongke/view/baichan/new_bai_chan.dart';
+import 'package:gongke/view/baichan/bai_chan_play.dart';
+import 'package:gongke/database.dart';
+import 'package:gongke/main.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'bai_chan_play.dart';
+import 'package:gongke/view/baichan/bai_chan_play.dart';
 import 'package:styled_widget/styled_widget.dart';
-import '../../comm/pub_tools.dart';
+import 'package:gongke/comm/pub_tools.dart';
 
 class BaiChanPage extends StatefulWidget {
   const BaiChanPage({super.key});

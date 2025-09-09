@@ -219,6 +219,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
       }
       // 初始化 PdfController，确保只初始化一次
       //print('-------------------------------开始初始化 PdfController,$curPage');
+      _pdfController?.dispose();
       _pdfController = PdfController(
         document: Future.value(_document!),
         initialPage: curPage,
@@ -357,31 +358,56 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
 
   @override
   void dispose() {
-    setPhoneWakeLock(false);
-    //print('--------------------------dispose _pdfController');
-    _pdfController?.dispose();
-    //print('--------------------------dispose _pageController');
-    _pageController?.dispose();
-    //print('--------------------------dispose focusNode');
-    focusNode.dispose();
-    print('--------------------------dispose flutterTts');
-    //ttstools.flutterTts.setCompletionHandler(() {});
-    if (widget.jingshu.type.contains('shanshu')) {
-      ttstools.stop();
+    if (!mounted) {
+      super.dispose();
+      return;
     }
 
-    // Remove a callback to receive data sent from the TaskHandler.
-    FlutterForegroundTask.removeTaskDataCallback(_onReceiveTaskData);
-    stopService();
-    _taskDataListenable.dispose();
-    //print('--------------------------dispose _taskDataListenable');
-    _doublePageFutures.clear();
-    _pageCaches.clear();
-    //print('--------------------------dispose _pageCaches');
-    print('--------------------------dispose AudioTools.clearAndStop');
-    AudioTools.clearAndStop();
+    print('--------------------------dispose start');
+
+    try {
+      // 1. 先移除所有监听器和同步任务
+      FlutterForegroundTask.removeTaskDataCallback(_onReceiveTaskData);
+      focusNode.dispose();
+      _taskDataListenable.dispose();
+      setPhoneWakeLock(false);
+
+      // 2. 停止 TTS
+      if (widget.jingshu.type.contains('shanshu')) {
+        print('--------------------------dispose flutterTts start');
+        ttstools.flutterTts.setCompletionHandler(() {});
+        ttstools.stop();
+        print('--------------------------dispose flutterTts end');
+      }
+
+      // 3. 停止音频
+      print('--------------------------dispose AudioTools start');
+      AudioTools.clearAndStop();
+      print('--------------------------dispose AudioTools end');
+
+      // 4. 清理文档资源
+      _document?.close();
+      _document = null;
+      _document2?.close();
+      _document2 = null;
+
+      // 5. 清理控制器和缓存
+      _pdfController?.dispose();
+      _pdfController = null;
+      _pageController?.dispose();
+      _pageController = null;
+      _doublePageFutures.clear();
+      _pageCaches.clear();
+
+      // 6. 停止服务
+      stopService();
+
+      print('--------------------------dispose end');
+    } catch (e) {
+      print('Error in dispose: $e');
+    }
+
     super.dispose();
-    print('--------------------------dispose 完成');
   }
 
   @override

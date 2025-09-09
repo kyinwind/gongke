@@ -23,6 +23,7 @@ import 'view/baichan/bai_chan_play.dart';
 import 'view/setting/setting_page.dart';
 import 'view/shanshu/shanshu.dart';
 import 'view/songjing/import_files.dart';
+import '/viewmodel/share_card.dart';
 // 导入 path_provider 库以使用 getApplicationDocumentsDirectory 函数
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -30,6 +31,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:drift/native.dart';
 import 'welcome.dart'; // 导入你的 WelcomePage
+
+import 'package:toastification/toastification.dart';
 
 // 声明全局数据库变量
 late AppDatabase globalDB; // 在main函数中创建单一实例;
@@ -62,7 +65,9 @@ void main() async {
   //print(firstDate);
   runApp(
     ProviderScope(
-      child: MyApp(db: globalDB, hasSeenWelcome: hasSeenWelcome),
+      child: ToastificationWrapper(
+        child: MyApp(db: globalDB, hasSeenWelcome: hasSeenWelcome),
+      ),
     ),
   ); // 传入数据库实例
 }
@@ -135,6 +140,7 @@ class _MyAppState extends State<MyApp> {
         '/BaiChan/BaiChanPlay': (context) => const BaiChanPlayPage(),
         '/Setting': (context) => const SettingPage(),
         '/ImportFiles': (context) => const ImportFilesPage(),
+        '/ShareCardPage': (context) => const ShareCardPage(),
       },
       initialRoute: '/',
       localizationsDelegates: const [

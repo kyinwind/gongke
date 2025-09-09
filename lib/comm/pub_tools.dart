@@ -936,7 +936,7 @@ final List<Map<String, String>> help_slides_windows = [
   {
     'image': 'assets/help/103.png',
     'title': '完成功课记录',
-    'description': '点击日历日期，完成当天功课。',
+    'description': '点击日历日期，完成当天功课。\n如果您使用本软件感觉很好，请分享给好友。',
   },
   {
     'image': 'assets/help/104.png',

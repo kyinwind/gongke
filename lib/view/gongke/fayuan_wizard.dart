@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:drift/drift.dart' hide Column;
-//import 'package:gongke/database.dart';
-//import '../../database.dart';
-import '../../main.dart';
+import 'package:gongke/main.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import '../../comm/date_tools.dart';
-import '../../comm/shared_preferences.dart';
-import '../../comm/pub_tools.dart';
+import 'package:gongke/comm/date_tools.dart';
+import 'package:gongke/comm/shared_preferences.dart';
+import 'package:gongke/comm/pub_tools.dart';
+import 'package:gongke/comm/logger_tools.dart';
 
 class VMFaYuanData {
   String? name; // 发愿名称
@@ -696,17 +695,23 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
     await globalDB.transaction(() async {
       int currentFaYuanId;
       _data.fayuanwen = getFaYuanWen();
+      // 检查是否为修改模式
       if (actType == 'M' && fayuanId != null) {
         // 修改模式
         currentFaYuanId = fayuanId!;
-        // 删除原有记录
-        await globalDB.managers.gongKeItem
-            .filter((t) => t.fayuanId(currentFaYuanId))
-            .delete();
+        final today = DateTime.now().toIso8601String().split('T').first;
+        logger.i('currentFaYuanId: $currentFaYuanId');
+        logger.i('today: $today');
+        // 删除当前日期及之后的所有功课记录
+        await (globalDB.delete(globalDB.gongKeItem)..where(
+              (t) =>
+                  t.fayuanId.equals(currentFaYuanId) &
+                  t.gongKeDay.isBiggerOrEqualValue(today),
+            ))
+            .go();
         await globalDB.managers.gongKeItemsOneDay
-            .filter((t) => t.fayuanId(currentFaYuanId))
+            .filter((t) => t.fayuanId.equals(currentFaYuanId))
             .delete();
-
         // 更新现有发愿记录
         await globalDB.managers.faYuan
             .filter((f) => f.id.equals(currentFaYuanId))
@@ -734,7 +739,6 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
           ),
         );
       }
-
       // 插入每日功课
       for (var item in _data.gkiODList) {
         await globalDB.managers.gongKeItemsOneDay.create(
@@ -755,30 +759,72 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
           gongkedaystr = DateTools.getDateStringByDate(
             DateTools.getDateAfterDays(_data.startDate ?? DateTime.now(), day),
           );
-          if (DateTools.getDateByString(
-            gongkedaystr,
-            'yyyy-MM-dd',
-          ).isBefore(DateTime.now())) {
-            if (gongkedaystr == DateTools.getDateStringByDate(DateTime.now())) {
-              iscomplete = false;
+          //如果是新增，则逐个增加。如果是修改，则只修改今天和以后的记录
+          if (actType == 'A') {
+            if (DateTools.getDateByString(
+              gongkedaystr,
+              'yyyy-MM-dd',
+            ).isBefore(DateTime.now())) {
+              if (gongkedaystr ==
+                  DateTools.getDateStringByDate(DateTime.now())) {
+                iscomplete = false;
+              } else {
+                // 如果日期早于今天，则设置为已完成
+                iscomplete = true;
+              }
             } else {
-              // 如果日期早于今天，则设置为已完成
-              iscomplete = true;
+              iscomplete = false;
             }
-          } else {
-            iscomplete = false;
+            await globalDB.managers.gongKeItem.create(
+              (o) => o(
+                fayuanId: currentFaYuanId, // 使用 currentFaYuanId
+                gongKeDay: gongkedaystr,
+                gongketype: item.gongketype.name,
+                name: item.name,
+                cnt: Value(item.cnt),
+                isComplete: Value(iscomplete),
+                idx: Value(item.idx),
+              ),
+            );
+          } else if (actType == 'M') {
+            if (gongkedaystr == DateTools.getDateStringByDate(DateTime.now())) {
+              //如果正好是今天，需要增加记录
+              iscomplete = false;
+              logger.i('gongkedaystr: $gongkedaystr,正好是今天。');
+              await globalDB.managers.gongKeItem.create(
+                (o) => o(
+                  fayuanId: currentFaYuanId, // 使用 currentFaYuanId
+                  gongKeDay: gongkedaystr,
+                  gongketype: item.gongketype.name,
+                  name: item.name,
+                  cnt: Value(item.cnt),
+                  isComplete: Value(iscomplete),
+                  idx: Value(item.idx),
+                ),
+              );
+            } else {
+              if (DateTools.getDateByString(
+                gongkedaystr,
+                'yyyy-MM-dd',
+              ).isBefore(DateTime.now())) {
+                // 如果日期早于今天，则跳过
+                continue;
+              } else {
+                logger.i('gongkedaystr: $gongkedaystr,正好是未来。');
+                await globalDB.managers.gongKeItem.create(
+                  (o) => o(
+                    fayuanId: currentFaYuanId, // 使用 currentFaYuanId
+                    gongKeDay: gongkedaystr,
+                    gongketype: item.gongketype.name,
+                    name: item.name,
+                    cnt: Value(item.cnt),
+                    isComplete: Value(iscomplete),
+                    idx: Value(item.idx),
+                  ),
+                );
+              }
+            }
           }
-          await globalDB.managers.gongKeItem.create(
-            (o) => o(
-              fayuanId: currentFaYuanId, // 使用 currentFaYuanId
-              gongKeDay: gongkedaystr,
-              gongketype: item.gongketype.name,
-              name: item.name,
-              cnt: Value(item.cnt),
-              isComplete: Value(iscomplete),
-              idx: Value(item.idx),
-            ),
-          );
         }
       }
     });

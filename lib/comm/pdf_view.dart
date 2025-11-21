@@ -896,7 +896,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
         SizedBox(height: 10),
         _buildMuyuButton(mp3Filename: 'mp3/muyu_normal.mp3', text: '||| '),
         SizedBox(height: 10),
-        _buildMuyuButton(mp3Filename: 'mp3/muyu_normal_2.mp3', text: '||||'),
+        _buildMuyuButton(mp3Filename: 'mp3/muyu_fast_1.3x.mp3', text: '||||'),
       ],
     );
   }

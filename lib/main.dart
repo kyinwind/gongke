@@ -33,6 +33,7 @@ import 'package:drift/native.dart';
 import 'welcome.dart'; // 导入你的 WelcomePage
 
 import 'package:toastification/toastification.dart';
+import 'view/help/help_center_page.dart' show initHelpCenter;
 
 // 声明全局数据库变量
 late AppDatabase globalDB; // 在main函数中创建单一实例;
@@ -61,6 +62,10 @@ void main() async {
   if (firstDate == null) {
     await saveDateValue('firstDate', DateTime.now());
   }
+
+  // 初始化帮助中心 controller（加载已读状态和远程公告）
+  await initHelpCenter();
+
   WidgetsFlutterBinding.ensureInitialized();
   //print(firstDate);
   runApp(

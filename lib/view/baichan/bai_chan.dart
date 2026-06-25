@@ -9,6 +9,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gongke/view/baichan/bai_chan_play.dart';
 import 'package:styled_widget/styled_widget.dart';
 import 'package:gongke/comm/pub_tools.dart';
+import '../help/help_center_page.dart';
 
 class BaiChanPage extends StatefulWidget {
   const BaiChanPage({super.key});
@@ -81,6 +82,7 @@ class _BaiChanListPageState extends State<BaiChanPage> {
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         actions: [
+          const HelpBadgeIcon(),
           IconButton(
             icon: const Icon(Icons.add_circle, color: Colors.blue, size: 35),
             onPressed: () async {
@@ -105,7 +107,7 @@ class _BaiChanListPageState extends State<BaiChanPage> {
               return Center(child: Text('数据加载出错: ${snapshot.error}'));
             }
             final list = snapshot.data ?? [];
-            if (list.length == 0) {
+            if (list.isEmpty) {
               return Center(child: Text('暂无拜忏记录，请先添加'));
             }
             return ListView.builder(
@@ -168,7 +170,7 @@ class _BaiChanListPageState extends State<BaiChanPage> {
                     // ),
                     title: Row(
                       children: [
-                        Container(
+                        SizedBox(
                           width: 100,
                           height: 100,
                           child: Image.asset(

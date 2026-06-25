@@ -13,6 +13,7 @@ import '../../main.dart';
 import '../../comm/date_tools.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../../comm/platform_tools.dart';
+import '../help/help_center_page.dart';
 
 // 添加数据模型类
 class _ChartData {
@@ -37,8 +38,8 @@ class _GongKePageState extends State<GongKePage> {
   // 添加日历控制变量
   DateTime _focusedDay = DateTime.now(); // 当前聚焦的日期
   DateTime? _selectedDay; // 当前选中的日期
-  Map<int, double> _fayuanCompletionRates = {}; // 存储每一个发愿的功课完成率
-  Map<String, double> _completionRates = {}; // 存储每一天的功课完成率
+  final Map<int, double> _fayuanCompletionRates = {}; // 存储每一个发愿的功课完成率
+  final Map<String, double> _completionRates = {}; // 存储每一天的功课完成率
   // 按日期分组处理当月所有的gongkeitem记录
   Map<String, List<GongKeItemData>> groupedCurrentMonthRecords = {};
 
@@ -64,7 +65,7 @@ class _GongKePageState extends State<GongKePage> {
   // 查询所有记录,以及计算功课完成率
   Future<void> fetchAllFaYuan() async {
     try {
-      final query;
+      final ProcessedTableManager<GeneratedDatabase, $FaYuanTable, FaYuanData, $$FaYuanTableFilterComposer, $$FaYuanTableOrderingComposer, $$FaYuanTableAnnotationComposer, $$FaYuanTableCreateCompanionBuilder, $$FaYuanTableUpdateCompanionBuilder, (FaYuanData, BaseReferences<GeneratedDatabase, $FaYuanTable, dynamic>), FaYuanData, PrefetchHooks Function()> query;
       if (flagFaYuanFilter == 0) {
         // 只显示有效的发愿
         query = globalDB.managers.faYuan
@@ -392,6 +393,11 @@ class _GongKePageState extends State<GongKePage> {
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min, // 让 Row 宽度适应内容
                   children: [
+                    // 帮助中心按钮
+                    Tooltip(
+                      message: '帮助中心',
+                      child: const HelpBadgeIcon(),
+                    ),
                     // 添加文字和开关的组合
                     Row(
                       mainAxisSize: MainAxisSize.min,
@@ -419,7 +425,7 @@ class _GongKePageState extends State<GongKePage> {
                                       _refreshAllData();
                                     });
                                   },
-                                  activeColor: Theme.of(context).primaryColor,
+                                  activeThumbColor: Theme.of(context).primaryColor,
                                   materialTapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap,
                                 ),

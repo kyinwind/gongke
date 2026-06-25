@@ -8,6 +8,7 @@ import 'dart:convert'; // 导入 dart:convert 库，确保已导入
 import 'package:flutter/services.dart';
 import 'package:gongke/viewmodel/current_record.dart';
 import 'package:gongke/comm/pub_tools.dart';
+import '../help/help_center_page.dart';
 
 // 为了让页面能够上下滑动，将 Scaffold 的 body 用 SingleChildScrollView 包裹
 class TipPage extends StatefulWidget {
@@ -148,7 +149,7 @@ class _TipPageState extends State<TipPage> {
         //backgroundColor: Colors.blue,
         //toolbarHeight: 40,
         actions: [
-          //Spacer(),
+          const HelpBadgeIcon(),
           const SizedBox(width: 8),
           IconButton(
             icon: const Icon(Icons.arrow_circle_down),

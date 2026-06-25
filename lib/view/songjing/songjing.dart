@@ -6,6 +6,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gongke/main.dart';
 import 'package:drift/drift.dart' hide Column;
 import '../../comm/pub_tools.dart';
+import '../help/help_center_page.dart';
 
 class SongJingPage extends StatefulWidget {
   const SongJingPage({super.key});
@@ -141,6 +142,7 @@ class _SongJingPageState extends State<SongJingPage> {
               ),
             ),
             const SizedBox(width: 8),
+            const HelpBadgeIcon(),
             IconButton(
               icon: const Icon(Icons.arrow_circle_down),
               color: Colors.blue,
@@ -168,7 +170,7 @@ class _SongJingPageState extends State<SongJingPage> {
               return Center(child: Text('数据加载出错: ${snapshot.error}'));
             }
             final list = snapshot.data ?? [];
-            if (list.length == 0) {
+            if (list.isEmpty) {
               return Center(
                 child: Container(
                   padding: EdgeInsets.all(16),

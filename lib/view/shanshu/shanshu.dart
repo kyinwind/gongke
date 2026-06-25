@@ -6,6 +6,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gongke/main.dart';
 import 'package:drift/drift.dart' hide Column;
 import '../../comm/pub_tools.dart';
+import '../help/help_center_page.dart';
 
 class ShanShuPage extends StatefulWidget {
   const ShanShuPage({super.key});
@@ -151,6 +152,7 @@ class _ShanShuPageState extends State<ShanShuPage> {
               ),
             ),
             const SizedBox(width: 8),
+            const HelpBadgeIcon(),
             IconButton(
               icon: const Icon(Icons.arrow_circle_down),
               color: Colors.blue,
@@ -180,7 +182,7 @@ class _ShanShuPageState extends State<ShanShuPage> {
             }
 
             final list = snapshot.data ?? [];
-            if (list.length == 0) {
+            if (list.isEmpty) {
               return Center(
                 child: Container(
                   padding: EdgeInsets.all(16),

@@ -108,11 +108,9 @@ class _SettingPageState extends State<SettingPage> {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(48),
+                        minimumSize: const Size(0, 48),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    const HelpBadgeIcon(),
                   ],
                 ),
               ),

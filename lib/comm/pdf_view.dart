@@ -16,6 +16,7 @@ import 'package:gongke/comm/tts_tools.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:gongke/comm/shared_preferences.dart';
 import 'package:gongke/comm/audio_tools.dart';
+import 'package:gongke/comm/logger_tools.dart';
 
 class PdfViewerPage extends ConsumerStatefulWidget {
   final JingShuData jingshu; //jingshu对象
@@ -60,6 +61,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
   //tts工具类
   TtsTools ttstools = TtsTools(); // TTS工具类实例
   bool isOnGonging = false; //是否正在播放声音
+  bool _isDisposing = false;
 
   // 根据条件得出当前是否显示双页，true需要显示双页
   bool _getIsDoubleFlag() {
@@ -71,7 +73,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     if (Platform.isWindows || Platform.isAndroid || Platform.isIOS) {
       // Android 和 iOS 平台根据屏幕宽度判断
       final screenWidth = MediaQuery.of(context).size.width;
-      //print('当前屏幕宽度: $screenWidth');
+      //logger.i('当前屏幕宽度: $screenWidth');
       if (screenWidth > 600 && orientation == Orientation.landscape) {
         // 如果屏幕宽度大于600，显示双页
         result = true;
@@ -88,7 +90,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
 
   final ValueNotifier<Object?> _taskDataListenable = ValueNotifier(null);
   void _onReceiveTaskData(Object data) {
-    //print('--------------------------接收到数据: $data');
+    //logger.i('--------------------------接收到数据: $data');
     _taskDataListenable.value = data;
     if (data is Map && data['buttonPressed'] == 'btn_stop') {
       ttstools.stop(); // 页面中你的 TTS 停止方法
@@ -118,25 +120,25 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
   @override
   void initState() {
     super.initState();
-    //print('----------------------initState 开始');
+    //logger.i('----------------------initState 开始');
     _doublePageFutures.clear();
     _pageCaches.clear();
     _bookName = widget.jingshu.name;
 
     Future<void> initAsync() async {
-      //print('----------------------initState 初始化_pageController');
+      //logger.i('----------------------initState 初始化_pageController');
       if (widget.jingshu.type.contains('shanshu')) {
         await _getCurPage();
         _page = _curPage; // 设置初始页码
         _currentIndex = _singePageToDoublePage(_curPage);
         _pageController = PageController(initialPage: _currentIndex);
-        //print('----------------------------取到上一次的页码: $_curPage');
+        //logger.i('----------------------------取到上一次的页码: $_curPage');
       } else {
         _page = 1; // 设置初始页码
         _currentIndex = 0; // 双页模式下的初始索引
         _pageController = PageController(initialPage: _currentIndex);
       }
-      //print('----------------------initState 初始化focusNode');
+      //logger.i('----------------------initState 初始化focusNode');
       // isPad().then((value) {
       //   _isPad = value;
       // });
@@ -147,16 +149,20 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
           focusNode.requestFocus();
         }
       });
-      //print('----------------------initState 初始化初始化前台服务');
+      //logger.i('----------------------initState 初始化初始化前台服务');
       //初始化前台服务
-      FlutterForegroundTask.initCommunicationPort();
-      // Add a callback to receive data sent from the TaskHandler.
-      FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
+      if (Platform.isAndroid || Platform.isIOS) {
+        FlutterForegroundTask.initCommunicationPort();
+        // Add a callback to receive data sent from the TaskHandler.
+        FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
+      }
 
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         try {
-          await requestPermissions();
-          initService();
+          if (Platform.isAndroid || Platform.isIOS) {
+            await requestPermissions();
+            initService();
+          }
 
           ref.read(pdfLoadingDoneProvider.notifier).state = false;
           ref.read(pdfTextDoneProvider.notifier).state = false;
@@ -164,25 +170,25 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
           ref.read(pdfThumbnailDoneProvider.notifier).state = false;
 
           await _loadPdf(_curPage);
-          //print('----------------------加载 PDF 完成1');
+          //logger.i('----------------------加载 PDF 完成1');
 
           if (widget.jingshu.type.contains('shanshu') &&
               (Platform.isIOS || Platform.isAndroid || Platform.isWindows)) {
             await _loadPdfText();
-            //print('----------------------加载 PDF text 完成');
+            //logger.i('----------------------加载 PDF text 完成');
           }
 
           await _copyPage(); //复制一份页码缓存，用于双页显示和缩略图显示
           ref.read(pdfThumbnailDoneProvider.notifier).state = true;
 
-          //print('----------------------加载 PDF text 完成');
+          //logger.i('----------------------加载 PDF text 完成');
 
           // ✅ 在加载完成后更新 Provider 状态
           ref.read(pdfControllerProvider.notifier).state = _pdfController;
           ref.read(pdfLoadingDoneProvider.notifier).state = true;
-          //print('----------------------加载 initAsync 完成');
+          //logger.i('----------------------加载 initAsync 完成');
         } catch (e, st) {
-          print('加载 PDF 时出现错误: $e\n$st');
+          logger.e('加载 PDF 时出现错误: $e\n$st');
           setState(() {
             _errorMessage = e.toString();
           });
@@ -202,13 +208,13 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
       });
     }
 
-    //print('--------------------------initstate 完成');
+    //logger.i('--------------------------initstate 完成');
   }
 
   Future<void> _loadPdf(int curPage) async {
     if (!mounted) return Future.value();
     try {
-      //print('------------------------进入 _loadPdf 方法');
+      //logger.i('------------------------进入 _loadPdf 方法');
       if (widget.jingshu.type == 'shanshu' ||
           widget.jingshu.type == 'jingshu') {
         _document = await PdfDocument.openAsset(
@@ -218,7 +224,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
         _document = await PdfDocument.openFile(widget.jingshu.fileUrl);
       }
       // 初始化 PdfController，确保只初始化一次
-      //print('-------------------------------开始初始化 PdfController,$curPage');
+      //logger.i('-------------------------------开始初始化 PdfController,$curPage');
       _pdfController?.dispose();
       _pdfController = PdfController(
         document: Future.value(_document!),
@@ -261,7 +267,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
       }
       pagesToGenerate.add(totalPages); // 尾页
     }
-    //print('----------------需要生成缩略图的页码: $pagesToGenerate');
+    //logger.i('----------------需要生成缩略图的页码: $pagesToGenerate');
     //先生成缓存list，缩略图先为null，text填写好
     _pages = _document2!.pagesCount;
     for (int i = 1; i <= _pages; i++) {
@@ -269,7 +275,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
         PageCache(pageIndex: i, image: null, thumbnail: null, text: ''),
       );
     }
-    //print('-----------------开始生成_pageCaches，页码数量: ${_pageCaches.length}');
+    //logger.i('-----------------开始生成_pageCaches，页码数量: ${_pageCaches.length}');
     for (final pageIndex in pagesToGenerate) {
       try {
         final page = await _document2!.getPage(pageIndex);
@@ -288,10 +294,10 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
 
         await page.close(); // 及时释放
       } catch (e) {
-        print('_copyPage Failed to generate thumbnail for page $pageIndex: $e');
+        logger.e('_copyPage Failed to generate thumbnail for page $pageIndex: $e');
       }
     }
-    //print('---------------------_copyPage 完成');
+    //logger.i('---------------------_copyPage 完成');
     setState(() {});
   }
 
@@ -312,7 +318,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     if (!mounted) return Future.value();
     late ByteData data;
     try {
-      //print('---------------------');
+      //logger.i('---------------------');
       // 1. 从 assets 加载 pdf 文件为字节流
       if (widget.jingshu.type == 'shanshu' ||
           widget.jingshu.type == 'jingshu') {
@@ -324,25 +330,28 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
         ).readAsBytes().then((bytes) => ByteData.view(bytes.buffer));
       }
       Uint8List bytes = data.buffer.asUint8List();
-      //print('------------------第一步加载成功');
+      //logger.i('------------------第一步加载成功');
       // 2. 把 PDF 文件写入临时文件（因为 flutter_pdf_text 需要文件路径）
       final tempDir = await getTemporaryDirectory();
       final tempFile = File('${tempDir.path}/temp.pdf');
       await tempFile.writeAsBytes(bytes, flush: true);
-      //print('------------------第二步临时文件生成成功');
+      //logger.i('------------------第二步临时文件生成成功');
       // 3. 加载 PDF 文本
       if (Platform.isWindows) {
         compute(loadPdfAndExtractText, tempFile.path)
             .then((result) {
+              if (!mounted || _isDisposing) {
+                return;
+              }
               // 任务完成后在主线程执行
               windoc = result;
               setState(() {
                 ref.read(pdfTextDoneProvider.notifier).state = true;
               });
-              //print('------------------第3步成功');
+              //logger.i('------------------第3步成功');
             })
             .catchError((error) {
-              print('PDF文本处理错误: $error');
+              logger.e('PDF文本处理错误: $error');
             });
         //windoc = await loadPdfAndExtractText(tempFile.path);
       } else {
@@ -352,7 +361,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
         });
       }
     } catch (e) {
-      print('加载 PDF text 出错: $e');
+      logger.e('加载 PDF text 出错: $e');
     }
   }
 
@@ -363,35 +372,34 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
       return;
     }
 
-    print('--------------------------dispose start');
+    logger.i('--------------------------dispose start');
+    _isDisposing = true;
 
     try {
       // 1. 先移除所有监听器和同步任务
-      FlutterForegroundTask.removeTaskDataCallback(_onReceiveTaskData);
+      if (Platform.isAndroid || Platform.isIOS) {
+        FlutterForegroundTask.removeTaskDataCallback(_onReceiveTaskData);
+      }
       focusNode.dispose();
       _taskDataListenable.dispose();
       setPhoneWakeLock(false);
 
       // 2. 停止 TTS
-      if (widget.jingshu.type.contains('shanshu')) {
-        print('--------------------------dispose flutterTts start');
+      // 2. Stop TTS only when playback is active. On Windows, calling stop on
+      // an idle flutter_tts instance can crash the native WinRT layer.
+      if (widget.jingshu.type.contains('shanshu') && isOnGonging) {
+        logger.i('--------------------------dispose flutterTts start');
         ttstools.flutterTts.setCompletionHandler(() {});
         ttstools.stop();
-        print('--------------------------dispose flutterTts end');
+        logger.i('--------------------------dispose flutterTts end');
       }
 
       // 3. 停止音频
-      print('--------------------------dispose AudioTools start');
+      logger.i('--------------------------dispose AudioTools start');
       AudioTools.clearAndStop();
-      print('--------------------------dispose AudioTools end');
+      logger.i('--------------------------dispose AudioTools end');
 
-      // 4. 清理文档资源
-      _document?.close();
-      _document = null;
-      _document2?.close();
-      _document2 = null;
-
-      // 5. 清理控制器和缓存
+      // 4. Clean controllers and caches before closing documents.
       _pdfController?.dispose();
       _pdfController = null;
       _pageController?.dispose();
@@ -399,12 +407,20 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
       _doublePageFutures.clear();
       _pageCaches.clear();
 
-      // 6. 停止服务
-      stopService();
+      // 5. Close PDF documents after controllers are released.
+      _document?.close();
+      _document = null;
+      _document2?.close();
+      _document2 = null;
 
-      print('--------------------------dispose end');
+      // 6. 停止服务
+      if (Platform.isAndroid || Platform.isIOS) {
+        stopService();
+      }
+
+      logger.i('--------------------------dispose end');
     } catch (e) {
-      print('Error in dispose: $e');
+      logger.e('Error in dispose: $e');
     }
 
     super.dispose();
@@ -414,7 +430,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _isDoublePage = _getIsDoubleFlag();
-    //print('--------------------------didChangeDependencies 完成');
+    //logger.i('--------------------------didChangeDependencies 完成');
   }
 
   //从单页码转为双页码
@@ -438,7 +454,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
       // 单条结果处理
       shanshu = results.single;
     }
-    //('get shanshu.curPageNum : ${shanshu.curPageNum}');
+    //logger.i('get shanshu.curPageNum : ${shanshu.curPageNum}');
     curPage = shanshu.curPageNum ?? 1;
     _curPage = curPage;
     return curPage;
@@ -458,12 +474,12 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
       itemBuilder: (context, index) {
         final leftPage = index * 2 + 1;
         final rightPage = leftPage + 1;
-        //print('0---------当前双页: 左页 $leftPage, 右页 $rightPage');
+        //logger.i('0---------当前双页: 左页 $leftPage, 右页 $rightPage');
 
         Future<List<Uint8List>> _loadDoublePage(int index) {
           if (_doublePageFutures[index] != null)
             return _doublePageFutures[index]!;
-          //print('1---------加载双页索引$index: 左页 $leftPage, 右页 $rightPage');
+          //logger.i('1---------加载双页索引$index: 左页 $leftPage, 右页 $rightPage');
           _doublePageFutures[index] = () async {
             if (_pdfController == null || _document == null) {
               return [Uint8List(0), Uint8List(0)];
@@ -479,7 +495,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
             } else {
               leftImage = _pageCaches[leftPage - 1].image;
             }
-            //print('2---------------------: 左页 $leftPage 加载完成！');
+            //logger.i('2---------------------: 左页 $leftPage 加载完成！');
             if (rightPage <= _pages) {
               if (_pageCaches[rightPage - 1].image == null) {
                 rightImage = await _renderPage(
@@ -494,7 +510,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
             } else {
               rightImage = null;
             }
-            //print('3---------------------: 右页 $rightPage 加载完成！');
+            //logger.i('3---------------------: 右页 $rightPage 加载完成！');
             return [
               leftImage?.bytes ?? Uint8List(0),
               rightImage?.bytes ?? Uint8List(0),
@@ -546,25 +562,25 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     if (!mounted) return Future.value();
     final doc = await controller.document;
     if (pageNumber < 1 || pageNumber > doc.pagesCount) {
-      print('无效的 pageNumber: $pageNumber, 页数范围: 1 - ${doc.pagesCount}');
+      logger.i('无效的 pageNumber: $pageNumber, 页数范围: 1 - ${doc.pagesCount}');
       return null;
     }
-    //print('有效的 doc:${doc.pagesCount}, 尝试获取第 $pageNumber 页');
+    //logger.i('有效的 doc:${doc.pagesCount}, 尝试获取第 $pageNumber 页');
     final page = await doc.getPage(pageNumber);
     try {
       try {
         final width = page.width;
         final height = page.height;
         if (width == null || height == null || width <= 0 || height <= 0) {
-          print('PDF page 宽高无效 width=$width height=$height');
+          logger.e('PDF page 宽高无效 width=$width height=$height');
           await page.close();
           return null;
         }
-        //print('---------------有效的page.width:$width, height:$height.');
+        //logger.i('---------------有效的page.width:$width, height:$height.');
 
         final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
         if (devicePixelRatio <= 0) {
-          print('设备像素密度无效: $devicePixelRatio');
+          logger.i('设备像素密度无效: $devicePixelRatio');
           await page.close();
           return null;
         }
@@ -573,23 +589,23 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
         final renderWidth = (width * devicePixelRatio * clarityFactor);
         final renderHeight = (height * devicePixelRatio * clarityFactor);
 
-        //print('渲染尺寸: width=$renderWidth, height=$renderHeight');
+        //logger.i('渲染尺寸: width=$renderWidth, height=$renderHeight');
 
-        //print('---------------开始渲染pdf page $pageNumber.');
+        //logger.i('---------------开始渲染pdf page $pageNumber.');
         final image = await page.render(
           width: renderWidth.toDouble(),
           height: renderHeight.toDouble(),
           format: PdfPageImageFormat.png,
         );
         if (image == null || image.bytes.isEmpty) {
-          print('page.render 返回了 null 或空字节数组');
+          logger.e('page.render 返回了 null 或空字节数组');
           await page.close();
           return null;
         }
-        //print("page $pageNumber 渲染完成，图像长度: ${image.bytes.length}");
+        //logger.i("page $pageNumber 渲染完成，图像长度: ${image.bytes.length}");
         return image;
       } catch (e, stackTrace) {
-        print('渲染页面 $pageNumber 出错: $e $stackTrace');
+        logger.e('渲染页面 $pageNumber 出错: $e $stackTrace');
         return null;
       }
     } finally {
@@ -598,12 +614,12 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
   }
 
   Widget _buildSinglePageView() {
-    //print('--------------------------_buildSinglePageView start');
+    //logger.i('--------------------------_buildSinglePageView start');
     if (_pdfController == null) {
-      //print('--------------------------_pdfController is null');
+      //logger.i('--------------------------_pdfController is null');
       return const Center(child: CircularProgressIndicator());
     }
-    //print('------------显示单页-------------------');
+    //logger.i('------------显示单页-------------------');
     PdfView pdf = PdfView(
       controller: _pdfController!,
       onPageChanged: (page) {
@@ -614,15 +630,15 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
       },
       scrollDirection: Axis.vertical,
     );
-    //print('--------------------------_buildSinglePageView end');
+    //logger.i('--------------------------_buildSinglePageView end');
     return pdf;
   }
 
   void _handleClickAndJump(int pageNumber) {
-    //print('点击缩略图跳转到第 $pageNumber 页');
+    //logger.i('点击缩略图跳转到第 $pageNumber 页');
     try {
       if (_isDoublePage) {
-        //print('----------------_handleClickAndJump--------双页模式');
+        //logger.i('----------------_handleClickAndJump--------双页模式');
         final doublePageIndex = _singePageToDoublePage(pageNumber);
         _pages = _document!.pagesCount;
         if (_pageController!.hasClients) {
@@ -639,14 +655,14 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
         }
         _currentIndex = doublePageIndex;
         _page = pageNumber;
-        // print(
+        // logger.i(
         //   '----------------应该跳到$pageNumber页--------跳转到双页索引: $doublePageIndex',
         // );
       } else {
-        //print('----------------_handleClickAndJump--------单页模式');
+        //logger.i('----------------_handleClickAndJump--------单页模式');
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          //print('-----------------当前单页页码: ${_pdfController!.page}');
+          //logger.i('-----------------当前单页页码: ${_pdfController!.page}');
           if (_pdfController != null && _pdfController!.page != pageNumber) {
             _pdfController?.jumpToPage(pageNumber);
             // 强制刷新
@@ -658,7 +674,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
         });
       }
     } catch (e) {
-      print('-----------------跳转到第 $pageNumber 页出错: $e');
+      logger.e('-----------------跳转到第 $pageNumber 页出错: $e');
     }
   }
 
@@ -691,7 +707,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
         if (_currentIndex < (_pages / 2).ceil() - 1) {
           _currentIndex++;
           _page = _doublePageToSinglePage(_currentIndex);
-          // print(
+          // logger.i(
           //   '当前页码索引: $_currentIndex，总组数: ${(_pages / 2).ceil().toInt()}，翻到下一页',
           // );
           _pageController?.animateToPage(
@@ -742,12 +758,12 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     int pageCnt = _pageCaches.length;
     if (!_isDoublePage && pagenum >= 1 && pagenum <= pageCnt) {
       String text = await getText(pagenum);
-      print('${pagenum}');
-      print(text);
+      logger.i('${pagenum}');
+      logger.i(text);
       if (Platform.isAndroid || Platform.isIOS) {
         startService('正在朗读 ${_bookName}');
       }
-      print('---page:${_pdfController!.page}-----pagenum:$pagenum');
+      logger.i('---page:${_pdfController!.page}-----pagenum:$pagenum');
       if (_pdfController != null && _pdfController!.page != pagenum) {
         _pdfController?.jumpToPage(pagenum);
         _page = pagenum; // 更新当前页码
@@ -761,21 +777,21 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
   }
 
   void ttsCallBackOnCompletion(int pagenum) {
-    print('-------------------------------------------回调函数被调用了');
+    logger.i('-------------------------------------------回调函数被调用了');
     isOnGonging = false;
     _listenText(pagenum + 1);
   }
 
   bool _getShowVoiceButtonFlag() {
     final _isTextDone = ref.read(pdfTextDoneProvider);
-    print('-----------------_isTextDone: ${_isTextDone}');
+    logger.i('-----------------_isTextDone: ${_isTextDone}');
 
     final flag =
         widget.jingshu.type.contains('shanshu') &&
         (Platform.isIOS || Platform.isAndroid || Platform.isWindows) &&
         !_isDoublePage &&
         _isTextDone;
-    print('--------_getShowVoiceButtonFlag: ${flag}');
+    logger.i('--------_getShowVoiceButtonFlag: ${flag}');
     return flag;
   }
 
@@ -945,18 +961,36 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     });
   }
 
-  Future<void> _backToParentPage() async {
-    // 检查组件是否还挂载
-    print('--------开始返回 _page:$_page');
-    if (mounted) {
-      Navigator.pop(context, _page); // 点击返回按钮时返回上一个页面
+  Future<void> _stopPlaybackForExit() async {
+    if (widget.jingshu.type.contains('shanshu') && isOnGonging) {
+      ttstools.flutterTts.setCompletionHandler(() {});
+      await ttstools.stop();
+      isOnGonging = false;
     }
-    print('--------开始返回 _page:$_page 结束');
+    await AudioTools.clearAndStop();
+    await setPhoneWakeLock(false);
+  }
+
+  Future<void> _backToParentPage() async {
+    if (_isDisposing) {
+      return;
+    }
+    _isDisposing = true;
+    logger.i('--------back start _page:$_page');
+    try {
+      await _stopPlaybackForExit();
+    } catch (e) {
+      logger.e('Error while stopping playback before pop: $e');
+    }
+    if (mounted) {
+      Navigator.pop(context, _page);
+    }
+    logger.i('--------back finish _page:$_page');
   }
 
   @override
   Widget build(BuildContext context) {
-    //print('-----------_document:${_document.toString()}');
+    //logger.i('-----------_document:${_document.toString()}');
     final isLoading = ref.watch(pdfLoadingDoneProvider);
     final pdfController = ref.watch(pdfControllerProvider);
     final _isThumbnailDone = ref.watch(pdfThumbnailDoneProvider);
@@ -985,7 +1019,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
-        //print('-----------didpop:$didPop,result:$result');
+        //logger.i('-----------didpop:$didPop,result:$result');
         if (!didPop) {
           _backToParentPage();
         }
@@ -1103,7 +1137,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
 //         if (snapshot.hasData) {
 //           return Image.memory(snapshot.data!.bytes, fit: BoxFit.contain);
 //         } else if (snapshot.hasError) {
-//           print('Error loading page $pageNumber: ${snapshot.error}');
+//           logger.e('Error loading page $pageNumber: ${snapshot.error}');
 //           return Center(
 //             child: Text('Error loading page $pageNumber: ${snapshot.error}'),
 //           );
@@ -1125,7 +1159,7 @@ class MyTaskHandler extends TaskHandler {
   // Called when the task is started.
   @override
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
-    print('onStart(starter: ${starter.name})');
+    logger.i('onStart(starter: ${starter.name})');
   }
 
   // Called based on the eventAction set in ForegroundTaskOptions.
@@ -1141,32 +1175,32 @@ class MyTaskHandler extends TaskHandler {
   // Called when the task is destroyed.
   @override
   Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {
-    print('onDestroy(isTimeout: $isTimeout)');
+    logger.i('onDestroy(isTimeout: $isTimeout)');
   }
 
   // Called when data is sent using `FlutterForegroundTask.sendDataToTask`.
   @override
   void onReceiveData(Object data) {
-    print('onReceiveData: $data');
+    logger.i('onReceiveData: $data');
   }
 
   // Called when the notification button is pressed.
   @override
   void onNotificationButtonPressed(String id) {
-    print('onNotificationButtonPressed: $id');
+    logger.i('onNotificationButtonPressed: $id');
     FlutterForegroundTask.sendDataToMain({'buttonPressed': id});
   }
 
   // Called when the notification itself is pressed.
   @override
   void onNotificationPressed() {
-    print('onNotificationPressed');
+    logger.i('onNotificationPressed');
   }
 
   // Called when the notification itself is dismissed.
   @override
   void onNotificationDismissed() {
-    print('onNotificationDismissed');
+    logger.i('onNotificationDismissed');
   }
 }
 
@@ -1181,7 +1215,7 @@ Future<void> requestPermissions() async {
     if (notificationPermission != NotificationPermission.granted) {
       await FlutterForegroundTask.requestNotificationPermission();
     } else {
-      print('--------------NotificationPermission ok');
+      logger.i('--------------NotificationPermission ok');
     }
 
     if (Platform.isAndroid) {
@@ -1192,7 +1226,7 @@ Future<void> requestPermissions() async {
         // This function requires `android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` permission.
         await FlutterForegroundTask.requestIgnoreBatteryOptimization();
       } else {
-        print('--------------isIgnoringBatteryOptimizations ok');
+        logger.i('--------------isIgnoringBatteryOptimizations ok');
       }
 
       // Use this utility only if you provide services that require long-term survival,
@@ -1205,7 +1239,7 @@ Future<void> requestPermissions() async {
       //   // So you need to explain to the user why set it.
       //   await FlutterForegroundTask.openAlarmsAndRemindersSettings();
       // } else {
-      //   print('--------------openAlarmsAndRemindersSettings ok');
+      //   logger.i('--------------openAlarmsAndRemindersSettings ok');
       // }
     }
   }
@@ -1262,23 +1296,6 @@ Future<ServiceRequestResult> startService(String msg) async {
 Future<ServiceRequestResult> stopService() {
   return FlutterForegroundTask.stopService();
 }
-
-// Future<bool> isPad() async {
-//   if (Platform.isIOS) {
-//     final iosInfo = await DeviceInfoPlugin().iosInfo;
-//     return iosInfo.model.toLowerCase().contains('ipad');
-//   } else if (Platform.isAndroid) {
-//     //final androidInfo = await DeviceInfoPlugin().androidInfo;
-//     // 安卓平板通常屏幕密度和尺寸较大
-//     final view = WidgetsBinding.instance.platformDispatcher.views.first;
-//     final size = view.physicalSize / view.devicePixelRatio;
-//     final diagonal = sqrt(size.width * size.width + size.height * size.height);
-//     return diagonal > 10 * 160; // 10 英寸约为 1600 点
-//   } else if (Platform.isWindows) {
-//     return true;
-//   }
-//   return false;
-// }
 
 //使用状态，在pdf加载完毕再显示pdf页面
 class PdfLoadProvider with ChangeNotifier {

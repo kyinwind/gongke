@@ -15,14 +15,18 @@ final AppHelpCenterConfig gongKeHelpConfig = AppHelpCenterConfig(
     dingTalkWebhookUrl: Uri.parse(
       'https://oapi.dingtalk.com/robot/send?access_token=fe7f86d6c40a7585ead48d4c87cbbdbbb49b96171c0c8fc6a3ef0f72ec2ae0c2',
     ),
+    dingTalkContentBuilder: (payload) => 'feedback\n${payload.combinedContent}',
     includeSystemInfo: true,
   ),
-  supportUrl: Uri.parse('https://my.feishu.cn/wiki/Px4OwS67Eia7ZNkVtWJchBpSnVg'),
+  supportUrl: Uri.parse(
+    'https://my.feishu.cn/wiki/Px4OwS67Eia7ZNkVtWJchBpSnVg',
+  ),
   announcements: [
     HelpAnnouncement(
       id: 'welcome_v106',
       title: '欢迎使用诵经助手',
-      message: '诵经助手是一款帮助佛友管理与记录日常佛学修行功课的免费工具。 应用提供了发愿向导、功课日历、功课统计、诵经、电子木鱼、念佛念咒计数、打坐计时、每日开示、语音引导拜忏等工具帮助佛友更好地进行日常佛学修行功课。\n\n如果您在使用过程中遇到问题，或者有任何建议和意见，欢迎通过反馈页面联系我们。',
+      message:
+          '诵经助手是一款帮助佛友管理与记录日常佛学修行功课的免费工具。 应用提供了发愿向导、功课日历、功课统计、诵经、电子木鱼、念佛念咒计数、打坐计时、每日开示、语音引导拜忏等工具帮助佛友更好地进行日常佛学修行功课。\n\n如果您在使用过程中遇到问题，或者有任何建议和意见，欢迎通过反馈页面联系我们。',
       publishedAt: DateTime(2026, 6, 27),
       level: HelpAnnouncementLevel.info,
       isPinned: true,
@@ -94,18 +98,22 @@ final AppHelpCenterConfig gongKeHelpConfig = AppHelpCenterConfig(
     HelpFaqItem(
       id: 'why_no_builtin_sutras',
       question: '为什么功课助手没有内置经书？还需要我自己导入？',
-      answer: '在《互联网宗教信息服务管理办法》中，要求 App 作者应当取得互联网宗教信息服务许可。\n\n所以目前的功课助手 App 以及诵经助手 App 都是纯工具类 App，不能内置经书。\n\n因为目前互联网上的经书很常见，也比较容易下载，各位佛友自己下载导入就可以使用。\n\n具体操作方法请参考技术支持网站。',
+      answer:
+          '在《互联网宗教信息服务管理办法》中，要求 App 作者应当取得互联网宗教信息服务许可。\n\n所以目前的功课助手 App 以及诵经助手 App 都是纯工具类 App，不能内置经书。\n\n因为目前互联网上的经书很常见，也比较容易下载，各位佛友自己下载导入就可以使用。\n\n具体操作方法请参考技术支持网站。',
     ),
   ],
 );
 
 /// 全局共享的帮助中心 controller
-final AppHelpCenterController helpCenterController =
-    AppHelpCenterController(config: gongKeHelpConfig);
+final AppHelpCenterController helpCenterController = AppHelpCenterController(
+  config: gongKeHelpConfig,
+);
 
 /// 在 app 启动时调用，初始化 controller（加载本地存储的已读状态、拉取远程公告）
 Future<void> initHelpCenter() async {
-  await helpCenterController.load(refreshRemote: gongKeHelpConfig.refreshRemoteOnOpen);
+  await helpCenterController.load(
+    refreshRemote: gongKeHelpConfig.refreshRemoteOnOpen,
+  );
 }
 
 /// 帮助中心页面（使用共享 controller，确保红点状态同步）

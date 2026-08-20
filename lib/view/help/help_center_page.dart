@@ -34,7 +34,7 @@ final AppHelpCenterConfig gongKeHelpConfig = AppHelpCenterConfig(
   ],
   versionHistory: [
      VersionHistoryItem(
-      versionName: 'v1.0.8',
+      versionName: 'v1.0.9',
       publishedAt: DateTime(2026, 8, 21),
       changes: '1.完善开示功能\n2.完善电子木鱼,增加十念法\n3.完善听书功能',
     ),

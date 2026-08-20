@@ -10,6 +10,8 @@ import 'view/gongke/nianshenghao.dart';
 import 'view/gongke/dazuo.dart';
 import 'view/gongke/nianzhou.dart';
 import 'view/gongke/gongke_stat.dart';
+import 'view/gongke/muyu_rhythm_management_page.dart';
+import 'comm/muyu_rhythm_store.dart';
 import 'database.dart';
 import 'view/songjing/songjing.dart';
 import 'view/tips/tip.dart';
@@ -47,6 +49,7 @@ void main() async {
 
   // 等待 SharedPreferences 初始化
   await SharedPreferences.getInstance();
+  await muyuRhythmStore.load();
   final hasSeenWelcome = await getBoolValue('hasSeenWelcome') ?? false;
   // 根据平台选择合适的数据库存储路径
   late String dbPath;
@@ -138,6 +141,8 @@ class _MyAppState extends State<MyApp> {
         '/GongKe/GongKeSetting/nianzhou': (context) => const NianzhouPage(),
         '/GongKe/GongKeSetting/nianshenghao': (context) =>
             const NianShengHaoPage(),
+        '/GongKe/MuyuRhythmManagement': (context) =>
+            const MuyuRhythmManagementPage(),
         '/GongKe/GongKeSetting/dazuo': (context) => const DaZuoPage(),
         '/GongKeStat': (context) => const GongKeStatPage(),
         '/BaiChan': (context) => const BaiChanPage(),

@@ -36,6 +36,16 @@ Future<int?> getIntValue(String key) async {
   return prefs.getInt(key);
 }
 
+Future<void> saveDoubleValue(String key, double value) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setDouble(key, value);
+}
+
+Future<double?> getDoubleValue(String key) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getDouble(key);
+}
+
 // 读取字符串
 Future<String?> getStringValue(String key) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();

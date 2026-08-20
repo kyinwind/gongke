@@ -5,9 +5,10 @@ import 'package:drift/drift.dart' hide Column;
 import '../../comm/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
-import 'dart:convert';
 import 'package:path/path.dart' as path;
 import '../../comm/pub_tools.dart';
+import '../../comm/tip_import_service.dart';
+import 'package:my_flutter_app_tools/my_flutter_app_tools.dart';
 
 class ImportFilesPage extends StatefulWidget {
   const ImportFilesPage({super.key});
@@ -57,11 +58,13 @@ class _ImportFilesPageState extends State<ImportFilesPage> {
           break;
         case 'kaishi':
           _title = '导入开示文件';
-          _content = '请选择开示文件所在目录';
+          _content = '请选择开示 JSON 文件（单次最多 15 个）';
           break;
         default:
       }
-      _loadSavedPath();
+      if (_jingshuType != 'kaishi') {
+        _loadSavedPath();
+      }
     } catch (e) {
       print('------------------didChangeDependencies error:${e}');
     }
@@ -86,30 +89,170 @@ class _ImportFilesPageState extends State<ImportFilesPage> {
     );
 
     if (result != null) {
+      final paths = result.paths.whereType<String>().toList();
+      if (_jingshuType == 'kaishi' &&
+          paths.length > TipImportService.maxFilesPerBatch) {
+        if (!mounted) return;
+        AppToast.warning(context, '单次最多选择 15 个开示文件');
+        return;
+      }
       setState(() {
-        _selectedFiles = result.paths.whereType<String>().toList();
+        _selectedFiles = paths;
         _isDirectorySelected = _selectedFiles.isNotEmpty;
       });
     }
   }
 
+  Future<void> _confirmTipImport() async {
+    if (_selectedFiles.isEmpty) return;
+    final sources = <TipImportSource>[];
+    for (final filePath in _selectedFiles) {
+      final file = File(filePath);
+      sources.add(
+        TipImportSource(
+          fileName: path.basename(filePath),
+          bytes: await file.readAsBytes(),
+        ),
+      );
+    }
+    final service = TipImportService(globalDB);
+    final previews = await service.preview(sources);
+    if (!mounted) return;
+    var strategy = TipImportConflictStrategy.skip;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('导入预览'),
+          content: SizedBox(
+            width: 560,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '文件 ${previews.length} 个，冲突 '
+                    '${previews.fold<int>(0, (sum, item) => sum + item.conflictCount)} 项',
+                  ),
+                  const SizedBox(height: 12),
+                  ...previews.map(
+                    (item) => ListTile(
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(
+                        item.error == null ? Icons.description : Icons.error,
+                        color: item.error == null ? null : Colors.red,
+                      ),
+                      title: Text(item.bookName ?? item.fileName),
+                      subtitle: Text(
+                        item.error ??
+                            '${item.recordCount} 条记录，${item.conflictCount} 项冲突',
+                      ),
+                    ),
+                  ),
+                  const Divider(),
+                  DropdownButtonFormField<TipImportConflictStrategy>(
+                    initialValue: strategy,
+                    decoration: const InputDecoration(labelText: '冲突处理'),
+                    items: const [
+                      DropdownMenuItem(
+                        value: TipImportConflictStrategy.skip,
+                        child: Text('跳过（推荐）'),
+                      ),
+                      DropdownMenuItem(
+                        value: TipImportConflictStrategy.updateExisting,
+                        child: Text('更新现有（保留个人状态）'),
+                      ),
+                      DropdownMenuItem(
+                        value: TipImportConflictStrategy.saveAsNew,
+                        child: Text('另存为新书'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        setDialogState(() => strategy = value);
+                      }
+                    },
+                  ),
+                  if (strategy == TipImportConflictStrategy.updateExisting)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 8),
+                      child: Text('内容会更新，本机收藏、完成状态、评论和用户排序会保留。'),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('取消'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('开始导入'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (confirmed != true) return;
+
+    final result = await service.importBatch(sources, strategy: strategy);
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('导入结果'),
+        content: SizedBox(
+          width: 520,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '成功 ${result.imported}，跳过 ${result.skipped}，失败 ${result.failed}',
+                ),
+                const SizedBox(height: 8),
+                ...result.items.map(
+                  (item) => Text('${item.fileName}：${item.message}'),
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('确定'),
+          ),
+        ],
+      ),
+    );
+    if (mounted) Navigator.pop(context, result.imported > 0);
+  }
+
   Future<void> _confirmImport() async {
+    if (_jingshuType == 'kaishi') {
+      await _confirmTipImport();
+      return;
+    }
     late List<JingShuData> list;
-    late List<TipBookData> tipList;
     int count = 0;
     late List<FileSystemEntity> files;
     //print('-------------------------进入_confirmImport');
     if (Platform.isWindows) {
       if (_directoryController.text.isEmpty) return;
       final directory = Directory(_directoryController.text);
-      files = directory.listSync();
-      //print('------------------查询${directory}所有文件成功${files.length}');
       if (!await directory.exists()) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('目录不存在')));
+        if (!mounted) return;
+        AppToast.error(context, '目录不存在');
         return;
       }
+      files = directory.listSync();
+      //print('------------------查询${directory}所有文件成功${files.length}');
     }
     if (Platform.isAndroid) {
       if (_selectedFiles.isEmpty) return;
@@ -118,136 +261,47 @@ class _ImportFilesPageState extends State<ImportFilesPage> {
       // );
     }
 
-    if (_jingshuType != 'kaishi') {
-      try {
-        final query = globalDB.managers.jingShu
-            .filter((f) => f.type.contains(_jingshuType))
-            .orderBy((t) => t.favoriteDateTime.desc() & t.name.asc());
-        list = await query.get(); // 获取所有记录
-      } catch (e) {
-        print('查询所有记录时出错: $e');
-        // 可以在这里设置一个空的 Stream 或者错误提示的 Stream
-      }
-      //print('------------------查询所有经书成功${list.length}');
+    try {
+      final query = globalDB.managers.jingShu
+          .filter((f) => f.type.contains(_jingshuType))
+          .orderBy((t) => t.favoriteDateTime.desc() & t.name.asc());
+      list = await query.get(); // 获取所有记录
+    } catch (e) {
+      debugPrint('查询所有记录时出错: $e');
+      return;
+    }
+    //print('------------------查询所有经书成功${list.length}');
 
-      if (Platform.isWindows) {
-        for (final file in files) {
-          //print('------------------${file.path}');
-          if (file is File &&
-              path.extension(file.path).toLowerCase() == '.pdf') {
-            //print('---------------${file.path}');
-            //如果当前导入的文件已经存在，则不导入
-            String filename_pdf = file.path.split('\\').last;
-            String filename_withoutpdf = filename_pdf.replaceAll('.pdf', '');
-            bool exists = list.any((o) => o.name == filename_withoutpdf);
-            //print('----------- ${filename_withoutpdf}--${exists}');
-            if (exists) {
-              continue; // 如果已经存在，则跳过插入
-            }
-            await createJingShu(file.path, _jingshuType, list);
-            count++;
+    if (Platform.isWindows) {
+      for (final file in files) {
+        //print('------------------${file.path}');
+        if (file is File && path.extension(file.path).toLowerCase() == '.pdf') {
+          //print('---------------${file.path}');
+          //如果当前导入的文件已经存在，则不导入
+          String filename_pdf = file.path.split('\\').last;
+          String filename_withoutpdf = filename_pdf.replaceAll('.pdf', '');
+          bool exists = list.any((o) => o.name == filename_withoutpdf);
+          //print('----------- ${filename_withoutpdf}--${exists}');
+          if (exists) {
+            continue; // 如果已经存在，则跳过插入
           }
-        }
-      } else {
-        for (final filePath in _selectedFiles) {
-          if (path.extension(filePath).toLowerCase() != '.pdf') continue;
-          final filename = path.basenameWithoutExtension(filePath);
-          //print('${filename}');
-          bool exists = list.any((o) => o.name == filename);
-          if (exists) continue;
-          await createJingShu(filePath, _jingshuType, list);
+          await createJingShu(file.path, _jingshuType, list);
           count++;
         }
       }
     } else {
-      //开示文件
-      try {
-        final query = globalDB.managers.tipBook.orderBy(
-          (t) => t.favoriteDateTime.desc() & t.name.asc(),
-        );
-        tipList = await query.get(); // 获取所有记录
-      } catch (e) {
-        print('查询所有记录时出错: $e');
-        // 可以在这里设置一个空的 Stream 或者错误提示的 Stream
-      }
-      if (Platform.isWindows) {
-        for (final file in files) {
-          if (file is File &&
-              path.extension(file.path).toLowerCase() == '.json') {
-            //print('---------------${file.path}');
-            //如果当前导入的文件已经存在，则不导入
-            String filename_json = file.path.split('\\').last;
-            String filename_withoutjson = filename_json.replaceAll('.json', '');
-            bool exists = tipList.any((o) => o.name == filename_withoutjson);
-            //print('----------- ${filename_withoutjson}--${exists}');
-            if (exists) {
-              continue; // 如果已经存在，则跳过插入
-            }
-            await createTipBook(file.path, filename_withoutjson);
-            count++;
-          }
-        }
-      } else {
-        for (final filePath in _selectedFiles) {
-          if (path.extension(filePath).toLowerCase() != '.json') continue;
-          final filename = path.basenameWithoutExtension(filePath);
-          bool exists = tipList.any((o) => o.name == filename);
-          if (exists) continue;
-          await createTipBook(filePath, filename);
-          count++;
-        }
+      for (final filePath in _selectedFiles) {
+        if (path.extension(filePath).toLowerCase() != '.pdf') continue;
+        final filename = path.basenameWithoutExtension(filePath);
+        bool exists = list.any((o) => o.name == filename);
+        if (exists) continue;
+        await createJingShu(filePath, _jingshuType, list);
+        count++;
       }
     }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('导入完成，共导入${count}个文件')));
+    if (!mounted) return;
+    AppToast.success(context, '导入完成，共导入$count个文件');
     Navigator.pop(context);
-  }
-
-  Future<void> createTipBook(String filePath, String name) async {
-    // 实现开示创建逻辑
-    debugPrint('创建开示: $filePath, 名称: $name');
-    String filename_json = path.basename(filePath);
-    String filename_withoutjson = path.basenameWithoutExtension(filePath);
-    //print('------------------${filename_json}');
-    final jsonString = await File(filePath).readAsString();
-    final jsonData = json.decode(jsonString);
-    // 开启事务
-    await globalDB.transaction(() async {
-      try {
-        // 提取 TipBook 数据
-        final quotation = jsonData['quotation'];
-        final tipBookCompanion = globalDB.tipBook.insertOne(
-          TipBookCompanion.insert(
-            name: quotation['name'],
-            image: quotation['image'],
-            remarks: Value(quotation['remarks']),
-            favoriteDateTime: const Value(null),
-            createDateTime: Value(DateTime.now()),
-          ),
-        );
-
-        // 插入 TipBook 记录并获取插入的 id
-        // 由于 tipBookCompanion 是 Future<int> 类型，需要使用 await 来获取实际的 id 值
-        final bookId = await tipBookCompanion;
-
-        // 提取 TipRecord 数据
-        final records = quotation['records'] as List<dynamic>;
-        for (final recordData in records) {
-          final tipRecordCompanion = TipRecordCompanion.insert(
-            bookId: bookId,
-            content: recordData['content'],
-          );
-
-          // 插入 TipRecord 记录
-          await globalDB.tipRecord.insertOne(tipRecordCompanion);
-        }
-      } catch (e) {
-        // 出现错误，回滚事务
-        //print('导入数据时出错: $e');
-        rethrow;
-      }
-    });
   }
 
   Future<void> createJingShu(
@@ -267,13 +321,13 @@ class _ImportFilesPageState extends State<ImportFilesPage> {
     if (exists) {
       return; // 如果已经存在，则跳过插入
     }
-    String? imagePath = _jingshuType.contains('shanshu')
+    final imagePath = _jingshuType.contains('shanshu')
         ? 'assets/images/shanshu.png'
         : 'assets/images/jingshu.png';
     //print('filename:${filename_withoutpdf}');
     final item = JingShuCompanion(
       name: Value(filename_withoutpdf),
-      image: Value(imagePath!),
+      image: Value(imagePath),
       fileUrl: Value(filePath),
       fileType: Value('pdf'),
       type: Value('external${jingshuType}'),
@@ -308,7 +362,7 @@ class _ImportFilesPageState extends State<ImportFilesPage> {
           alignment: Alignment.centerLeft, // 添加 Align widget
           child: Column(
             children: [
-              Platform.isWindows
+              Platform.isWindows && _jingshuType != 'kaishi'
                   ? TextField(
                       controller: _directoryController,
                       decoration: InputDecoration(

@@ -6,6 +6,7 @@ import 'package:gongke/comm/date_tools.dart';
 import 'package:gongke/comm/shared_preferences.dart';
 import 'package:gongke/comm/pub_tools.dart';
 import 'package:gongke/comm/logger_tools.dart';
+import 'package:my_flutter_app_tools/my_flutter_app_tools.dart';
 
 class VMFaYuanData {
   String? name; // 发愿名称
@@ -83,6 +84,7 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
   late TextEditingController fodiziNameController;
   // 添加初始化标记，避免重复初始化
   bool _initialized = false; // 添加初始化标记
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -511,7 +513,9 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
     GongKeType? selectedType;
     String? selectedJingShu;
     final TextEditingController nameController = TextEditingController();
-    final TextEditingController cntController = TextEditingController();
+    final TextEditingController cntController = TextEditingController(
+      text: '1',
+    );
 
     await showDialog(
       context: context,
@@ -593,41 +597,31 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
             TextButton(
               onPressed: () {
                 if (selectedType == null) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('请选择功课类型')));
+                  AppToast.warning(context, '请选择功课类型');
                   return;
                 }
 
                 final String name;
                 if (selectedType == GongKeType.songjing) {
                   if (selectedJingShu == null) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(const SnackBar(content: Text('请选择经书')));
+                    AppToast.warning(context, '请选择经书');
                     return;
                   }
                   name = selectedJingShu!;
                 } else {
                   if (nameController.text.isEmpty) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(const SnackBar(content: Text('请输入功课名称')));
+                    AppToast.warning(context, '请输入功课名称');
                     return;
                   }
                   name = nameController.text;
                 }
                 if (cntController.text.isEmpty) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('请输入功课数量')));
+                  AppToast.warning(context, '请输入功课数量');
                   return;
                 }
                 final cnt = int.tryParse(cntController.text);
                 if (cnt == null || cnt <= 0) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('请输入有效的整数')));
+                  AppToast.warning(context, '请输入有效的整数');
                   return;
                 }
 
@@ -691,106 +685,96 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
   }
 
   Future<void> _handleSave() async {
-    // 将 newFaYuanId 移到事务内部声明
-    await globalDB.transaction(() async {
-      int currentFaYuanId;
-      _data.fayuanwen = getFaYuanWen();
-      // 检查是否为修改模式
-      if (actType == 'M' && fayuanId != null) {
-        // 修改模式
-        currentFaYuanId = fayuanId!;
-        final today = DateTime.now().toIso8601String().split('T').first;
-        logger.i('currentFaYuanId: $currentFaYuanId');
-        logger.i('today: $today');
-        // 删除当前日期及之后的所有功课记录
-        await (globalDB.delete(globalDB.gongKeItem)..where(
-              (t) =>
-                  t.fayuanId.equals(currentFaYuanId) &
-                  t.gongKeDay.isBiggerOrEqualValue(today),
-            ))
-            .go();
-        await globalDB.managers.gongKeItemsOneDay
-            .filter((t) => t.fayuanId.equals(currentFaYuanId))
-            .delete();
-        // 更新现有发愿记录
-        await globalDB.managers.faYuan
-            .filter((f) => f.id.equals(currentFaYuanId))
-            .update(
-              (o) => o(
-                name: Value(_data.name!),
-                fodiziname: Value(_data.fodiziName!),
-                startDate: Value(_data.startDate!),
-                endDate: Value(_data.endDate!),
-                yuanwang: Value(_data.yuanwang ?? ''),
-                fayuanwen: Value(_data.fayuanwen ?? ''),
-              ),
-            );
-      } else {
-        // 新增模式
-        currentFaYuanId = await globalDB.managers.faYuan.create(
-          (o) => o(
-            name: _data.name!,
-            fodiziname: _data.fodiziName!,
-            startDate: _data.startDate!,
-            endDate: _data.endDate!,
-            yuanwang: _data.yuanwang ?? '',
-            fayuanwen: _data.fayuanwen ?? '',
-            remarks: Value(''),
-          ),
-        );
-      }
-      // 插入每日功课
-      for (var item in _data.gkiODList) {
-        await globalDB.managers.gongKeItemsOneDay.create(
-          (o) => o(
-            fayuanId: currentFaYuanId, // 使用 currentFaYuanId
-            gongketype: Value(item.gongketype.name),
-            name: item.name,
-            cnt: Value(item.cnt),
-            idx: Value(_data.gkiODList.indexOf(item) + 1),
-          ),
-        );
-      }
-      String gongkedaystr = '';
-      bool iscomplete = false;
-      // 插入具体功课记录
-      for (var day = 0; day < _data.getDurationDays(); day++) {
-        for (var item in _data.gkiODList) {
-          gongkedaystr = DateTools.getDateStringByDate(
-            DateTools.getDateAfterDays(_data.startDate ?? DateTime.now(), day),
+    if (_isSaving) return;
+    setState(() => _isSaving = true);
+    try {
+      // 将 newFaYuanId 移到事务内部声明
+      await globalDB.transaction(() async {
+        int currentFaYuanId;
+        _data.fayuanwen = getFaYuanWen();
+        // 检查是否为修改模式
+        if (actType == 'M' && fayuanId != null) {
+          // 修改模式
+          currentFaYuanId = fayuanId!;
+          final today = DateTime.now().toIso8601String().split('T').first;
+          logger.i('currentFaYuanId: $currentFaYuanId');
+          logger.i('today: $today');
+          // 删除当前日期及之后的所有功课记录
+          await (globalDB.delete(globalDB.gongKeItem)..where(
+                (t) =>
+                    t.fayuanId.equals(currentFaYuanId) &
+                    t.gongKeDay.isBiggerOrEqualValue(today),
+              ))
+              .go();
+          await globalDB.managers.gongKeItemsOneDay
+              .filter((t) => t.fayuanId.equals(currentFaYuanId))
+              .delete();
+          // 更新现有发愿记录
+          await globalDB.managers.faYuan
+              .filter((f) => f.id.equals(currentFaYuanId))
+              .update(
+                (o) => o(
+                  name: Value(_data.name!),
+                  fodiziname: Value(_data.fodiziName!),
+                  startDate: Value(_data.startDate!),
+                  endDate: Value(_data.endDate!),
+                  yuanwang: Value(_data.yuanwang ?? ''),
+                  fayuanwen: Value(_data.fayuanwen ?? ''),
+                ),
+              );
+        } else {
+          // 新增模式
+          currentFaYuanId = await globalDB.managers.faYuan.create(
+            (o) => o(
+              name: _data.name!,
+              fodiziname: _data.fodiziName!,
+              startDate: _data.startDate!,
+              endDate: _data.endDate!,
+              yuanwang: _data.yuanwang ?? '',
+              fayuanwen: _data.fayuanwen ?? '',
+              remarks: Value(''),
+            ),
           );
-          //如果是新增，则逐个增加。如果是修改，则只修改今天和以后的记录
-          if (actType == 'A') {
-            if (DateTools.getDateByString(
-              gongkedaystr,
-              'yyyy-MM-dd',
-            ).isBefore(DateTime.now())) {
-              if (gongkedaystr ==
-                  DateTools.getDateStringByDate(DateTime.now())) {
-                iscomplete = false;
-              } else {
-                // 如果日期早于今天，则设置为已完成
-                iscomplete = true;
-              }
-            } else {
-              iscomplete = false;
-            }
-            await globalDB.managers.gongKeItem.create(
-              (o) => o(
-                fayuanId: currentFaYuanId, // 使用 currentFaYuanId
-                gongKeDay: gongkedaystr,
-                gongketype: item.gongketype.name,
-                name: item.name,
-                cnt: Value(item.cnt),
-                isComplete: Value(iscomplete),
-                idx: Value(item.idx),
+        }
+        // 插入每日功课
+        for (var item in _data.gkiODList) {
+          await globalDB.managers.gongKeItemsOneDay.create(
+            (o) => o(
+              fayuanId: currentFaYuanId, // 使用 currentFaYuanId
+              gongketype: Value(item.gongketype.name),
+              name: item.name,
+              cnt: Value(item.cnt),
+              idx: Value(_data.gkiODList.indexOf(item) + 1),
+            ),
+          );
+        }
+        String gongkedaystr = '';
+        bool iscomplete = false;
+        // 插入具体功课记录
+        for (var day = 0; day < _data.getDurationDays(); day++) {
+          for (var item in _data.gkiODList) {
+            gongkedaystr = DateTools.getDateStringByDate(
+              DateTools.getDateAfterDays(
+                _data.startDate ?? DateTime.now(),
+                day,
               ),
             );
-          } else if (actType == 'M') {
-            if (gongkedaystr == DateTools.getDateStringByDate(DateTime.now())) {
-              //如果正好是今天，需要增加记录
-              iscomplete = false;
-              logger.i('gongkedaystr: $gongkedaystr,正好是今天。');
+            //如果是新增，则逐个增加。如果是修改，则只修改今天和以后的记录
+            if (actType == 'A') {
+              if (DateTools.getDateByString(
+                gongkedaystr,
+                'yyyy-MM-dd',
+              ).isBefore(DateTime.now())) {
+                if (gongkedaystr ==
+                    DateTools.getDateStringByDate(DateTime.now())) {
+                  iscomplete = false;
+                } else {
+                  // 如果日期早于今天，则设置为已完成
+                  iscomplete = true;
+                }
+              } else {
+                iscomplete = false;
+              }
               await globalDB.managers.gongKeItem.create(
                 (o) => o(
                   fayuanId: currentFaYuanId, // 使用 currentFaYuanId
@@ -802,15 +786,12 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
                   idx: Value(item.idx),
                 ),
               );
-            } else {
-              if (DateTools.getDateByString(
-                gongkedaystr,
-                'yyyy-MM-dd',
-              ).isBefore(DateTime.now())) {
-                // 如果日期早于今天，则跳过
-                continue;
-              } else {
-                logger.i('gongkedaystr: $gongkedaystr,正好是未来。');
+            } else if (actType == 'M') {
+              if (gongkedaystr ==
+                  DateTools.getDateStringByDate(DateTime.now())) {
+                //如果正好是今天，需要增加记录
+                iscomplete = false;
+                logger.i('gongkedaystr: $gongkedaystr,正好是今天。');
                 await globalDB.managers.gongKeItem.create(
                   (o) => o(
                     fayuanId: currentFaYuanId, // 使用 currentFaYuanId
@@ -822,14 +803,40 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
                     idx: Value(item.idx),
                   ),
                 );
+              } else {
+                if (DateTools.getDateByString(
+                  gongkedaystr,
+                  'yyyy-MM-dd',
+                ).isBefore(DateTime.now())) {
+                  // 如果日期早于今天，则跳过
+                  continue;
+                } else {
+                  logger.i('gongkedaystr: $gongkedaystr,正好是未来。');
+                  await globalDB.managers.gongKeItem.create(
+                    (o) => o(
+                      fayuanId: currentFaYuanId, // 使用 currentFaYuanId
+                      gongKeDay: gongkedaystr,
+                      gongketype: item.gongketype.name,
+                      name: item.name,
+                      cnt: Value(item.cnt),
+                      isComplete: Value(iscomplete),
+                      idx: Value(item.idx),
+                    ),
+                  );
+                }
               }
             }
           }
         }
-      }
-    });
+      });
 
-    Navigator.pop(context);
+      if (mounted) Navigator.pop(context);
+    } catch (error) {
+      if (!mounted) return;
+      AppToast.error(context, '保存失败：$error');
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
   }
 
   @override
@@ -851,18 +858,14 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
                 if (_data.isDateValid()) {
                   setState(() => _currentStep++);
                 } else {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('请选择起始日期和截止日期')));
+                  AppToast.warning(context, '请选择起始日期和截止日期');
                 }
                 break;
               case 2:
                 if (_data.isGongKeValid()) {
                   setState(() => _currentStep++);
                 } else {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('请至少添加一个功课')));
+                  AppToast.warning(context, '请至少添加一个功课');
                 }
                 break;
               default:
@@ -893,15 +896,17 @@ class _FaYuanWizardPageState extends State<FaYuanWizardPage> {
                 const SizedBox(width: 8),
                 ElevatedButton(
                   style: AppButtonStyle.primaryButton,
-                  onPressed: controls.onStepCancel,
+                  onPressed: _isSaving ? null : controls.onStepCancel,
                   child: const Text('上一步'),
                 ),
               ],
               const Spacer(),
               ElevatedButton(
                 style: AppButtonStyle.primaryButton,
-                onPressed: controls.onStepContinue,
-                child: Text(_currentStep < 4 ? '下一步' : '保存'),
+                onPressed: _isSaving ? null : controls.onStepContinue,
+                child: Text(
+                  _currentStep < 4 ? '下一步' : (_isSaving ? '保存中…' : '保存'),
+                ),
               ),
               const Spacer(),
             ],

@@ -46,6 +46,24 @@ class AudioTools {
     }
   }
 
+  static Future<void> playLocalAssetAndWait(
+    String file, {
+    double? playbackRate,
+  }) async {
+    final completer = Completer<void>();
+    await playLocalAsset(
+      file,
+      playbackRate: playbackRate,
+      onComplete: () {
+        if (!completer.isCompleted) completer.complete();
+      },
+    );
+    await completer.future.timeout(
+      const Duration(seconds: 10),
+      onTimeout: () {},
+    );
+  }
+
   static Future<void> clearAndStop() async {
     if (!_isDisposed) {
       _onCompleteCallback = null;

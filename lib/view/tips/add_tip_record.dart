@@ -3,6 +3,7 @@ import 'package:gongke/main.dart';
 import 'package:styled_widget/styled_widget.dart';
 import 'package:drift/drift.dart' hide Column;
 import '../../comm/pub_tools.dart';
+import '../../database.dart';
 
 class AddTipRecordPage extends StatefulWidget {
   const AddTipRecordPage({super.key});
@@ -16,6 +17,9 @@ class _AddTipRecordPageState extends State<AddTipRecordPage> {
   final _contentController = TextEditingController();
   late int bookId; // 默认值，实际使用时可能需要从路由参数获取
   late String acttype;
+  int? _recordId;
+  bool _loadedArguments = false;
+  bool _saving = false;
 
   @override
   void initState() {
@@ -27,11 +31,25 @@ class _AddTipRecordPageState extends State<AddTipRecordPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (_loadedArguments) return;
+    _loadedArguments = true;
     final args = ModalRoute.of(context)?.settings.arguments;
     if (args is Map<String, dynamic> && args['bookId'] != null) {
       acttype = args['acttype'];
       bookId = args['bookId'];
+      _recordId = args['recordId'] as int?;
+      if (acttype == 'mod' && _recordId != null) {
+        _loadRecord();
+      }
     }
+  }
+
+  Future<void> _loadRecord() async {
+    final record = await (globalDB.select(
+      globalDB.tipRecord,
+    )..where((row) => row.id.equals(_recordId!))).getSingleOrNull();
+    if (!mounted || record == null) return;
+    _contentController.text = record.content;
   }
 
   @override
@@ -41,16 +59,37 @@ class _AddTipRecordPageState extends State<AddTipRecordPage> {
   }
 
   Future<void> _submitForm() async {
-    if (_formKey.currentState!.validate()) {
+    if (_saving || !_formKey.currentState!.validate()) return;
+    setState(() => _saving = true);
+    try {
       if (acttype == 'new') {
-        await globalDB.managers.tipRecord.create(
-          (o) => o(content: _contentController.text, bookId: bookId),
-          mode: InsertMode.replace,
+        final existing =
+            await (globalDB.select(globalDB.tipRecord)
+                  ..where((row) => row.bookId.equals(bookId))
+                  ..orderBy([(row) => OrderingTerm.desc(row.sortOrder)])
+                  ..limit(1))
+                .getSingleOrNull();
+        await globalDB
+            .into(globalDB.tipRecord)
+            .insert(
+              TipRecordCompanion.insert(
+                content: _contentController.text.trim(),
+                bookId: bookId,
+                jsonId: Value('local-${DateTime.now().microsecondsSinceEpoch}'),
+                sortOrder: Value((existing?.sortOrder ?? -1) + 1),
+              ),
+            );
+      } else if (_recordId != null) {
+        await (globalDB.update(
+          globalDB.tipRecord,
+        )..where((row) => row.id.equals(_recordId!))).write(
+          TipRecordCompanion(content: Value(_contentController.text.trim())),
         );
       }
-      if (!mounted) return; // 添加这行检查
-      // 返回上一级路由
+      if (!mounted) return;
       Navigator.of(context).pop();
+    } finally {
+      if (mounted) setState(() => _saving = false);
     }
   }
 
@@ -60,7 +99,10 @@ class _AddTipRecordPageState extends State<AddTipRecordPage> {
       appBar: AppBar(
         title: Text(acttype == 'new' ? '新增开示' : '修改开示'),
         actions: [
-          IconButton(icon: const Icon(Icons.check), onPressed: _submitForm),
+          IconButton(
+            icon: const Icon(Icons.check),
+            onPressed: _saving ? null : _submitForm,
+          ),
         ],
       ),
       body: Padding(
@@ -88,8 +130,8 @@ class _AddTipRecordPageState extends State<AddTipRecordPage> {
               ).padding(bottom: 16),
               ElevatedButton(
                 style: AppButtonStyle.primaryButton,
-                onPressed: _submitForm,
-                child: const Text('提交'),
+                onPressed: _saving ? null : _submitForm,
+                child: Text(_saving ? '保存中…' : '提交'),
               ),
             ],
           ),

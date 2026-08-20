@@ -5,9 +5,17 @@ import '../../database.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter_slidable/flutter_slidable.dart'; // 导入 Slidable 库
 import 'dart:convert'; // 导入 dart:convert 库，确保已导入
+import 'dart:io';
 import 'package:flutter/services.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:gongke/comm/tip_export_service.dart';
+import 'package:gongke/comm/tip_import_service.dart';
+import 'package:gongke/comm/today_tip_service.dart';
+import 'package:gongke/comm/tts_tools.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:gongke/viewmodel/current_record.dart';
 import 'package:gongke/comm/pub_tools.dart';
+import 'package:my_flutter_app_tools/my_flutter_app_tools.dart';
 import '../help/help_center_page.dart';
 
 // 为了让页面能够上下滑动，将 Scaffold 的 body 用 SingleChildScrollView 包裹
@@ -22,6 +30,10 @@ class TipPage extends StatefulWidget {
 class _TipPageState extends State<TipPage> {
   Stream<List<TipBookData>> records = Stream.value([]);
   CurrentRecord curRec = CurrentRecord();
+  final TtsTools _tts = TtsTools();
+  TodayTipMode _todayTipMode = TodayTipMode.sequential;
+  int _refreshSequence = 0;
+  bool _isSpeaking = false;
   _TipPageState(); // 添加构造函数
 
   @override
@@ -32,6 +44,7 @@ class _TipPageState extends State<TipPage> {
   }
 
   Future<void> _checkRecords() async {
+    _todayTipMode = await TodayTipSettings.loadMode();
     // 监听 Stream 的第一个值
     final firstValue = await records.first;
     if (firstValue.isEmpty) {
@@ -46,8 +59,14 @@ class _TipPageState extends State<TipPage> {
   }
 
   // 新增方法处理异步加载
-  Future<void> _loadCurrentRecord() async {
-    final record = await getCurrentRecord();
+  Future<void> _loadCurrentRecord({bool refresh = false}) async {
+    if (refresh) _refreshSequence++;
+    final record = await getCurrentRecord(
+      mode: _todayTipMode,
+      refreshSequence: _refreshSequence,
+      previousRecordId: curRec.id,
+    );
+    if (!mounted) return;
     setState(() {
       curRec = record;
       //print(curRec.id);
@@ -59,49 +78,34 @@ class _TipPageState extends State<TipPage> {
     // 假设文件名为 广钦老和尚开示.json, 第二个文件.json, 第三个文件.json, 第四个文件.json
     final fileNames = ['1.json', '2.json', '3.json', '4.json'];
 
-    // 开启事务
-    await globalDB.transaction(() async {
-      try {
-        for (final fileName in fileNames) {
-          final jsonString = await rootBundle.loadString(
-            'assets/tips/$fileName',
-          );
-          final jsonData = json.decode(jsonString);
+    final service = TipImportService(globalDB);
+    for (final fileName in fileNames) {
+      final data = await rootBundle.load('assets/tips/$fileName');
+      await service.importBytes(
+        data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+      );
+    }
+  }
 
-          // 提取 TipBook 数据
-          final quotation = jsonData['quotation'];
-          final tipBookCompanion = globalDB.tipBook.insertOne(
-            TipBookCompanion.insert(
-              name: quotation['name'],
-              image: quotation['image'],
-              remarks: Value(quotation['remarks']),
-              favoriteDateTime: const Value(null),
-              createDateTime: Value(DateTime.now()),
-            ),
-          );
-
-          // 插入 TipBook 记录并获取插入的 id
-          // 由于 tipBookCompanion 是 Future<int> 类型，需要使用 await 来获取实际的 id 值
-          final bookId = await tipBookCompanion;
-
-          // 提取 TipRecord 数据
-          final records = quotation['records'] as List<dynamic>;
-          for (final recordData in records) {
-            final tipRecordCompanion = TipRecordCompanion.insert(
-              bookId: bookId,
-              content: recordData['content'],
-            );
-
-            // 插入 TipRecord 记录
-            await globalDB.tipRecord.insertOne(tipRecordCompanion);
-          }
-        }
-      } catch (e) {
-        // 出现错误，回滚事务
-        //print('导入数据时出错: $e');
-        rethrow;
+  Future<void> _importSampleTips() async {
+    try {
+      final data = await rootBundle.load('assets/tips/fojiaogeyan.json');
+      final imported = await TipImportService(globalDB).importBytes(
+        data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+      );
+      if (!mounted) return;
+      await fetchTip();
+      await _loadCurrentRecord();
+      if (!mounted) return;
+      if (imported) {
+        AppToast.success(context, '已导入佛教格言七则');
+      } else {
+        AppToast.info(context, '示例开示已存在');
       }
-    });
+    } catch (error) {
+      if (!mounted) return;
+      AppToast.error(context, '导入示例失败：$error');
+    }
   }
 
   // 查询所有记录
@@ -117,6 +121,7 @@ class _TipPageState extends State<TipPage> {
 
   @override
   void dispose() {
+    _tts.stop();
     super.dispose();
   }
 
@@ -137,6 +142,172 @@ class _TipPageState extends State<TipPage> {
     await _loadCurrentRecord();
   }
 
+  Future<void> _exportBook(TipBookData book) async {
+    try {
+      final bytes = await const TipExportService().exportBook(
+        globalDB,
+        book.id,
+      );
+      final outputPath = await FilePicker.platform.saveFile(
+        dialogTitle: '导出开示录',
+        fileName: '${book.name}.json',
+        type: FileType.custom,
+        allowedExtensions: const ['json'],
+        bytes: bytes,
+      );
+      if (outputPath == null) return;
+      final output = File(outputPath);
+      if (!await output.exists() || await output.length() != bytes.length) {
+        await output.writeAsBytes(bytes, flush: true);
+      }
+      if (!mounted) return;
+      AppToast.success(context, '开示 JSON 已导出');
+    } catch (error) {
+      if (!mounted) return;
+      AppToast.error(context, '导出失败：$error');
+    }
+  }
+
+  Future<void> _deleteBook(TipBookData book) async {
+    final recordCount =
+        await (globalDB.select(globalDB.tipRecord)
+              ..where((row) => row.bookId.equals(book.id)))
+            .get()
+            .then((rows) => rows.length);
+    if (!mounted) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('删除开示录'),
+        content: Text('《${book.name}》包含 $recordCount 条记录，确定一并删除吗？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('删除'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await globalDB.transaction(() async {
+      await (globalDB.delete(
+        globalDB.tipRecord,
+      )..where((row) => row.bookId.equals(book.id))).go();
+      await (globalDB.delete(
+        globalDB.tipBook,
+      )..where((row) => row.id.equals(book.id))).go();
+    });
+    await fetchTip();
+    await _loadCurrentRecord();
+  }
+
+  Future<void> _setTodayTipMode(TodayTipMode mode) async {
+    await TodayTipSettings.saveMode(mode);
+    if (!mounted) return;
+    setState(() {
+      _todayTipMode = mode;
+      _refreshSequence = 0;
+    });
+    await _loadCurrentRecord();
+  }
+
+  Future<void> _toggleCurrentFavorite() async {
+    if (!curRec.hasData) return;
+    await (globalDB.update(
+      globalDB.tipRecord,
+    )..where((row) => row.id.equals(curRec.id))).write(
+      TipRecordCompanion(
+        favoriteDateTime: Value(
+          curRec.favoriteDateTime == null ? DateTime.now() : null,
+        ),
+      ),
+    );
+    await _loadCurrentRecord();
+  }
+
+  Future<void> _toggleCurrentCompleted() async {
+    if (!curRec.hasData) return;
+    await (globalDB.update(
+      globalDB.tipRecord,
+    )..where((row) => row.id.equals(curRec.id))).write(
+      TipRecordCompanion(
+        completedDateTime: Value(
+          curRec.completedDateTime == null ? DateTime.now() : null,
+        ),
+      ),
+    );
+    await _loadCurrentRecord();
+  }
+
+  Future<void> _editCurrentComment() async {
+    if (!curRec.hasData) return;
+    final controller = TextEditingController(text: curRec.comments);
+    final comment = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('评论'),
+        content: TextField(
+          controller: controller,
+          minLines: 3,
+          maxLines: 8,
+          decoration: const InputDecoration(border: OutlineInputBorder()),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, controller.text),
+            child: const Text('保存'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (comment == null) return;
+    await (globalDB.update(globalDB.tipRecord)
+          ..where((row) => row.id.equals(curRec.id)))
+        .write(TipRecordCompanion(comments: Value(comment.trim())));
+    await _loadCurrentRecord();
+  }
+
+  Future<void> _copyCurrent() async {
+    if (!curRec.hasData) return;
+    await Clipboard.setData(ClipboardData(text: curRec.content));
+    if (mounted) {
+      AppToast.success(context, '开示文本已复制');
+    }
+  }
+
+  Future<void> _shareCurrent() async {
+    if (!curRec.hasData) return;
+    try {
+      await SharePlus.instance.share(
+        ShareParams(text: '${curRec.content}\n——《${curRec.bookName}》'),
+      );
+    } catch (_) {
+      await _copyCurrent();
+    }
+  }
+
+  Future<void> _speakCurrent() async {
+    if (!curRec.hasData) return;
+    if (_isSpeaking) {
+      await _tts.stop();
+      if (mounted) setState(() => _isSpeaking = false);
+      return;
+    }
+    setState(() => _isSpeaking = true);
+    await _tts.speak(curRec.content, () {
+      if (mounted) setState(() => _isSpeaking = false);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -152,16 +323,24 @@ class _TipPageState extends State<TipPage> {
           const HelpBadgeIcon(),
           const SizedBox(width: 8),
           IconButton(
+            tooltip: '导入示例开示',
+            icon: const Icon(Icons.library_add_outlined),
+            onPressed: _importSampleTips,
+          ),
+          IconButton(
             icon: const Icon(Icons.arrow_circle_down),
             color: Colors.blue,
             iconSize: 35,
-            onPressed: () {
+            onPressed: () async {
               // 跳转到新增页面
-              Navigator.pushNamed(
+              final imported = await Navigator.pushNamed(
                 context,
                 '/ImportFiles',
                 arguments: {'jingshutype': 'kaishi'},
               );
+              if (!mounted || imported != true) return;
+              await fetchTip();
+              await _loadCurrentRecord();
             },
           ),
           IconButton(
@@ -248,15 +427,7 @@ class _TipPageState extends State<TipPage> {
                           motion: const ScrollMotion(),
                           children: [
                             SlidableAction(
-                              onPressed: (context) async {
-                                // 在这里处理删除操作
-                                await globalDB.managers.tipBook
-                                    .filter((f) => f.id(record.id))
-                                    .delete();
-                                // 重新获取数据
-                                await fetchTip();
-                                _checkRecords();
-                              },
+                              onPressed: (context) => _deleteBook(record),
                               backgroundColor: Color(0xFFFE4A49),
                               foregroundColor: Colors.white,
                               icon: Icons.delete,
@@ -295,6 +466,11 @@ class _TipPageState extends State<TipPage> {
                                 const SizedBox.shrink(),
                             ],
                           ),
+                          trailing: IconButton(
+                            tooltip: '导出 JSON',
+                            icon: const Icon(Icons.ios_share_outlined),
+                            onPressed: () => _exportBook(record),
+                          ),
                         ).padding(all: 10),
                       );
                     },
@@ -308,7 +484,35 @@ class _TipPageState extends State<TipPage> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ).padding(all: 15),
                   const Spacer(),
+                  PopupMenuButton<TodayTipMode>(
+                    tooltip: '选择每日开示模式',
+                    initialValue: _todayTipMode,
+                    onSelected: _setTodayTipMode,
+                    itemBuilder: (context) => const [
+                      PopupMenuItem(
+                        value: TodayTipMode.sequential,
+                        child: Text('顺序模式'),
+                      ),
+                      PopupMenuItem(
+                        value: TodayTipMode.random,
+                        child: Text('随机模式'),
+                      ),
+                    ],
+                    icon: Icon(
+                      _todayTipMode == TodayTipMode.sequential
+                          ? Icons.format_list_numbered
+                          : Icons.shuffle,
+                    ),
+                  ),
                   IconButton(
+                    tooltip: '随机刷新',
+                    icon: const Icon(Icons.refresh),
+                    onPressed: curRec.hasData
+                        ? () => _loadCurrentRecord(refresh: true)
+                        : null,
+                  ),
+                  IconButton(
+                    tooltip: '制作分享卡片',
                     icon: const Icon(Icons.share),
                     color: Colors.blue,
                     iconSize: 35,
@@ -400,6 +604,69 @@ class _TipPageState extends State<TipPage> {
                           ),
                         ],
                       ),
+                      if (curRec.comments.isNotEmpty)
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text('评论：${curRec.comments}'),
+                          ),
+                        ),
+                      if (curRec.hasData)
+                        Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: 4,
+                          children: [
+                            IconButton(
+                              tooltip: curRec.favoriteDateTime == null
+                                  ? '收藏'
+                                  : '取消收藏',
+                              onPressed: _toggleCurrentFavorite,
+                              icon: Icon(
+                                curRec.favoriteDateTime == null
+                                    ? Icons.favorite_border
+                                    : Icons.favorite,
+                                color: Colors.amber,
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: curRec.completedDateTime == null
+                                  ? '标记完成'
+                                  : '取消完成',
+                              onPressed: _toggleCurrentCompleted,
+                              icon: Icon(
+                                curRec.completedDateTime == null
+                                    ? Icons.check_circle_outline
+                                    : Icons.check_circle,
+                                color: Colors.green,
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: _isSpeaking ? '停止朗读' : '朗读',
+                              onPressed: _speakCurrent,
+                              icon: Icon(
+                                _isSpeaking
+                                    ? Icons.stop_circle_outlined
+                                    : Icons.volume_up_outlined,
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: '复制',
+                              onPressed: _copyCurrent,
+                              icon: const Icon(Icons.copy_outlined),
+                            ),
+                            IconButton(
+                              tooltip: '分享文本',
+                              onPressed: _shareCurrent,
+                              icon: const Icon(Icons.share_outlined),
+                            ),
+                            IconButton(
+                              tooltip: '评论',
+                              onPressed: _editCurrentComment,
+                              icon: const Icon(Icons.comment_outlined),
+                            ),
+                          ],
+                        ),
                     ],
                   ),
                 ],

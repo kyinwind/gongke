@@ -17,10 +17,11 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.7+1
+version: 1.0.8+108
 
 environment:
-  sdk: ^3.8.0
+  sdk: ">=3.12.2 <4.0.0"
+  flutter: ">=3.44.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -58,7 +59,9 @@ dependencies:
   sensors_plus: ^6.1.1  # 用于传感器数据获取
   flutter_svg: ^2.0.9  # 用于SVG图标支持
   audioplayers: ^6.4.0
-  flutter_tts: 4.2.0    #text to speech
+  # Windows 原生完成回调需切回 Flutter 平台线程；使用项目内修复版本。
+  flutter_tts:
+    path: packages/flutter_tts
   carousel_slider: ^5.1.1  #图片轮播
   wakelock_plus: ^1.3.2 #防息屏
   device_info_plus: ^9.1.2 #设备信息
@@ -73,8 +76,9 @@ dependencies:
   share_plus: ^11.1.0  # 用于分享
   logger: ^2.6.1
   pasteboard: ^0.4.0
-  app_help_center:
-    path: C:/yangxuehui/dev_open_source/app_help_center
+  app_help_center: ^0.2.6
+  my_flutter_app_tools:
+    path: C:/yangxuehui/dev_open_source/my_flutter_app_tools
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -103,7 +107,7 @@ flutter:
     #- assets/pdfs/
     - assets/images/
     - assets/icons/
-    #- assets/tips/
+    - assets/tips/
     - assets/mp3/
     - assets/help/
   # To add assets to your application, add an assets section, like this:
@@ -166,7 +170,7 @@ msix_config:
   display_name: 诵经助手
   publisher_display_name: 自在清风
   identity_name: BF9189DD.48248878B78C1
-  msix_version: 1.0.7.0
+  msix_version: 1.0.8.0
 
   # 发布到 Microsoft Store 必须设置
   publisher: CN=A760DC78-F7E9-480B-9C7A-33DB2FDBD7EC

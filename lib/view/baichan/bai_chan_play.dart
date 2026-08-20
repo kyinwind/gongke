@@ -1,166 +1,162 @@
 import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
-import 'package:gongke/main.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-import 'package:gongke/database.dart';
-import 'package:gongke/comm/pub_tools.dart';
-import 'package:gongke/comm/audio_tools.dart';
+
+import '../../comm/audio_tools.dart';
+import '../../comm/pub_tools.dart';
+import '../../comm/tts_tools.dart';
+import '../../database.dart';
 
 class BaiChanPlayPage extends StatefulWidget {
   const BaiChanPlayPage({super.key});
 
   @override
-  _BaiChanPlayPageState createState() => _BaiChanPlayPageState();
+  State<BaiChanPlayPage> createState() => _BaiChanPlayPageState();
 }
 
 class _BaiChanPlayPageState extends State<BaiChanPlayPage> {
-  bool _isInitialized = false; // 添加初始化标记
-  late int baichanId;
-  late BaiChanData baichan;
-  int count = 0;
-  bool isPlaying = false;
-  bool flag = true;
-  int num = 0;
+  final TtsTools _tts = TtsTools();
+  BaiChanData? _baichan;
   Timer? _timer;
-  String msg = "拜忏中...";
-  final FlutterTts flutterTts = FlutterTts();
-
-  @override
-  void initState() {
-    super.initState();
-  }
+  int _count = 0;
+  int _seconds = 0;
+  bool _isPlaying = false;
+  bool _waitingBetweenBows = true;
+  bool _isAnnouncing = false;
+  bool _initialized = false;
+  String _message = '拜忏中…';
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_isInitialized) {
-      return;
+    if (_initialized) return;
+    _initialized = true;
+    final arguments = ModalRoute.of(context)?.settings.arguments;
+    if (arguments is Map<String, dynamic>) {
+      _baichan = arguments['baichan'] as BaiChanData?;
     }
-    final args =
-        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
-    baichanId = args['baichanId'] as int;
-    BaiChanData? temp;
-    temp = args['baichan'] as BaiChanData?;
-    if (temp != null) {
-      baichan = temp;
-    }
-
-    _isInitialized = true;
-    if (baichanId > 0 && baichan != null) {
-      _speak(baichan.chanhuiWenStart.toString(), () => _startLoop());
+    final current = _baichan;
+    if (current != null) {
+      _announce(current.chanhuiWenStart, _startLoop);
     }
   }
 
-  Future<BaiChanData> _loadBaiChanData(id) async {
-    return await globalDB.managers.baiChan
-        .filter((f) => f.id.equals(id))
-        .getSingle();
-  }
-
-  void _startLoop() async {
-    setState(() => isPlaying = true);
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (!isPlaying) return;
-      WakelockPlus.enable(); //避免息屏
-      if (flag) {
-        final int baichanInterval2 = baichan.baichanInterval2.toInt();
-        if (num % baichanInterval2 == 0) {
-          setState(() {
-            count++;
-          });
-
-          if (count <= baichan.baichanTimes && baichan.flagOrderNumber) {
-            AudioTools.playLocalAsset('mp3/yinqing.wav').then((_) {
-              _speak("第$count 拜", () {});
-            });
-          }
-          num = 0;
-          flag = false;
-        }
-        if (count == baichan.baichanTimes.toInt() + 1) {
-          AudioTools.playLocalAsset('mp3/yinqing.wav').then((_) {
-            _speak(baichan.chanhuiWenEnd, () {
-              _stop();
-              WakelockPlus.disable();
-              Navigator.pop(context);
-            });
-          });
-        }
-        num++;
-      } else {
-        if (num % baichan.baichanInterval1.toInt() == 0) {
-          if (baichan.flagQiShen) {
-            AudioTools.playLocalAsset('mp3/yinqing.wav').then((_) {
-              _speak("起身", () {});
-            });
-          }
-          num = 0;
-          flag = true;
-        }
-        num++;
-      }
+  Future<void> _announce(String text, VoidCallback onDone) async {
+    if (!mounted) return;
+    setState(() {
+      _message = text;
+      _isAnnouncing = true;
     });
-  }
-
-  Future<void> _speak(String text, VoidCallback onDone) async {
-    await flutterTts.setLanguage("zh-CN");
-    await flutterTts.setSpeechRate(0.5);
-    await flutterTts.speak(text);
-    flutterTts.setCompletionHandler(() {
+    await _tts.speak(text, () {
+      if (!mounted) return;
+      setState(() => _isAnnouncing = false);
       onDone();
     });
   }
 
-  void _stop() async {
+  Future<void> _speakAfterBell(String text, {VoidCallback? onDone}) async {
+    if (_isAnnouncing) return;
+    setState(() => _isAnnouncing = true);
+    await AudioTools.playLocalAssetAndWait('mp3/yinqing.wav');
+    if (!mounted || !_isPlaying) return;
+    await _announce(text, onDone ?? () {});
+  }
+
+  void _startLoop() {
+    if (!mounted || _isPlaying) return;
+    setState(() => _isPlaying = true);
+    WakelockPlus.enable();
     _timer?.cancel();
-    await flutterTts.stop();
-    if (!mounted) return; // ✅ 避免 setState 后报错
-    setState(() => isPlaying = false);
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+  }
+
+  void _tick() {
+    final current = _baichan;
+    if (!mounted || !_isPlaying || _isAnnouncing || current == null) return;
+    _seconds++;
+    if (_waitingBetweenBows) {
+      if (_seconds < max(1, current.baichanInterval2)) return;
+      _seconds = 0;
+      _count++;
+      if (_count > current.baichanTimes) {
+        _speakAfterBell(
+          current.chanhuiWenEnd,
+          onDone: () async {
+            await _stop();
+            if (mounted) Navigator.pop(context);
+          },
+        );
+        return;
+      }
+      setState(() => _waitingBetweenBows = false);
+      if (current.flagOrderNumber) _speakAfterBell('第 $_count 拜');
+    } else {
+      if (_seconds < max(1, current.baichanInterval1)) return;
+      _seconds = 0;
+      setState(() => _waitingBetweenBows = true);
+      if (current.flagQiShen) _speakAfterBell('起身');
+    }
+  }
+
+  Future<void> _stop() async {
+    _timer?.cancel();
+    _timer = null;
+    _isAnnouncing = false;
+    await _tts.stop();
+    await AudioTools.clearAndStop();
+    await WakelockPlus.disable();
+    if (mounted) setState(() => _isPlaying = false);
   }
 
   @override
   void dispose() {
-    WakelockPlus.disable(); //放开避免息屏
     _timer?.cancel();
-    flutterTts.stop();
+    _tts.stop();
+    AudioTools.clearAndStop();
+    WakelockPlus.disable();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (baichan == null) {
-      return Scaffold(
-        appBar: AppBar(title: Text('拜忏进行中')),
-        body: Center(child: CircularProgressIndicator()),
-      );
+    final current = _baichan;
+    if (current == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-    final bai = baichan;
     return Scaffold(
       appBar: AppBar(
-        title: Text('拜忏进行中'),
+        title: const Text('拜忏进行中'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            _stop();
-            Navigator.pop(context);
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () async {
+            await _stop();
+            if (context.mounted) Navigator.pop(context);
           },
         ),
       ),
-      body: Center(
-        child: GestureDetector(
-          onTap: isPlaying ? _stop : _startLoop,
+      body: GestureDetector(
+        onTap: _isPlaying ? _stop : _startLoop,
+        child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Expanded(
                 child: Image.asset(
-                  getFoPuSaImagePath(bai.image),
+                  getFoPuSaImagePath(current.image),
                   fit: BoxFit.contain,
                 ),
               ),
-              SizedBox(height: 20),
-              Text('$count / ${bai.baichanTimes.toInt()} $msg'),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  '$_count / ${current.baichanTimes}\n$_message',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 20),
             ],
           ),
         ),

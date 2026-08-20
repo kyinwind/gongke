@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 2,
+  "quotation": {
+    "id": "builtin-buddhist-maxims-7",
+    "name": "佛教格言七则",
+    "remarks": "可选示例开示数据",
+    "image": "",
+    "ver": "1",
+    "sourceType": "builtin",
+    "productId": "gongke.sample.maxims.7",
+    "records": [
+      {"id": "maxim-1", "content": "诸恶莫作，众善奉行，自净其意，是诸佛教。", "sortOrder": 0},
+      {"id": "maxim-2", "content": "若人欲了知，三世一切佛，应观法界性，一切唯心造。", "sortOrder": 1},
+      {"id": "maxim-3", "content": "心如工画师，能画诸世间。", "sortOrder": 2},
+      {"id": "maxim-4", "content": "不为自己求安乐，但愿众生得离苦。", "sortOrder": 3},
+      {"id": "maxim-5", "content": "一切有为法，如梦幻泡影，如露亦如电，应作如是观。", "sortOrder": 4},
+      {"id": "maxim-6", "content": "勤修戒定慧，息灭贪瞋痴。", "sortOrder": 5},
+      {"id": "maxim-7", "content": "知足之人，虽卧地上，犹为安乐。", "sortOrder": 6}
+    ]
+  }
+}

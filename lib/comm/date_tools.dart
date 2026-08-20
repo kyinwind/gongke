@@ -2,6 +2,25 @@ import 'package:intl/intl.dart';
 import 'package:lunar/lunar.dart';
 
 class DateTools {
+  static DateTime? tryParseFlexibleDate(Object? value) {
+    if (value is DateTime) return value;
+    if (value is num) {
+      final number = value.toDouble();
+      final milliseconds = number.abs() >= 100000000000
+          ? number.round()
+          : (number * 1000).round();
+      return DateTime.fromMillisecondsSinceEpoch(milliseconds);
+    }
+    if (value is String) {
+      final trimmed = value.trim();
+      if (trimmed.isEmpty) return null;
+      final numeric = num.tryParse(trimmed);
+      if (numeric != null) return tryParseFlexibleDate(numeric);
+      return DateTime.tryParse(trimmed);
+    }
+    return null;
+  }
+
   // Get month string in "yyyy-MM" format from Date
   static String getMonthStringByDate(DateTime date) {
     return DateFormat('yyyy-MM').format(date);

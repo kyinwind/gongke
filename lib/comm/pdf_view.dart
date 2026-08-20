@@ -1,9 +1,11 @@
+import 'dart:async';
+import 'dart:io'; // 引入 dart:io 来判断平台
+
 import 'package:flutter/material.dart';
 import 'package:gongke/database.dart';
 import 'package:gongke/main.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:flutter/services.dart';
-import 'dart:io'; // 引入 dart:io 来判断平台
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
@@ -17,6 +19,9 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:gongke/comm/shared_preferences.dart';
 import 'package:gongke/comm/audio_tools.dart';
 import 'package:gongke/comm/logger_tools.dart';
+import 'package:my_flutter_app_tools/my_flutter_app_tools.dart';
+
+import 'pdf_listening_logic.dart';
 
 class PdfViewerPage extends ConsumerStatefulWidget {
   final JingShuData jingshu; //jingshu对象
@@ -62,6 +67,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
   TtsTools ttstools = TtsTools(); // TTS工具类实例
   bool isOnGonging = false; //是否正在播放声音
   bool _isDisposing = false;
+  int _readingSessionId = 0;
 
   // 根据条件得出当前是否显示双页，true需要显示双页
   bool _getIsDoubleFlag() {
@@ -93,16 +99,9 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     //logger.i('--------------------------接收到数据: $data');
     _taskDataListenable.value = data;
     if (data is Map && data['buttonPressed'] == 'btn_stop') {
-      ttstools.stop(); // 页面中你的 TTS 停止方法
-      setState(() {
-        isOnGonging = false;
-      });
+      unawaited(_stopListening());
     } else if (data is Map && data['buttonPressed'] == 'btn_start') {
-      // 开始播放的代码
-      _listenText(_page);
-      setState(() {
-        isOnGonging = true;
-      });
+      if (!isOnGonging) unawaited(_startListening());
     }
   }
 
@@ -201,13 +200,6 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     // 调用异步初始化函数
     initAsync();
 
-    //设置 TTS 回调函数
-    if (widget.jingshu.type.contains('shanshu')) {
-      ttstools.flutterTts.setCompletionHandler(() {
-        ttsCallBackOnCompletion(_page);
-      });
-    }
-
     //logger.i('--------------------------initstate 完成');
   }
 
@@ -294,7 +286,9 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
 
         await page.close(); // 及时释放
       } catch (e) {
-        logger.e('_copyPage Failed to generate thumbnail for page $pageIndex: $e');
+        logger.e(
+          '_copyPage Failed to generate thumbnail for page $pageIndex: $e',
+        );
       }
     }
     //logger.i('---------------------_copyPage 完成');
@@ -303,7 +297,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
 
   //得到第pagenum页的text
   Future<String> getText(int pagenum) async {
-    if (!mounted) return Future.value();
+    if (!mounted) return '';
     String txt = '';
     if (Platform.isWindows) {
       txt = windoc.pages[pagenum - 1].text;
@@ -374,6 +368,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
 
     logger.i('--------------------------dispose start');
     _isDisposing = true;
+    _readingSessionId++;
 
     try {
       // 1. 先移除所有监听器和同步任务
@@ -389,7 +384,6 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
       // an idle flutter_tts instance can crash the native WinRT layer.
       if (widget.jingshu.type.contains('shanshu') && isOnGonging) {
         logger.i('--------------------------dispose flutterTts start');
-        ttstools.flutterTts.setCompletionHandler(() {});
         ttstools.stop();
         logger.i('--------------------------dispose flutterTts end');
       }
@@ -635,6 +629,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
   }
 
   void _handleClickAndJump(int pageNumber) {
+    if (isOnGonging) unawaited(_stopListening());
     //logger.i('点击缩略图跳转到第 $pageNumber 页');
     try {
       if (_isDoublePage) {
@@ -680,6 +675,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
 
   // 封装上一页逻辑的函数
   void _handlePreviousPage() {
+    if (isOnGonging) unawaited(_stopListening());
     if (_isDoublePage) {
       setState(() {
         if (_currentIndex > 0) {
@@ -702,6 +698,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
   }
 
   void _handleNextPage() {
+    if (isOnGonging) unawaited(_stopListening());
     if (_isDoublePage) {
       setState(() {
         if (_currentIndex < (_pages / 2).ceil() - 1) {
@@ -753,33 +750,99 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     return processedLines.join();
   }
 
-  void _listenText(int pagenum) async {
-    //pagenum 页码从1开始
-    int pageCnt = _pageCaches.length;
-    if (!_isDoublePage && pagenum >= 1 && pagenum <= pageCnt) {
-      String text = await getText(pagenum);
-      logger.i('${pagenum}');
-      logger.i(text);
-      if (Platform.isAndroid || Platform.isIOS) {
-        startService('正在朗读 ${_bookName}');
-      }
-      logger.i('---page:${_pdfController!.page}-----pagenum:$pagenum');
-      if (_pdfController != null && _pdfController!.page != pagenum) {
-        _pdfController?.jumpToPage(pagenum);
-        _page = pagenum; // 更新当前页码
-      }
-      isOnGonging = true;
-
-      await setPhoneWakeLock(true); //避免息屏
-      await ttstools.speak(text, null);
+  Future<void> _startListening() async {
+    if (isOnGonging || _pageCaches.isEmpty) return;
+    final sessionId = ++_readingSessionId;
+    setState(() => isOnGonging = true);
+    try {
       await setPhoneWakeLock(true);
+      if (Platform.isAndroid || Platform.isIOS) {
+        await startService('正在朗读 $_bookName');
+      }
+      await _listenText(_page, sessionId);
+    } catch (error) {
+      if (mounted && sessionId == _readingSessionId) {
+        AppToast.error(context, '听书启动失败：$error');
+        setState(() => isOnGonging = false);
+        await setPhoneWakeLock(false);
+      }
     }
   }
 
-  void ttsCallBackOnCompletion(int pagenum) {
-    logger.i('-------------------------------------------回调函数被调用了');
-    isOnGonging = false;
-    _listenText(pagenum + 1);
+  Future<void> _listenText(int startPage, int sessionId) async {
+    final pageCount = _pageCaches.length;
+    try {
+      for (final pageNumber in PdfListeningLogic.pagesFrom(
+        startPage: startPage,
+        pageCount: pageCount,
+      )) {
+        if (!mounted ||
+            _isDisposing ||
+            !isOnGonging ||
+            sessionId != _readingSessionId) {
+          return;
+        }
+        final text = await getText(pageNumber);
+        if (!mounted ||
+            _isDisposing ||
+            !isOnGonging ||
+            sessionId != _readingSessionId) {
+          return;
+        }
+        if (text.trim().isEmpty) {
+          AppToast.warning(context, '第 $pageNumber 页未读取到可朗读的文本');
+          break;
+        }
+
+        _showListeningPage(pageNumber);
+        await ttstools.speak(text, null);
+      }
+    } catch (error) {
+      if (mounted && sessionId == _readingSessionId) {
+        AppToast.error(context, '听书失败：$error');
+      }
+    } finally {
+      if (mounted && sessionId == _readingSessionId) {
+        setState(() => isOnGonging = false);
+        await setPhoneWakeLock(false);
+        if (Platform.isAndroid || Platform.isIOS) await stopService();
+      }
+    }
+  }
+
+  void _showListeningPage(int pageNumber) {
+    if (_isDoublePage) {
+      final targetIndex = PdfListeningLogic.doublePageIndex(pageNumber);
+      if (_pageController?.hasClients == true && targetIndex != _currentIndex) {
+        _pageController!.jumpToPage(targetIndex);
+      }
+      setState(() {
+        _page = pageNumber;
+        _currentIndex = targetIndex;
+      });
+      return;
+    }
+
+    if (_pdfController != null && _pdfController!.page != pageNumber) {
+      _pdfController!.jumpToPage(pageNumber);
+    }
+    setState(() {
+      _page = pageNumber;
+      _currentIndex = _singePageToDoublePage(pageNumber);
+    });
+  }
+
+  Future<void> _stopListening() async {
+    final wasListening = isOnGonging;
+    _readingSessionId++;
+    if (mounted && isOnGonging) {
+      setState(() => isOnGonging = false);
+    } else {
+      isOnGonging = false;
+    }
+    if (wasListening) await ttstools.stop();
+    await setPhoneWakeLock(false);
+    if (Platform.isAndroid || Platform.isIOS) await stopService();
   }
 
   bool _getShowVoiceButtonFlag() {
@@ -789,7 +852,6 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     final flag =
         widget.jingshu.type.contains('shanshu') &&
         (Platform.isIOS || Platform.isAndroid || Platform.isWindows) &&
-        !_isDoublePage &&
         _isTextDone;
     logger.i('--------_getShowVoiceButtonFlag: ${flag}');
     return flag;
@@ -806,19 +868,12 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
                     ? const Icon(Icons.record_voice_over, color: Colors.blue)
                     : const Icon(Icons.stop_circle, color: Colors.red),
                 tooltip: '听书',
-                onPressed: () {
-                  setState(() {
-                    if (!isOnGonging) {
-                      _listenText(_page);
-                    } else {
-                      // 如果正在朗读，停止朗读
-                      ttstools.pause();
-                    }
-                    isOnGonging = !isOnGonging;
-                    if (!isOnGonging) {
-                      setPhoneWakeLock(false); //没有播放的时候，就允许息屏了
-                    }
-                  });
+                onPressed: () async {
+                  if (isOnGonging) {
+                    await _stopListening();
+                  } else {
+                    await _startListening();
+                  }
                   focusNode.requestFocus(); // 处理完事件后重新获取焦点
                 },
               )

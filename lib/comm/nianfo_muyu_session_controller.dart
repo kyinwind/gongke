@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import '../model/muyu_rhythm_pattern.dart';
 import 'audio_tools.dart';
@@ -28,6 +29,7 @@ class NianFoMuyuSessionController {
   final Future<void> Function() _stopStrikes;
   final void Function() _playCompletionChime;
   Timer? _timer;
+  Duration _interval = const Duration(seconds: 1);
   NianFoMuyuState state = NianFoMuyuState.idle;
   MuyuRhythmPattern? activePattern;
   int totalCount = 0;
@@ -61,33 +63,57 @@ class NianFoMuyuSessionController {
 
   Future<void> _begin(MuyuRhythmPattern pattern, Duration interval) async {
     activePattern = pattern;
+    _interval = interval;
     state = NianFoMuyuState.leadingChime;
     await _waitForLeadingChime();
     if (state != NianFoMuyuState.leadingChime) return;
     state = NianFoMuyuState.playing;
-    _timer = Timer.periodic(interval, (_) => _beat());
+    _scheduleNextBeat();
   }
 
-  void _beat() {
+  void _scheduleNextBeat() {
+    _timer?.cancel();
+    _timer = Timer(_interval, () => unawaited(_beat()));
+  }
+
+  Future<void> _beat() async {
     if (state != NianFoMuyuState.playing) return;
     if (remainingCount <= 0) {
-      _complete();
+      await _complete();
       return;
     }
-    _playStrike(
-      activePattern?.variantForZeroBasedStrikeIndex(strikeIndex) ??
-          MuyuSoundVariant.regular,
-    );
+    try {
+      await _playStrike(
+        activePattern?.variantForZeroBasedStrikeIndex(strikeIndex) ??
+            MuyuSoundVariant.regular,
+      );
+    } catch (error, stackTrace) {
+      developer.log(
+        '木鱼音频播放失败',
+        name: 'NianFoMuyuSessionController',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      if (state == NianFoMuyuState.playing) _scheduleNextBeat();
+      return;
+    }
+    if (state != NianFoMuyuState.playing) return;
     strikeIndex++;
     remainingCount--;
-    if (remainingCount == 0) _complete();
+    // 最后一声也保留一个完整节拍，避免刚开始播放就被 stopMuyu 截断。
+    if (remainingCount == 0) {
+      _timer = Timer(_interval, () => unawaited(_complete()));
+    } else {
+      _scheduleNextBeat();
+    }
   }
 
-  void _complete() {
+  Future<void> _complete() async {
+    if (state != NianFoMuyuState.playing) return;
     _timer?.cancel();
     _timer = null;
-    _stopStrikes();
     state = NianFoMuyuState.completed;
+    await _stopStrikes();
     _playCompletionChime();
     onCompleted?.call();
   }

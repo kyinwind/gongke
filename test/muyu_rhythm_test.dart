@@ -185,11 +185,77 @@ void main() {
         pattern: MuyuRhythmTemplateCatalog.masterYinguang,
         interval: const Duration(milliseconds: 10),
       );
-      await Future<void>.delayed(const Duration(milliseconds: 35));
+      await Future<void>.delayed(const Duration(milliseconds: 45));
       expect(strikes, hasLength(3));
       expect(controller.playedCount, 3);
       expect(controller.state, NianFoMuyuState.completed);
       expect(completions, 1);
+    },
+  );
+
+  test(
+    'slow strike commands never overlap or advance the count early',
+    () async {
+      final pendingStrikes = <Completer<void>>[];
+      final controller = NianFoMuyuSessionController(
+        waitForLeadingChime: () async {},
+        playStrike: (_) {
+          final pending = Completer<void>();
+          pendingStrikes.add(pending);
+          return pending.future;
+        },
+        stopStrikes: () async {},
+        playCompletionChime: () {},
+      );
+
+      await controller.start(
+        pattern: MuyuRhythmTemplateCatalog.masterYinguang,
+        totalCount: 3,
+        interval: const Duration(milliseconds: 5),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(pendingStrikes, hasLength(1));
+      expect(controller.playedCount, 0);
+
+      pendingStrikes.first.complete();
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      expect(pendingStrikes, hasLength(2));
+      expect(controller.playedCount, 1);
+
+      controller.pause();
+      pendingStrikes.last.complete();
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      expect(controller.playedCount, 1);
+      expect(controller.state, NianFoMuyuState.idle);
+    },
+  );
+
+  test(
+    'the final strike gets a full interval before completion stops audio',
+    () async {
+      var stopCount = 0;
+      var completionChimeCount = 0;
+      final controller = NianFoMuyuSessionController(
+        waitForLeadingChime: () async {},
+        playStrike: (_) async {},
+        stopStrikes: () async => stopCount++,
+        playCompletionChime: () => completionChimeCount++,
+      );
+
+      await controller.start(
+        pattern: MuyuRhythmTemplateCatalog.regular,
+        totalCount: 1,
+        interval: const Duration(milliseconds: 30),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+      expect(controller.playedCount, 1);
+      expect(controller.state, NianFoMuyuState.playing);
+      expect(stopCount, 0);
+
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(controller.state, NianFoMuyuState.completed);
+      expect(stopCount, 1);
+      expect(completionChimeCount, 1);
     },
   );
 }
